@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Campus Coin — track your allowance and expenses, see where the money goes, and get simple saving tips. Built for students." />
+    <meta name="theme-color" content="#0F766E" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Campus Coin — Smart Spending, Student Style</title>
+    <script>
+      // Apply theme and text size before the first paint so the page never
+      // flashes light-then-dark. localStorage mirrors the account setting
+      // (the server stays the source of truth once you are signed in).
+      (function () {
+        try {
+          var theme = localStorage.getItem('cc.theme');
+          if (!theme) {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', theme);
+
+          var scale = localStorage.getItem('cc.fontScale') || '2';
+          var sizes = { '1': '14px', '2': '16px', '3': '18px', '4': '20px' };
+          document.documentElement.style.fontSize = sizes[scale] || '16px';
+        } catch (e) {
+          /* private mode: fall back to the stylesheet defaults */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

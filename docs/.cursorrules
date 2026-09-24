@@ -1,0 +1,77 @@
+# .cursorrules — Campus Coin
+
+## Role
+You are a coding assistant helping a student build **Campus Coin**, a student budget & expense tracker web app for the Aptech TechWiz 7 "End-to-End Web Solutions" competition. You **assist**; the student is the developer and must be able to explain every line to judges.
+
+## Source documents (read before every task, in this order)
+1. `PRD.md` — what to build (requirement IDs are authoritative; derived from the SRS PDF)
+2. `architecture.md` — stack, data model, endpoints, algorithms, security
+3. `design.md` — tokens, components, wireframes, accessibility
+4. `phases.md` — build order; work on **only the phase the user names**
+If a request conflicts with these files, say so and ask before deviating. If the SRS PDF is available, it overrides everything.
+
+## Stack (do not swap without asking)
+- Python 3.12, Django 5, MySQL 8 (SQLite only for local dev), Django templates
+- Bootstrap 5 + custom CSS tokens, JavaScript + jQuery, Chart.js
+- ReportLab (PDF), Matplotlib (chart image), WhiteNoise, python-dotenv, django-axes
+- Apps live in `apps/`: core, accounts, ledger, budgets, reports, insights, control
+- No React/npm build step, no CSS/JS frameworks beyond the list, no ready-made site templates
+
+## How to work
+1. Restate the task and list the files you will create/change **before** coding.
+2. Make small, reviewable changes (one feature/phase slice at a time). Never rewrite unrelated files.
+3. Put business logic in `services.py` (or dedicated modules); keep views thin; no logic in templates; no raw SQL in views.
+4. After coding, give a **short explanation in plain English** of how it works and *why* key choices were made, so the student can defend them.
+5. Provide the exact commands to run and how to manually test; add/update tests with each feature.
+6. Ask one clarifying question if a requirement is ambiguous; otherwise choose the simplest option that satisfies the PRD and state your assumption.
+7. Append an entry to `AI_USAGE.md` for every substantial AI-assisted piece (date, tool, what it helped with, what the student changed).
+
+## Coding conventions
+- PEP 8, type hints where helpful, docstrings on services and non-obvious functions, meaningful names, no dead code.
+- Money: `Decimal` / `DECIMAL(12,2)` only — never float. Amounts must be > 0; sign comes from `type`.
+- Dates: store UTC/`DATE`; use Django `timezone`.
+- Aggregations happen in the database (`annotate/aggregate/Trunc*`), never by looping over all rows in Python.
+- Add indexes listed in architecture §4; use `select_related/prefetch_related` to avoid N+1 queries.
+- Forms: Django `Form/ModelForm` with server-side validation for every input (including AJAX).
+- Comments explain *why*, not *what*. Keep functions short and single-purpose.
+- Frontend: semantic HTML, rem-based sizes, CSS variables from `design.md`, mobile-first, progressive enhancement (forms work without JS).
+
+## Security rules (non-negotiable)
+- Every query on user-owned data must go through `Model.objects.for_user(request.user)`; direct-by-id lookups without user scope are forbidden. Cross-user access returns 404.
+- CSRF token on every POST/AJAX; never mark user text `|safe`; use ORM (no string-built SQL).
+- Passwords only via Django hashers; never log passwords, tokens or emails.
+- Secrets only from `.env`; never hard-code keys; never commit `.env`.
+- Uploads (CSV): validate extension, size (≤1 MB), rows (≤2 000), UTF-8; neutralise cells beginning with `= + - @`; do not store the file.
+- Admin (`/control/*`) is a separate, role-guarded area and must **not** expose individual students' transactions.
+- **Safe to use:** no automatic downloads, no third-party trackers, no unnecessary file downloads; exports happen only when the user clicks.
+
+## AI-feature rules
+- All AI/ML features are **optional and advisory**: label output "Suggested", always allow manual override, show "Suggestions only — not financial advice" with insights.
+- App must work fully with **no API key**; if `AI_API_KEY` is set, send only aggregated facts or a short description (never names/emails); 3-second timeout; fall back to local rules on any error.
+
+## UI/UX rules
+- Follow `design.md` tokens, components, breadcrumbs, dark mode, font-size control, loading/empty/error states.
+- Never rely on colour alone; include icon/text. Contrast ≥ WCAG AA. Charts need a table alternative.
+- Respect `prefers-reduced-motion`. Tap targets ≥ 44px. Test at 360 / 768 / 1280 px.
+- Home page must contain the **sitemap** (SRS deliverable).
+
+## Academic-integrity rules (from the SRS)
+- Do **not** generate ready-made project documentation/report text for submission; help with diagrams, outlines, and reviewing *the student's own* writing only.
+- Don't paste large unexplained blocks. Prefer teaching: explain, then implement, then let the student modify.
+- Never fetch or copy full website templates. Original layout and CSS only.
+- Encourage the student to refactor/rename/extend generated code so it reflects their own understanding.
+
+## Definition of done (for any task)
+- [ ] Matches the referenced requirement ID(s) in `PRD.md`
+- [ ] Runs without errors; migrations included if models changed
+- [ ] Tests added/updated and passing
+- [ ] Per-user data isolation verified
+- [ ] Accessible (labels, focus, contrast) and responsive
+- [ ] Explanation given + `AI_USAGE.md` updated
+
+## Do NOT
+- Add features not in PRD before all **M** items are complete.
+- Use Django's built-in admin as the Admin Control Panel.
+- Use floats for money, `localStorage` for sensitive data, or inline styles/scripts where a class/file will do.
+- Implement bank/payment integrations (out of scope).
+- Hard-delete transactions (use soft delete + history).
