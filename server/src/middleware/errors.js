@@ -18,6 +18,13 @@ export function errorHandler(err, req, res, _next) {
     return res.status(400).json({ error: 'Invalid id in the request.' });
   }
 
+  // Expected client problems keep their own plain sentence ("Transaction not
+  // found.", "Amount must be more than 0…") — only faults we did not plan for
+  // are reported generically, and never with a stack trace (PRD §4).
+  if (err.status >= 400 && err.status < 500 && err.message) {
+    return res.status(err.status).json({ error: err.message });
+  }
+
   // Only genuine server-side faults get the stack trace in the console;
   // expected client problems (400/403/404/409) are part of normal traffic.
   if (!err.status || err.status >= 500) {
