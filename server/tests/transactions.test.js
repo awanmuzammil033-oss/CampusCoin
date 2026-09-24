@@ -35,6 +35,42 @@ function txnPayload(overrides = {}) {
   };
 }
 
+/* ------------------------------ calendar days ------------------------------ */
+
+test('the saved calendar day is exactly the day that was entered', async () => {
+  const { agent, user } = await session();
+
+  // Regression: a date-only value must survive the round trip byte for byte.
+  // Local-midnight storage shifted entries back one day on any server whose
+  // time zone sits east of UTC — entering 1 Sep saved 31 Aug instead.
+  const created = await withCsrf(user, agent.post('/api/transactions')).send(
+    txnPayload({
+      type: 'income',
+      categoryId: allowance._id.toString(),
+      amount: '1000',
+      date: '2026-09-01',
+      description: 'mehnat ki kamai',
+    })
+  );
+  assert.equal(created.status, 201);
+  assert.match(created.body.transaction.date, /^2026-09-01/);
+
+  // The very same day comes back through the list and its day filter.
+  const day = await agent.get('/api/transactions?from=2026-09-01&to=2026-09-01');
+  assert.equal(day.status, 200);
+  assert.equal(day.body.pagination.total, 1);
+  assert.match(day.body.rows[0].date, /^2026-09-01/);
+
+  // ...and reports file it under September, not August.
+  const sep = await agent.get('/api/reports?tab=daily&month=2026-09');
+  assert.equal(sep.status, 200);
+  assert.equal(sep.body.days[0].income, 1000);
+
+  const aug = await agent.get('/api/reports?tab=daily&month=2026-08');
+  assert.equal(aug.status, 200);
+  assert.equal(aug.body.days.reduce((sum, d) => sum + d.income, 0), 0);
+});
+
 /* --------------------------------- creation --------------------------------- */
 
 test('creates a transaction and refuses invalid amounts and mismatched types', async () => {

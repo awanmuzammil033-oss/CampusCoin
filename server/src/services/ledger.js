@@ -227,9 +227,17 @@ function validate(input) {
   return null;
 }
 
+/**
+ * Calendar dates are stored at UTC midnight, never at the server's local
+ * midnight: the database groups months with $dateToString (UTC) and the UI
+ * slices the ISO string, so anything else shifts the day in time zones east
+ * or west of UTC (entering 1 Sep would otherwise save as 31 Aug).
+ */
 function startOfDay(value) {
+  const day = /^\d{4}-\d{2}-\d{2}/.exec(String(value));
+  if (day) return new Date(`${day[0].slice(0, 10)}T00:00:00.000Z`);
   const d = new Date(value);
-  d.setHours(0, 0, 0, 0);
+  d.setUTCHours(0, 0, 0, 0);
   return d;
 }
 

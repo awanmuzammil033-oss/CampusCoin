@@ -177,15 +177,19 @@ function validate(body) {
   return null;
 }
 
+/** Entries keep the calendar day the student picked — anchored at UTC
+ *  midnight so month grouping and the ISO display agree (see ledger.js). */
 function startOfDay(value) {
+  const day = /^\d{4}-\d{2}-\d{2}/.exec(String(value));
+  if (day) return new Date(`${day[0].slice(0, 10)}T00:00:00.000Z`);
   const d = new Date(value);
-  d.setHours(0, 0, 0, 0);
+  d.setUTCHours(0, 0, 0, 0);
   return d;
 }
 
 function addDays(date, days) {
   const d = new Date(date);
-  d.setDate(d.getDate() + days);
+  d.setUTCDate(d.getUTCDate() + days);
   return d;
 }
 

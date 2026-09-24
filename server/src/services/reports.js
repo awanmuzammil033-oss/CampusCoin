@@ -320,23 +320,23 @@ function weekRows(grouped) {
   return rows;
 }
 
-/** Date-only strings become local midnights — the exact instant entries are
+/** Date-only strings become UTC midnights — the exact instant entries are
  *  stored at (see ledger.js) — so "to 2026-09-24" includes everything logged
- *  on the 24th. */
+ *  on the 24th, whatever the server's own time zone is. */
 function parseDay(value) {
   const m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(String(value).trim());
   if (!m) throw badRequest(DAY_HELP);
-  const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
   // The Date constructor quietly rolls 2026-02-31 into March, so round-trip
   // check every part — that is what actually rejects impossible dates.
-  if (d.getFullYear() !== Number(m[1]) || d.getMonth() !== Number(m[2]) - 1 || d.getDate() !== Number(m[3])) {
+  if (d.getUTCFullYear() !== Number(m[1]) || d.getUTCMonth() !== Number(m[2]) - 1 || d.getUTCDate() !== Number(m[3])) {
     throw badRequest(DAY_HELP);
   }
   return d;
 }
 
 function isoLocal(d) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
 }
 
 function isoUtc(d) {
