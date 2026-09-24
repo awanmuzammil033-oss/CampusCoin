@@ -27,9 +27,10 @@ Express.js, React, Node.js … are also valid").
 1. **Database engine** — MongoDB was chosen over MySQL because the approved
    stack lists it explicitly; the data model, endpoints and algorithms from
    the SRS are unchanged (see `db/schema.md`).
-2. **Development database** — `npm run dev:local` runs an in-memory database
-   so the project can be demoed without any cloud setup; production uses the
-   `MONGODB_URI` in `.env`.
+2. **Development database** — `npm run dev:local` runs a local database with
+   no cloud setup at all; files live in `db/data/` and survive restarts
+   (delete that folder to start fresh). Production uses the `MONGODB_URI`
+   in `.env`.
 3. **Email** — password reset and report sharing print the message to the
    server console in development (`EMAIL_BACKEND=console`); real SMTP is a
    configuration change only, no code change.
@@ -51,9 +52,10 @@ cd ../client && npm install
 # 2. configure (optional for local try-out)
 copy .env.example .env        # fill MONGODB_URI for a real database
 
-# 3a. run against a built-in in-memory database (demo / try-out)
+# 3a. run against a local on-disk database (demo / try-out, no cloud needed)
 cd server
-$env:SEED='1'; npm run dev:local      # seeds demo accounts, then serves :5000
+$env:SEED='1'; npm run dev:local      # seeds demo accounts, serves :5000,
+                                      # data kept in db/data/ across restarts
 
 # 3b. run against your own database
 npm run seed                          # first time only

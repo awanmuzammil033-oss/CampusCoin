@@ -1,20 +1,30 @@
 /**
- * `npm run dev:local` — run the whole API against an in-memory database.
+ * `npm run dev:local` — run the whole API without any cloud database.
  *
- * Useful when you do not want to point the project at a cloud database while
- * developing: the data lives for as long as the process runs and vanishes
- * afterwards. The server itself is untouched — it reads MONGODB_URI like it
- * always does; this script just fills that variable in first.
+ * The data lives on disk (db/data/, next to db/schema.md), so anything you
+ * create — accounts, entries, budgets — survives server restarts. Nothing
+ * cloud-side is touched: the server still reads MONGODB_URI like it always
+ * does; this script just fills that variable in first.
  *
- * SEED=1 npm run dev:local   → also loads the demo accounts and sample history.
+ * To start over from a clean slate, stop the server and delete db/data/.
+ *
+ * SEED=1 npm run dev:local   → also loads the demo accounts and sample history
+ *                              (safe to repeat: existing accounts are reused).
  */
+import { fileURLToPath } from 'node:url';
+import { mkdir } from 'node:fs/promises';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
-const mongod = await MongoMemoryServer.create();
+const dbPath = fileURLToPath(new URL('../../../db/data', import.meta.url));
+await mkdir(dbPath, { recursive: true });
+
+const mongod = await MongoMemoryServer.create({
+  instance: { dbPath, storageEngine: 'wiredTiger' },
+});
 process.env.MONGODB_URI = mongod.getUri('campuscoin');
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
-console.log('In-memory database started (data resets on restart).');
+console.log(`Local database started — data kept in ${dbPath} (survives restarts).`);
 
 if (process.env.SEED === '1') {
   const { runSeed } = await import('./seed.js');
