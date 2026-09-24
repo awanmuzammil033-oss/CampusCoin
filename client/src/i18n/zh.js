@@ -135,4 +135,14 @@ export default {
   'app.checkingSession': '正在检查你的会话…',
   'app.notFound': '找不到页面',
   'app.notFoundBody': '你要找的页面已被移动，或者从来就不存在。',
+  /* public home — feature strip */
+  'home.featuresAria': 'Campus Coin 能做什么',
+  'home.feature.quickTitle': '10 秒记一笔',
+  'home.feature.quickText': '金额、分类，完成。定期收入和订阅会自动填入。',
+  'home.feature.budgetTitle': '提前提醒的预算',
+  'home.feature.budgetText': '为每个分类设置每月上限，用到 80% 就提醒你——不是来不及的时候。',
+  'home.feature.reportTitle': '可导出的报表',
+  'home.feature.reportText': '分类、半年和日视图，点击即可保存为 PDF 或通过邮件分享。',
+  'home.feature.tipTitle': '来自你自己记录的建议',
+  'home.feature.tipText': '建议按本月实际能省下的金额排序。',
 };

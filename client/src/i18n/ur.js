@@ -136,4 +136,14 @@ export default {
   'app.checkingSession': 'آپ کا سیشن چیک ہو رہا ہے…',
   'app.notFound': 'صفحہ نہیں ملا',
   'app.notFoundBody': 'آپ جس صفحے کی تلاش میں تھے وہ منتقل ہو گیا ہے یا موجود ہی نہیں۔',
+  /* public home — feature strip */
+  'home.featuresAria': 'کیمپس کوائن کیا کرتا ہے',
+  'home.feature.quickTitle': '10 سیکنڈ میں اندراج',
+  'home.feature.quickText': 'رقم، زمرہ، بس ہو گیا۔ ریکرنگ الوان اور سبسکرپشنز خود بھر جاتی ہیں۔',
+  'home.feature.budgetTitle': 'ایسے بجٹ جو پہلے خبر دیں',
+  'home.feature.budgetText': 'ہر زمرے کی ماہانہ حد مقرر کریں اور 80% پر اطلاع پائیں — آخری وقت پر نہیں۔',
+  'home.feature.reportTitle': 'برآمد کی جا سکنے والی رپورٹیں',
+  'home.feature.reportText': 'زمرہ، چھ ماہی اور روزانہ مناظر، کلک کرنے پر PDF میں محفوظ یا ای میل سے شیئر۔',
+  'home.feature.tipTitle': 'اپنی ہی ہسٹری سے تجاویز',
+  'home.feature.tipText': 'تجاویز اس مقدار کے لحاظ سے درجہ بندی ہیں جو آپ اس ماہ واقعی بچا سکتے ہیں۔',
 };

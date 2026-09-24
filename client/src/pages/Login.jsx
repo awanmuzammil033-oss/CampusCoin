@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
+import { useLocale } from '../locale.jsx';
 import FormField from '../components/FormField.jsx';
 
 /** Student sign-in. The administrator door lives at /control/login. */
 export default function Login() {
   const { login } = useAuth();
+  const { t } = useLocale();
   const navigate = useNavigate();
   const location = useLocation();
   const [email, setEmail] = useState('');
@@ -35,9 +37,9 @@ export default function Login() {
         <div className="auth-brand">
           <span className="brand-mark" aria-hidden="true">C</span>
         </div>
-        <h1 className="text-center" style={{ marginBottom: 4 }}>Welcome back</h1>
+        <h1 className="text-center" style={{ marginBottom: 4 }}>{t('auth.welcomeBack')}</h1>
         <p className="text-center muted" style={{ marginBottom: 24 }}>
-          Sign in to keep tracking your spending.
+          {t('auth.signInSubtitle')}
         </p>
 
         <form onSubmit={onSubmit} noValidate>
@@ -48,7 +50,7 @@ export default function Login() {
             </div>
           )}
 
-          <FormField label="Email" htmlFor="email">
+          <FormField label={t('auth.email')} htmlFor="email">
             {(a) => (
               <input
                 id="email"
@@ -64,7 +66,7 @@ export default function Login() {
             )}
           </FormField>
 
-          <FormField label="Password" htmlFor="password">
+          <FormField label={t('auth.password')} htmlFor="password">
             {(a) => (
               <div className="position-relative">
                 <input
@@ -86,7 +88,7 @@ export default function Login() {
                   onClick={() => setShowPassword((v) => !v)}
                   aria-pressed={showPassword}
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? t('auth.hide') : t('auth.show')}
                 </button>
               </div>
             )}
@@ -94,14 +96,14 @@ export default function Login() {
 
           <button type="submit" className="btn btn-primary w-100" disabled={busy}>
             {busy && <span className="spinner" aria-hidden="true" />}
-            {busy ? 'Signing in…' : 'Sign in'}
+            {busy ? t('auth.signingIn') : t('auth.signIn')}
           </button>
         </form>
 
         <div className="d-flex justify-content-between mt-4 smallish">
-          <Link to="/forgot-password">Forgot password?</Link>
+          <Link to="/forgot-password">{t('auth.forgotPassword')}</Link>
           <span className="muted">
-            New here? <Link to="/register">Create an account</Link>
+            {t('auth.newHere')} <Link to="/register">{t('auth.createAccount')}</Link>
           </span>
         </div>
       </div>

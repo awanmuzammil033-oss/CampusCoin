@@ -136,4 +136,14 @@ export default {
   'app.checkingSession': 'セッションを確認しています…',
   'app.notFound': 'ページが見つかりません',
   'app.notFoundBody': 'お探しのページは移動したか、存在しなかったようです。',
+  /* public home — feature strip */
+  'home.featuresAria': 'Campus Coin ができること',
+  'home.feature.quickTitle': '10秒で記録',
+  'home.feature.quickText': '金額、カテゴリ、完了。定期収入とサブスクリプションは自動入力されます。',
+  'home.feature.budgetTitle': '早めに警告する予算',
+  'home.feature.budgetText': 'カテゴリごとに月間上限を設定し、80% で通知——手遅れになってからではありません。',
+  'home.feature.reportTitle': '書き出せるレポート',
+  'home.feature.reportText': 'カテゴリ・半年・日別の表示を、クリックで PDF 保存やメール共有ができます。',
+  'home.feature.tipTitle': '自分の履歴からのヒント',
+  'home.feature.tipText': '今月実際に節約できる額に基づいて並んだ提案です。',
 };

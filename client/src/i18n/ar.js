@@ -136,4 +136,14 @@ export default {
   'app.checkingSession': 'جارٍ التحقق من جلستك…',
   'app.notFound': 'الصفحة غير موجودة',
   'app.notFoundBody': 'الصفحة التي تبحث عنها نُقلت أو لم تكن موجودة أبدًا.',
+  /* public home — feature strip */
+  'home.featuresAria': 'ما الذي يفعله Campus Coin',
+  'home.feature.quickTitle': 'سجّل خلال 10 ثوانٍ',
+  'home.feature.quickText': 'المبلغ والفئة، وانتهى الأمر. تُملأ الدخل المتكرر والاشتراكات تلقائيًا.',
+  'home.feature.budgetTitle': 'ميزانيات تنبّهك مبكرًا',
+  'home.feature.budgetText': 'حدّ شهري لكل فئة واحصل على تنبيه عند 80% — لا بعد فوات الأوان.',
+  'home.feature.reportTitle': 'تقارير يمكنك تصديرها',
+  'home.feature.reportText': 'عرض الفئة وستة أشهر ويومي، تُحفظ PDF أو تُشارك بالبريد عند النقر.',
+  'home.feature.tipTitle': 'نصائح من سجلك أنت',
+  'home.feature.tipText': 'نصائح مرتبة حسب ما قد توفّره فعليًا هذا الشهر.',
 };

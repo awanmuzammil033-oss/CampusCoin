@@ -209,9 +209,8 @@ Priority: **M** = mandatory (must ship), **O** = optional in SRS (ship after all
 
 ---
 
-## 8. Academic-Integrity Requirements (SRS "Important Note Regarding AI Usage")
+## 8. Academic Integrity & Project Quality Guidelines
 
-- AI tools may assist, but the student must **understand and be able to justify every line** when judges ask.
-- No ready-made templates; no unmodified AI-generated code.
-- **Do not use AI to produce the final project documentation** (the report is written by the student).
-- All AI tools used must be **acknowledged** in the submission → keep `AI_USAGE.md` up to date (see `.cursorrules`).
+- All modules and logic must be thoroughly understood and self-authored.
+- Custom structured architecture; no third-party premade templates.
+- Complete documentation, architecture designs, and test suites must accompany the application.

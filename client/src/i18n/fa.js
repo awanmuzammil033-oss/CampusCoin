@@ -136,4 +136,14 @@ export default {
   'app.checkingSession': 'در حال بررسی نشست شما…',
   'app.notFound': 'صفحه پیدا نشد',
   'app.notFoundBody': 'صفحه‌ای که دنبالش بودید جابه‌جا شده یا اصلاً وجود نداشته است.',
+  /* public home — feature strip */
+  'home.featuresAria': 'کمپوس کوین چه می‌کند',
+  'home.feature.quickTitle': 'ثبت در ۱۰ ثانیه',
+  'home.feature.quickText': 'مبلغ، دسته، تمام. درآمدهای دوره‌ای و اشتراک‌ها خودشان پر می‌شوند.',
+  'home.feature.budgetTitle': 'بودجه‌هایی که زود هشدار می‌دهند',
+  'home.feature.budgetText': 'برای هر دسته سقف ماهانه بگذارید و در ۸۰ درصد هشدار بگیرید — نه وقتی دیر شده.',
+  'home.feature.reportTitle': 'گزارش‌های قابل خروجی',
+  'home.feature.reportText': 'نمایش دسته‌ای، شش‌ماهه و روزانه، با یک کلیک PDF می‌شود یا با ایمیل به اشتراک می‌رود.',
+  'home.feature.tipTitle': 'پیشنهادهایی از سابقه خودتان',
+  'home.feature.tipText': 'پیشنهادها بر اساس مبلغی که واقعاً این ماه می‌توانید پس‌انداز کنید مرتب شده‌اند.',
 };

@@ -136,4 +136,14 @@ export default {
   'app.checkingSession': 'आपका सत्र जाँचा जा रहा है…',
   'app.notFound': 'पेज नहीं मिला',
   'app.notFoundBody': 'आप जिस पेज की तलाश में थे वह हटा दिया गया है या कभी मौजूद नहीं था।',
+  /* public home — feature strip */
+  'home.featuresAria': 'Campus Coin क्या करता है',
+  'home.feature.quickTitle': '10 सेकंड में एंट्री',
+  'home.feature.quickText': 'रकम, श्रेणी, बस हो गया। बार-बार आने वाली आमदनी और सब्सक्रिप्शन अपने आप भर जाते हैं।',
+  'home.feature.budgetTitle': 'ऐसे बजट जो पहले चेतावनी दें',
+  'home.feature.budgetText': 'हर श्रेणी की मासिक सीमा तय करें और 80% पर सूचना पाएं — देर होने से पहले नहीं।',
+  'home.feature.reportTitle': 'निर्यात करनेयोग्य रिपोर्ट',
+  'home.feature.reportText': 'श्रेणी, छह-माही और दैनिक व्यू, क्लिक पर PDF में सेव या ईमेल से शेयर।',
+  'home.feature.tipTitle': 'अपने ही रिकॉर्ड से सुझाव',
+  'home.feature.tipText': 'सुझाव इस आधार पर क्रमबद्ध कि इस महीने आप कितना वास्तव में बचा सकते हैं।',
 };

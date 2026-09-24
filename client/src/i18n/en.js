@@ -138,4 +138,14 @@ export default {
   'app.checkingSession': 'Checking your session…',
   'app.notFound': 'Page not found',
   'app.notFoundBody': 'The page you were looking for has moved or never existed.',
+  /* public home — feature strip */
+  'home.featuresAria': 'What Campus Coin does',
+  'home.feature.quickTitle': 'Log in 10 seconds',
+  'home.feature.quickText': 'Amount, category, done. Recurring allowance and subscriptions fill themselves in.',
+  'home.feature.budgetTitle': 'Budgets that warn you early',
+  'home.feature.budgetText': 'Set a monthly limit per category and get a nudge at 80% — not after it is too late.',
+  'home.feature.reportTitle': 'Reports you can export',
+  'home.feature.reportText': 'Category, six-month and daily views, saved as PDF or shared by email when you click.',
+  'home.feature.tipTitle': 'Tips from your own history',
+  'home.feature.tipText': 'Suggestions ranked by how much you would actually save this month.',
 };

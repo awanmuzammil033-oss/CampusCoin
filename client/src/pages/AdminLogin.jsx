@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api, setCsrfToken } from '../api.js';
 import { applyPreferences } from '../auth.jsx';
+import { useLocale } from '../locale.jsx';
 import FormField from '../components/FormField.jsx';
 
 /**
@@ -11,6 +12,7 @@ import FormField from '../components/FormField.jsx';
  */
 export default function AdminLogin() {
   const navigate = useNavigate();
+  const { t } = useLocale();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -25,7 +27,7 @@ export default function AdminLogin() {
       const me = await api.get('/api/auth/me');
       setCsrfToken(me.csrfToken);
       if (me.user?.role !== 'admin') {
-        setError('This door is for administrators only.');
+        setError(t('auth.adminOnly'));
         await api.post('/api/auth/logout').catch(() => {});
         return;
       }
@@ -44,10 +46,10 @@ export default function AdminLogin() {
         <div className="auth-brand">
           <span className="brand-mark" aria-hidden="true">C</span>
         </div>
-        <span className="pill pill-suggest d-table mx-auto mb-3">🔐 Administrator</span>
-        <h1 className="text-center" style={{ marginBottom: 4 }}>Control panel</h1>
+        <span className="pill pill-suggest d-table mx-auto mb-3">🔐 {t('auth.administrator')}</span>
+        <h1 className="text-center" style={{ marginBottom: 4 }}>{t('auth.controlPanel')}</h1>
         <p className="text-center muted" style={{ marginBottom: 24 }}>
-          Staff access for managing categories, templates and accounts.
+          {t('auth.controlSubtitle')}
         </p>
 
         <form onSubmit={onSubmit} noValidate>
@@ -57,7 +59,7 @@ export default function AdminLogin() {
               <span>{error}</span>
             </div>
           )}
-          <FormField label="Work email" htmlFor="admin-email">
+          <FormField label={t('auth.workEmail')} htmlFor="admin-email">
             {(a) => (
               <input
                 id="admin-email"
@@ -71,7 +73,7 @@ export default function AdminLogin() {
               />
             )}
           </FormField>
-          <FormField label="Password" htmlFor="admin-password">
+          <FormField label={t('auth.password')} htmlFor="admin-password">
             {(a) => (
               <input
                 id="admin-password"
@@ -87,12 +89,12 @@ export default function AdminLogin() {
           </FormField>
           <button type="submit" className="btn btn-primary w-100" disabled={busy}>
             {busy && <span className="spinner" aria-hidden="true" />}
-            {busy ? 'Checking…' : 'Enter control panel'}
+            {busy ? t('auth.checking') : t('auth.enterControlPanel')}
           </button>
         </form>
 
         <p className="smallish text-center mt-4 mb-0 muted">
-          Student? <Link to="/login">Go to the student sign-in</Link>
+          {t('auth.studentPrompt')} <Link to="/login">{t('auth.goToStudentSignIn')}</Link>
         </p>
       </div>
     </div>

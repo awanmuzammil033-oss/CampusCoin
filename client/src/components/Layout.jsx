@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { useLocale } from '../locale.jsx';
-import { CURRENCIES } from '../data/currencies.js';
-import { LANGUAGES } from '../data/languages.js';
+import LocalePickers from './LocalePickers.jsx';
 
 const NAV = [
   { sectionKey: 'nav.section.money' },
@@ -38,18 +37,12 @@ const BOTTOM = [
  */
 export default function Layout({ children }) {
   const { user, logout, updatePreferences } = useAuth();
-  const { t, currency, setCurrency, language, setLanguage } = useLocale();
+  const { t } = useLocale();
   const navigate = useNavigate();
   const [unread, setUnread] = useState(0);
   const [bellOpen, setBellOpen] = useState(false);
   const [feed, setFeed] = useState([]);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [currencyOpen, setCurrencyOpen] = useState(false);
-  const [languageOpen, setLanguageOpen] = useState(false);
-  const [currencyQuery, setCurrencyQuery] = useState('');
-  const [languageQuery, setLanguageQuery] = useState('');
-  const currencyRef = useRef(null);
-  const languageRef = useRef(null);
 
   // Recent notifications for the bell — fetched once when the chrome mounts.
   useEffect(() => {
@@ -67,35 +60,10 @@ export default function Layout({ children }) {
     };
   }, []);
 
-  // While either picker is open: click outside closes it, Escape closes both.
-  // Same idea as the bell/account popovers, but the long lists deserve an
-  // explicit way out too.
-  useEffect(() => {
-    if (!currencyOpen && !languageOpen) return undefined;
-    function onDocMouseDown(e) {
-      if (currencyRef.current && !currencyRef.current.contains(e.target)) setCurrencyOpen(false);
-      if (languageRef.current && !languageRef.current.contains(e.target)) setLanguageOpen(false);
-    }
-    function onDocKeyDown(e) {
-      if (e.key === 'Escape') {
-        setCurrencyOpen(false);
-        setLanguageOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', onDocMouseDown);
-    document.addEventListener('keydown', onDocKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', onDocMouseDown);
-      document.removeEventListener('keydown', onDocKeyDown);
-    };
-  }, [currencyOpen, languageOpen]);
-
   async function toggleBell() {
     const next = !bellOpen;
     setBellOpen(next);
     setAccountOpen(false);
-    setCurrencyOpen(false);
-    setLanguageOpen(false);
     if (next) {
       try {
         const data = await api.get('/api/notifications');
@@ -130,27 +98,6 @@ export default function Layout({ children }) {
     navigate('/login');
   }
 
-  const activeCurrency = CURRENCIES.find((c) => c.code === currency);
-  const activeLanguage = LANGUAGES.find((l) => l.code.toLowerCase() === language.toLowerCase());
-
-  // Live filter: case-insensitive substring over code + name (and native for
-  // languages) — with 150+ entries, scrolling alone is not enough.
-  const currencyQueryTrimmed = currencyQuery.trim().toLowerCase();
-  const currencyRows = CURRENCIES.filter(
-    (c) =>
-      !currencyQueryTrimmed ||
-      c.code.toLowerCase().includes(currencyQueryTrimmed) ||
-      c.name.toLowerCase().includes(currencyQueryTrimmed)
-  );
-  const languageQueryTrimmed = languageQuery.trim().toLowerCase();
-  const languageRows = LANGUAGES.filter(
-    (l) =>
-      !languageQueryTrimmed ||
-      l.code.toLowerCase().includes(languageQueryTrimmed) ||
-      l.name.toLowerCase().includes(languageQueryTrimmed) ||
-      l.native.toLowerCase().includes(languageQueryTrimmed)
-  );
-
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">{t('a11y.skipToContent')}</a>
@@ -162,109 +109,7 @@ export default function Layout({ children }) {
         </Link>
         <div className="topbar-spacer" />
 
-        {/* Currency picker — display preference only, never a conversion. */}
-        <div className="position-relative" ref={currencyRef}>
-          <button
-            type="button"
-            className="icon-btn"
-            aria-label={t('picker.currency')}
-            aria-expanded={currencyOpen}
-            onClick={() => {
-              const next = !currencyOpen;
-              setCurrencyOpen(next);
-              setLanguageOpen(false);
-              setBellOpen(false);
-              setAccountOpen(false);
-              if (next) setCurrencyQuery('');
-            }}
-          >
-            <span aria-hidden="true">{activeCurrency?.symbol || currency}</span>
-            <span>{currency}</span>
-          </button>
-          {currencyOpen && (
-            <div className="dropdown-menu" role="group" aria-label={t('picker.currency')}>
-              <input
-                className="input menu-search"
-                type="search"
-                value={currencyQuery}
-                onChange={(e) => setCurrencyQuery(e.target.value)}
-                placeholder={t('picker.searchCurrency')}
-                aria-label={t('picker.searchCurrency')}
-                autoFocus
-              />
-              {currencyRows.length === 0 && <p className="menu-empty">{t('picker.noMatch')}</p>}
-              {currencyRows.map((c) => (
-                <button
-                  key={c.code}
-                  type="button"
-                  className="dropdown-row"
-                  aria-pressed={c.code === currency}
-                  onClick={() => {
-                    setCurrency(c.code);
-                    setCurrencyOpen(false);
-                  }}
-                >
-                  <span aria-hidden="true">{c.symbol}</span>
-                  <strong>{c.code}</strong>
-                  <span className="row-name">{c.name}</span>
-                  {c.code === currency && <span aria-hidden="true">✓</span>}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Language picker — switches chrome text via the dictionaries. */}
-        <div className="position-relative" ref={languageRef}>
-          <button
-            type="button"
-            className="icon-btn"
-            aria-label={t('picker.language')}
-            aria-expanded={languageOpen}
-            onClick={() => {
-              const next = !languageOpen;
-              setLanguageOpen(next);
-              setCurrencyOpen(false);
-              setBellOpen(false);
-              setAccountOpen(false);
-              if (next) setLanguageQuery('');
-            }}
-          >
-            <span aria-hidden="true">🌐</span>
-            <span className="nav-label lang-native">{activeLanguage?.native || language}</span>
-          </button>
-          {languageOpen && (
-            <div className="dropdown-menu" role="group" aria-label={t('picker.language')}>
-              <input
-                className="input menu-search"
-                type="search"
-                value={languageQuery}
-                onChange={(e) => setLanguageQuery(e.target.value)}
-                placeholder={t('picker.searchLanguage')}
-                aria-label={t('picker.searchLanguage')}
-                autoFocus
-              />
-              {languageRows.length === 0 && <p className="menu-empty">{t('picker.noMatch')}</p>}
-              {languageRows.map((l) => (
-                <button
-                  key={l.code}
-                  type="button"
-                  className="dropdown-row"
-                  aria-pressed={l.code.toLowerCase() === language.toLowerCase()}
-                  onClick={() => {
-                    setLanguage(l.code);
-                    setLanguageOpen(false);
-                  }}
-                >
-                  <span className="row-native" aria-hidden="true">{l.native}</span>
-                  <span aria-hidden="true">—</span>
-                  <span className="row-name">{l.name}</span>
-                  {l.code.toLowerCase() === language.toLowerCase() && <span aria-hidden="true">✓</span>}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <LocalePickers onOpen={() => { setBellOpen(false); setAccountOpen(false); }} />
 
         <button type="button" className="icon-btn" onClick={() => changeFont(-1)} aria-label={t('a11y.decreaseText')} title={t('topbar.smallerText')}>
           A−
@@ -320,7 +165,7 @@ export default function Layout({ children }) {
           <button
             type="button"
             className="icon-btn"
-            onClick={() => { setAccountOpen((v) => !v); setBellOpen(false); setCurrencyOpen(false); setLanguageOpen(false); }}
+            onClick={() => { setAccountOpen((v) => !v); setBellOpen(false); }}
             aria-expanded={accountOpen}
           >
             <span aria-hidden="true">👤</span>

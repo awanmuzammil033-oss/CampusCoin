@@ -136,4 +136,14 @@ export default {
   'app.checkingSession': 'Verificando sua sessão…',
   'app.notFound': 'Página não encontrada',
   'app.notFoundBody': 'A página que você procurava mudou de lugar ou nunca existiu.',
+  /* public home — feature strip */
+  'home.featuresAria': 'O que o Campus Coin faz',
+  'home.feature.quickTitle': 'Registre em 10 segundos',
+  'home.feature.quickText': 'Valor, categoria, pronto. Entradas recorrentes e assinaturas se preenchem sozinhas.',
+  'home.feature.budgetTitle': 'Orçamentos que avisam cedo',
+  'home.feature.budgetText': 'Defina um limite mensal por categoria e receba um aviso aos 80% — não quando já for tarde.',
+  'home.feature.reportTitle': 'Relatórios que você pode exportar',
+  'home.feature.reportText': 'Visões por categoria, seis meses e diárias, salvas em PDF ou compartilhadas por e-mail com um clique.',
+  'home.feature.tipTitle': 'Dicas do seu próprio histórico',
+  'home.feature.tipText': 'Sugestões ordenadas pelo quanto você realmente economizaria este mês.',
 };

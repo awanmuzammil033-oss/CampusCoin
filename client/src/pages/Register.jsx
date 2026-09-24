@@ -1,12 +1,18 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
+import { useLocale } from '../locale.jsx';
 import FormField from '../components/FormField.jsx';
+
+/** Live-strength label keys — the strings themselves come from t(). */
+const LEVEL_KEYS = ['auth.tooShort', 'auth.weak', 'auth.okay', 'auth.strong'];
+const TIP_KEYS = ['auth.tipUseEight', 'auth.tipNumbersCapitals', 'auth.tipSymbol', 'auth.tipSolid'];
 
 /** Registration (AUTH-1). The same rules are checked server-side too —
  *  this live hint just saves a round trip. */
 export default function Register() {
   const { register } = useAuth();
+  const { t } = useLocale();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
   const [showPassword, setShowPassword] = useState(false);
@@ -24,11 +30,11 @@ export default function Register() {
     setError('');
 
     if (form.password !== form.confirm) {
-      setError('The two passwords do not match.');
+      setError(t('auth.passwordMismatch'));
       return;
     }
     if (form.password.length < 8) {
-      setError('Password must be at least 8 characters.');
+      setError(t('auth.passwordTooShort'));
       return;
     }
 
@@ -49,9 +55,9 @@ export default function Register() {
         <div className="auth-brand">
           <span className="brand-mark" aria-hidden="true">C</span>
         </div>
-        <h1 className="text-center" style={{ marginBottom: 4 }}>Create your account</h1>
+        <h1 className="text-center" style={{ marginBottom: 4 }}>{t('auth.createYourAccount')}</h1>
         <p className="text-center muted" style={{ marginBottom: 24 }}>
-          Free for students — no card, no bank connection.
+          {t('auth.registerSubtitle')}
         </p>
 
         <form onSubmit={onSubmit} noValidate>
@@ -62,29 +68,29 @@ export default function Register() {
             </div>
           )}
 
-          <FormField label="Full name" htmlFor="name">
+          <FormField label={t('auth.fullName')} htmlFor="name">
             {(a) => (
               <input id="name" className="input" autoComplete="name" required value={form.name} onChange={update('name')} {...a} />
             )}
           </FormField>
 
-          <FormField label="Email" htmlFor="email" help="You will sign in with this address.">
+          <FormField label={t('auth.email')} htmlFor="email" help={t('auth.emailHelp')}>
             {(a) => (
               <input id="email" type="email" className="input" autoComplete="email" required value={form.email} onChange={update('email')} {...a} />
             )}
           </FormField>
 
           <FormField
-            label="Password"
+            label={t('auth.password')}
             htmlFor="password"
-            help="At least 8 characters — mix words and numbers."
+            help={t('auth.passwordHelp')}
             hint={
               form.password ? (
                 <span>
-                  Strength:{' '}
-                  <strong>{['Too short', 'Weak', 'Okay', 'Strong'][strength.level]}</strong>
+                  {t('auth.strength')}{' '}
+                  <strong>{t(LEVEL_KEYS[strength.level])}</strong>
                   {' · '}
-                  <span className="muted">{strength.tip}</span>
+                  <span className="muted">{t(TIP_KEYS[strength.tipLevel])}</span>
                 </span>
               ) : undefined
             }
@@ -109,13 +115,13 @@ export default function Register() {
                   onClick={() => setShowPassword((v) => !v)}
                   aria-pressed={showPassword}
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? t('auth.hide') : t('auth.show')}
                 </button>
               </div>
             )}
           </FormField>
 
-          <FormField label="Confirm password" htmlFor="confirm">
+          <FormField label={t('auth.confirmPassword')} htmlFor="confirm">
             {(a) => (
               <input
                 id="confirm"
@@ -132,25 +138,26 @@ export default function Register() {
 
           <button type="submit" className="btn btn-primary w-100" disabled={busy}>
             {busy && <span className="spinner" aria-hidden="true" />}
-            {busy ? 'Creating account…' : 'Create account'}
+            {busy ? t('auth.creatingAccount') : t('auth.createAccountButton')}
           </button>
         </form>
 
         <p className="smallish text-center mt-4 mb-0 muted">
-          Already registered? <Link to="/login">Sign in</Link>
+          {t('auth.alreadyRegistered')} <Link to="/login">{t('auth.signIn')}</Link>
         </p>
       </div>
     </div>
   );
 }
 
-/** Rough live hint only — the server enforces the real policy. */
+/** Rough live hint only — the server enforces the real policy. Returns key
+ *  indexes instead of strings so the caller can translate through t(). */
 function passwordStrength(pw) {
-  if (pw.length < 8) return { level: 0, tip: 'Use at least 8 characters.' };
+  if (pw.length < 8) return { level: 0, tipLevel: 0 };
   let score = 1;
   if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score += 1;
   if (/\d/.test(pw)) score += 1;
   if (/[^A-Za-z0-9]/.test(pw)) score += 1;
-  const tips = ['Use at least 8 characters.', 'Add numbers or capitals.', 'Throw in a symbol too.', 'Nice — that is a solid password.'];
-  return { level: Math.min(3, score), tip: tips[Math.min(3, score)] };
+  const tipLevel = Math.min(3, score);
+  return { level: Math.min(3, score), tipLevel };
 }

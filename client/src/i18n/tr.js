@@ -136,4 +136,14 @@ export default {
   'app.checkingSession': 'Oturumunuz denetleniyor…',
   'app.notFound': 'Sayfa bulunamadı',
   'app.notFoundBody': 'Aradığınız sayfa taşınmış ya da hiç var olmamış.',
+  /* public home — feature strip */
+  'home.featuresAria': 'Campus Coin ne yapar',
+  'home.feature.quickTitle': '10 saniyede kayıt',
+  'home.feature.quickText': 'Tutar, kategori, bitti. Tekrarlayan gelirler ve abonelikler kendiliğinden dolar.',
+  'home.feature.budgetTitle': 'Erken uyaran bütçeler',
+  'home.feature.budgetText': 'Her kategori için aylık bir limit belirleyin ve %80’de uyarı alın — iş işten geçtikten sonra değil.',
+  'home.feature.reportTitle': 'Dışa aktarabileceğiniz raporlar',
+  'home.feature.reportText': 'Kategori, altı aylık ve günlük görünümler; tıklayınca PDF olarak kaydedilir veya e-postayla paylaşılır.',
+  'home.feature.tipTitle': 'Kendi geçmişinizden öneriler',
+  'home.feature.tipText': 'Bu ay gerçekten ne kadar biriktirebileceğinize göre sıralanmış öneriler.',
 };

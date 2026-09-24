@@ -136,4 +136,14 @@ export default {
   'app.checkingSession': 'Memeriksa sesimu…',
   'app.notFound': 'Halaman tidak ditemukan',
   'app.notFoundBody': 'Halaman yang kamu cari sudah dipindah atau tidak pernah ada.',
+  /* public home — feature strip */
+  'home.featuresAria': 'Apa yang dilakukan Campus Coin',
+  'home.feature.quickTitle': 'Catat dalam 10 detik',
+  'home.feature.quickText': 'Jumlah, kategori, selesai. Pemasukan rutin dan langganan terisi sendiri.',
+  'home.feature.budgetTitle': 'Anggaran yang memperingatkan lebih awal',
+  'home.feature.budgetText': 'Tetapkan batas bulanan per kategori dan dapatkan pemberitahuan di 80% — bukan setelah terlambat.',
+  'home.feature.reportTitle': 'Laporan yang bisa diekspor',
+  'home.feature.reportText': 'Tampilan kategori, enam bulan, dan harian, disimpan sebagai PDF atau dibagikan lewat email saat diklik.',
+  'home.feature.tipTitle': 'Saran dari riwayat Anda sendiri',
+  'home.feature.tipText': 'Saran diurutkan menurut berapa yang benar-benar bisa Anda hemat bulan ini.',
 };

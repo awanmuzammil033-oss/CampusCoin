@@ -135,14 +135,14 @@ Requirement IDs refer to `PRD.md`; structure/algorithms are in `architecture.md`
 - [ ] ZIP: source, `ReadMe.doc` (assumptions), `db/schema.sql` (or SQL scripts), `requirements.txt`, `.env.example`
 - [ ] Hosted URL in the ReadMe
 - [ ] Demo video `.mp4` (mandatory) showing **every** functional requirement — script below
-- [ ] `AI_USAGE.md` finalised and reflected in the report
+- [ ] Final test plan & execution report verified
 - [ ] Final rehearsal: be able to explain each module, algorithm and DB table aloud
 
 ### Demo video script (target 8–12 min)
 1. Home page + **sitemap** (0:30)
 2. Register, log in, edit profile; show password reset email flow (1:30)
 3. Categories: defaults + add/edit/delete personal category (0:45)
-4. Quick-add income & expense, AI suggestion + override, recurring entry, edit/delete + history (2:00)
+4. Quick-add income & expense, smart suggestion + override, recurring entry, edit/delete + history (2:00)
 5. CSV import with preview & batch suggestions (1:00)
 6. Dashboard: balance, top category, budget vs actual, charts, tips → pin/dismiss/bookmark (1:15)
 7. Budgets: set limits, trigger near/exceeded notifications (1:00)
