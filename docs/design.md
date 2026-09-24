@@ -123,7 +123,7 @@ Implement the sitemap block as a nested `<nav aria-label="Sitemap">` list of rea
 | **Amount input** | Numeric, `inputmode="decimal"`, currency symbol prefix, big font on mobile |
 | **Category picker** | Grid of icon chips (type-filtered); AI-suggested chip gets a ✨ "Suggested" badge and is pre-selected but changeable |
 | **Balance card** | Display-size balance; Income (↑ green) and Expense (↓ orange) sub-figures; savings-goal ring |
-| **Budget progress bar** | Label "Food · $24 of $30 (80%)"; colour by threshold + icon (✔ / ⚠ / ⛔); `role="progressbar"` with aria-values |
+| **Budget progress bar** | Label "Food · $24 of $30 (80%)"; coin-gold "under budget" / red "over budget" + icon (✔ / ⛔, ⏳ on goals); `role="progressbar"` with aria-values |
 | **Tip card** | Lightbulb icon, one-sentence tip, "Save ~$12" chip, actions: 📌 Pin · 🔖 Bookmark · ✕ Dismiss. Pinned = gold left border |
 | **Insight card** | Month, narrative paragraph, flagged-category chips (↑ 40%), advice line, disclaimer, bookmark + note |
 | **Notification item** | Icon by kind, message, time, unread dot; click marks read |

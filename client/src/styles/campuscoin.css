@@ -346,8 +346,14 @@ textarea.input {
   border-radius: inherit;
   transition: width 400ms ease-out;
 }
-.progress-ok .progress-fill { background: var(--cc-income); }
-.progress-near .progress-fill { background: var(--cc-warning); }
+/* "Under budget" draws in the app's coin-gold — the yellow students
+   already know from the brand — with a 1px warning edge so the fill's
+   boundary still clears 3:1 against the track. The state itself is in
+   the icon + words, never colour alone. */
+.progress-ok .progress-fill {
+  background: var(--cc-accent);
+  box-shadow: inset 0 0 0 1px var(--cc-warning);
+}
 .progress-over .progress-fill { background: var(--cc-danger); }
 
 /* ------------------------------- tip card -------------------------------- */

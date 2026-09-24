@@ -224,7 +224,7 @@ After every transaction create/edit/delete/restore for an **expense**:
 1. `spent = SUM(amount)` for user+category+month (DB aggregate).
 2. `ratio = spent / limit`. If `≥ 1.0` → notification `budget_exceeded`; elif `≥ 0.8` → `budget_near`.
 3. Insert-if-not-exists using the UNIQUE key → one alert per threshold per month.
-4. Progress bar colours: <80% green, 80–99% amber, ≥100% red (plus text label, not colour alone).
+4. Progress bar colours: <100% coin-gold "under budget", ≥100% red "over budget"; the savings-goal card is coin-gold "under goal" / "under budget" and never red — icon + text label, never colour alone.
 
 ### 6.2 Recurring entries (`ledger/services.py`)
 - Management command `generate_recurring` (cron / on-login catch-up): for each active rule, create missing transactions from `last_generated_on` to today; clamp day 29–31 to month end; update `last_generated_on`. Idempotent.

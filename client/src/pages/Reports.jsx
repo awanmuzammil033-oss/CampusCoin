@@ -5,6 +5,7 @@ import Page from '../components/Page.jsx';
 import Modal from '../components/Modal.jsx';
 import FormField from '../components/FormField.jsx';
 import ChartCard from '../components/ChartCard.jsx';
+import { categoryColor } from '../chartColors.js';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
@@ -87,7 +88,8 @@ function readDailyRows(data) {
     .filter((r) => r.day !== undefined || r.date !== undefined)
     .map((r) => ({
       day: r.day ?? Number(String(r.date).slice(8, 10)),
-      amount: Number(r.amount ?? r.total ?? r.value ?? 0),
+      // the report sends `expense`; the older keys stay for old exports
+      amount: Number(r.amount ?? r.total ?? r.value ?? r.expense ?? 0),
     }));
 }
 
@@ -96,7 +98,7 @@ function readWeekRows(data) {
   if (!Array.isArray(source)) return [];
   return source.map((r) => ({
     label: r.label || r.week || `Week ${r.weekNumber ?? ''}`,
-    amount: Number(r.amount ?? r.total ?? r.value ?? 0),
+    amount: Number(r.amount ?? r.total ?? r.value ?? r.expense ?? 0),
   }));
 }
 
@@ -193,7 +195,15 @@ export default function Reports() {
         <ChartCard
           title="Spending by category"
           type="bar"
-          data={{ labels: categoryRows.map((r) => r.name), datasets: [{ label: 'Amount', data: categoryRows.map((r) => r.amount) }] }}
+          data={{
+            labels: categoryRows.map((r) => r.name),
+            datasets: [{
+              label: 'Amount',
+              data: categoryRows.map((r) => r.amount),
+              // each bar wears its category's colour, same as the doughnut
+              backgroundColor: categoryRows.map((r) => categoryColor(r.name)),
+            }],
+          }}
           loading={!data}
           emptyText="No expenses in this month."
           table={{
@@ -217,8 +227,8 @@ export default function Reports() {
           data={{
             labels: trendRows.map((r) => r.label),
             datasets: [
-              { label: 'Income', data: trendRows.map((r) => r.income) },
-              { label: 'Expense', data: trendRows.map((r) => r.expense) },
+              { label: 'Income', data: trendRows.map((r) => r.income), backgroundColor: 'var(--cc-income)' },
+              { label: 'Expense', data: trendRows.map((r) => r.expense), backgroundColor: 'var(--cc-expense)' },
             ],
           }}
           loading={!data}

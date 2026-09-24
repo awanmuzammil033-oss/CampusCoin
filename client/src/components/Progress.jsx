@@ -1,13 +1,35 @@
 /**
- * Budget progress bar (BUD-2). The percentage is in the label text as well
- * as the fill width, and the icon repeats the state — so the meaning never
- * depends on seeing colour.
+ * Progress bar (BUD-2) with two readings:
+ *
+ *  - budget (default): spending against a limit. Red "over budget" only
+ *    when the limit is genuinely passed; everything still inside the
+ *    limit is the yellow "under budget" line — out is never shown when
+ *    it is not out.
+ *  - goal: a savings goal, where saving MORE than planned is good news.
+ *    It never turns red or says "over budget"; the percentage always
+ *    tells the truth (100% = reached, less = still working toward it).
+ *
+ * The icon and the words repeat the state, so meaning never depends on
+ * seeing colour (design.md §3).
  */
-export default function Progress({ pct, label }) {
-  const tone = pct >= 100 ? 'over' : pct >= 80 ? 'near' : 'ok';
-  const icon = tone === 'over' ? '⛔' : tone === 'near' ? '⚠' : '✔';
-  const toneText = tone === 'over' ? 'over budget' : tone === 'near' ? 'nearly there' : 'on track';
-  const width = Math.min(100, pct);
+export default function Progress({ pct, label, variant = 'budget' }) {
+  const parsed = Number(pct);
+  const value = Number.isFinite(parsed) ? Math.max(0, Math.round(parsed)) : 0;
+  const width = Math.min(100, value);
+
+  const goal = variant === 'goal';
+  const reached = goal && value >= 100;
+  const over = !goal && value >= 100;
+
+  const tone = over ? 'over' : 'ok';
+  const icon = goal ? (reached ? '✔' : '⏳') : over ? '⛔' : '✔';
+  const toneText = goal
+    ? reached
+      ? 'under budget'
+      : 'under goal'
+    : over
+      ? 'over budget'
+      : 'under budget';
 
   return (
     <div>
@@ -16,16 +38,16 @@ export default function Progress({ pct, label }) {
           {icon} {label}
         </span>
         <span className="num">
-          {pct}% <span className="muted">({toneText})</span>
+          {value}% <span className="muted">({toneText})</span>
         </span>
       </div>
       <div
         className={`progress-track progress-${tone}`}
         role="progressbar"
-        aria-valuenow={pct}
+        aria-valuenow={value}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label={`${label} — ${pct}% used, ${toneText}`}
+        aria-label={`${label} — ${value}% ${toneText}`}
       >
         <div className="progress-fill" style={{ width: `${width}%` }} />
       </div>

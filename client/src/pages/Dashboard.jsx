@@ -5,6 +5,7 @@ import Page from '../components/Page.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import Progress from '../components/Progress.jsx';
 import ChartCard from '../components/ChartCard.jsx';
+import { categoryColor } from '../chartColors.js';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { useToast } from '../components/Toast.jsx';
@@ -68,13 +69,17 @@ export default function Dashboard() {
 
   const doughnutData = {
     labels: doughnutRows.map((r) => r.category),
-    datasets: [{ data: doughnutRows.map((r) => Number(r.total)) }],
+    datasets: [{
+      data: doughnutRows.map((r) => Number(r.total)),
+      // one colour per category — Food's slice is Food's colour (design.md §5)
+      backgroundColor: doughnutRows.map((r) => categoryColor(r.category)),
+    }],
   };
   const trendData = {
     labels: trendRows.map((r) => r.label),
     datasets: [
-      { label: 'Income', data: trendRows.map((r) => Number(r.income)) },
-      { label: 'Expense', data: trendRows.map((r) => Number(r.expense)) },
+      { label: 'Income', data: trendRows.map((r) => Number(r.income)), backgroundColor: 'var(--cc-income)' },
+      { label: 'Expense', data: trendRows.map((r) => Number(r.expense)), backgroundColor: 'var(--cc-expense)' },
     ],
   };
 
@@ -146,11 +151,14 @@ export default function Dashboard() {
                   </Link>
                 </div>
                 <Progress
+                  variant="goal"
                   pct={summary.savingsGoal.pct}
                   label={`${money(summary.savingsGoal.saved)} saved of ${money(summary.savingsGoal.goal)}`}
                 />
                 <p className="smallish muted mb-0 mt-3">
-                  Set the goal in your profile — the bar fills as the month runs.
+                  {summary.savingsGoal.saved >= summary.savingsGoal.goal
+                    ? `Goal reached — ${money(summary.savingsGoal.saved - summary.savingsGoal.goal)} beyond target, still under budget.`
+                    : `${money(summary.savingsGoal.goal - summary.savingsGoal.saved)} to go — adjust the goal in your profile.`}
                 </p>
               </div>
             )}

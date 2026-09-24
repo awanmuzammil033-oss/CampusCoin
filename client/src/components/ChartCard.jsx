@@ -1,54 +1,105 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Chart as ChartJS, ArcElement, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Filler } from 'chart.js';
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
 
 import { money } from '../money.js';
+import { cssColor, withAlpha } from '../chartColors.js';
 
 // Registering only what we draw keeps the bundle lean.
 ChartJS.register(ArcElement, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Filler);
+
+const PALETTE = [
+  'var(--cc-chart-1)', 'var(--cc-chart-2)', 'var(--cc-chart-3)', 'var(--cc-chart-4)',
+  'var(--cc-chart-5)', 'var(--cc-chart-6)', 'var(--cc-chart-7)', 'var(--cc-chart-8)',
+];
 
 /**
  * Chart wrapper (design.md §5): title, skeleton while loading, the canvas,
  * and a "View as table" toggle — every chart has a text equivalent for
  * screen readers and anyone who prefers numbers over pictures.
+ *
+ * Colours arrive as `var(--cc-*)` tokens from the pages; canvas cannot
+ * resolve those, so they are turned into the stylesheet's current values
+ * at draw time and re-read whenever the theme flips.
  */
 export default function ChartCard({ title, type = 'doughnut', data, options, loading, emptyText, table }) {
   const [showTable, setShowTable] = useState(false);
+  const [themeTick, setThemeTick] = useState(0);
 
   useEffect(() => {
     if (!loading) setShowTable(false);
   }, [loading, data]);
 
-  const palette = [
-    'var(--cc-chart-1)', 'var(--cc-chart-2)', 'var(--cc-chart-3)', 'var(--cc-chart-4)',
-    'var(--cc-chart-5)', 'var(--cc-chart-6)', 'var(--cc-chart-7)', 'var(--cc-chart-8)',
-  ];
+  // Computed colours depend on [data-theme]; re-render when it changes so
+  // a theme flip repaints the canvases instead of keeping stale colours.
+  useEffect(() => {
+    if (typeof MutationObserver === 'undefined') return undefined;
+    const observer = new MutationObserver(() => setThemeTick((n) => n + 1));
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, []);
 
-  const coloured = {
-    ...data,
-    datasets: (data?.datasets || []).map((ds, i) => ({
-      ...ds,
-      backgroundColor: ds.backgroundColor || (type === 'doughnut'
-        ? data.labels.map((_, n) => palette[n % palette.length])
-        : palette[i % palette.length]),
-      borderColor: ds.borderColor || 'var(--cc-surface)',
-      borderWidth: ds.borderWidth ?? (type === 'doughnut' ? 2 : 0),
-    })),
-  };
+  const resolve = (value) => (Array.isArray(value) ? value.map(cssColor) : cssColor(value));
 
-  const defaults = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { position: type === 'doughnut' ? 'bottom' : 'bottom', labels: { usePointStyle: true, boxWidth: 10 } },
-      tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label ? `${ctx.dataset.label}: ` : ''}${money(ctx.parsed.y ?? ctx.parsed)}` } },
-    },
-    scales: type === 'doughnut'
-      ? undefined
-      : { y: { ticks: { callback: (v) => `$${v}` }, grid: { color: 'rgba(128,128,128,0.15)' } } },
-  };
+  const coloured = useMemo(() => {
+    const datasets = (data?.datasets || []).map((ds, i) => {
+      const series = cssColor(PALETTE[i % PALETTE.length]);
+      const isLine = type === 'line';
+      const defaultFill = !ds.backgroundColor;
 
-  const merged = { ...defaults, ...options, plugins: { ...defaults.plugins, ...(options?.plugins || {}) } };
+      const backgroundColor = ds.backgroundColor
+        ? resolve(ds.backgroundColor)
+        : type === 'doughnut'
+          ? (data?.labels || []).map((_, n) => cssColor(PALETTE[n % PALETTE.length]))
+          : isLine
+            ? withAlpha(series, 0.16)
+            : series;
+
+      const borderColor = ds.borderColor
+        ? resolve(ds.borderColor)
+        : type === 'doughnut'
+          ? cssColor('var(--cc-surface)')
+          : isLine
+            ? series
+            : 'transparent';
+
+      return {
+        ...ds,
+        backgroundColor,
+        borderColor,
+        borderWidth: ds.borderWidth ?? (type === 'doughnut' ? 2 : isLine ? 2.5 : 0),
+        // A line's fill is a wash under the stroke, never a solid slab.
+        fill: ds.fill ?? (isLine && defaultFill ? true : ds.fill),
+      };
+    });
+    return { ...data, datasets };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, type, themeTick]);
+
+  const merged = useMemo(() => {
+    const defaults = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { usePointStyle: true, boxWidth: 10, color: cssColor('var(--cc-text)') },
+        },
+        tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label ? `${ctx.dataset.label}: ` : ''}${money(ctx.parsed.y ?? ctx.parsed)}` } },
+      },
+      scales: type === 'doughnut'
+        ? undefined
+        : {
+            x: { ticks: { color: cssColor('var(--cc-muted)') } },
+            y: {
+              ticks: { callback: (v) => `$${v}`, color: cssColor('var(--cc-muted)') },
+              grid: { color: 'rgba(128,128,128,0.15)' },
+            },
+          },
+    };
+    return { ...defaults, ...options, plugins: { ...defaults.plugins, ...(options?.plugins || {}) } };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type, options, themeTick]);
   const Chart = type === 'doughnut' ? Doughnut : type === 'line' ? Line : Bar;
 
   const hasData = Boolean(data?.labels?.length);
