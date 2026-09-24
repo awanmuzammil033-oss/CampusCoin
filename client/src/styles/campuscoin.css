@@ -630,6 +630,26 @@ textarea.input {
   color: var(--cc-muted);
 }
 
+/* Tells the picker row at a glance whether this language has a translated
+   interface or keeps English text — a language being listed does not mean
+   every string in it exists yet. */
+.dropdown-row .row-ui-tag {
+  flex: none;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 1px 6px;
+  border-radius: var(--cc-radius-pill);
+  background: var(--cc-surface-2);
+  color: var(--cc-muted);
+  border: 1px solid var(--cc-border);
+}
+.dropdown-row .row-ui-tag.row-ui-full {
+  background: var(--cc-primary-soft);
+  color: var(--cc-primary);
+  border-color: transparent;
+}
+
 .layout {
   display: flex;
   min-height: calc(100vh - var(--cc-topbar-h));

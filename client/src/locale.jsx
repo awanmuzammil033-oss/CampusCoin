@@ -61,11 +61,6 @@ export function LocaleProvider({ children }) {
     persist('cc.language', language);
   }, [language, dir]);
 
-  // When a session appears (mount, login, refresh), adopt the account's own
-  // saved choices once — the signed-in account is the source of truth across
-  // devices. Reconciling only on that transition (not on every user object)
-  // keeps a preferences PATCH that is still in flight from being fought by
-  // the old server value.
   useEffect(() => {
     if (!user) {
       reconciledFor.current = null;
@@ -74,23 +69,42 @@ export function LocaleProvider({ children }) {
     const who = user.id || user.email;
     if (reconciledFor.current === who) return;
     reconciledFor.current = who;
-    if (user.currency) {
+
+    // The pickers mark a choice as explicitly made on THIS device. Such a
+    // choice is the newer intent, so it is pushed up to the account — letting
+    // an older saved value win would silently undo the click the user just
+    // made (the classic case: pick Urdu as a visitor, log in, and watch it
+    // snap back to English). Without a local mark the account comes down as
+    // before, so other devices still sync.
+    const pickedLanguage = readStored('cc.language.picked', '') === '1' ? readStored('cc.language', '') : '';
+    const pickedCurrency = readStored('cc.currency.picked', '') === '1' ? readStored('cc.currency', '') : '';
+
+    if (pickedLanguage && user.language && pickedLanguage !== user.language) {
+      updatePreferences?.({ language: pickedLanguage });
+    } else if (!pickedLanguage && user.language && user.language !== language) {
+      setLanguageState(user.language);
+      persist('cc.language', user.language);
+    }
+
+    if (pickedCurrency && user.currency && pickedCurrency !== user.currency) {
+      updatePreferences?.({ currency: pickedCurrency });
+    } else if (!pickedCurrency && user.currency && user.currency !== currency) {
       setCurrencyState(user.currency);
       setDisplayCurrency(user.currency);
       persist('cc.currency', user.currency);
     }
-    if (user.language) {
-      setLanguageState(user.language);
-      persist('cc.language', user.language);
-    }
-  }, [user]);
+  }, [user, updatePreferences, language, currency]);
 
+  // Choosing in a picker records an explicit local mark — reconcile (above)
+  // uses it to tell "the user just clicked this" apart from "the account
+  // already said this".
   const setCurrency = useCallback(
     (code) => {
       if (!code || code === currency) return;
       setCurrencyState(code);
       setDisplayCurrency(code);
       persist('cc.currency', code);
+      persist('cc.currency.picked', '1');
       if (user) updatePreferences?.({ currency: code });
     },
     [currency, user, updatePreferences]
@@ -101,6 +115,7 @@ export function LocaleProvider({ children }) {
       if (!code || code === language) return;
       setLanguageState(code);
       persist('cc.language', code);
+      persist('cc.language.picked', '1');
       if (user) updatePreferences?.({ language: code });
     },
     [language, user, updatePreferences]

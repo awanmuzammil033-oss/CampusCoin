@@ -2,6 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocale } from '../locale.jsx';
 import { CURRENCIES } from '../data/currencies.js';
 import { LANGUAGES } from '../data/languages.js';
+import dictionaries from '../i18n/index.js';
+
+/** True when the interface actually speaks this language (not just listed). */
+function hasUi(code) {
+  return Boolean(dictionaries[code] || dictionaries[String(code).split('-')[0]]);
+}
 
 /**
  * The currency + language pickers, kept together because they behave
@@ -156,6 +162,13 @@ export default function LocalePickers({ onOpen }) {
                 <span className="row-native" aria-hidden="true">{l.native}</span>
                 <span aria-hidden="true">—</span>
                 <span className="row-name">{l.name}</span>
+                <span
+                  className={`row-ui-tag${hasUi(l.code) ? ' row-ui-full' : ''}`}
+                  aria-hidden="true"
+                  title={hasUi(l.code) ? 'Interface translated' : 'Interface stays in English for now'}
+                >
+                  {hasUi(l.code) ? '✓ UI' : 'EN'}
+                </span>
                 {l.code.toLowerCase() === language.toLowerCase() && <span aria-hidden="true">✓</span>}
               </button>
             ))}
