@@ -6,6 +6,7 @@ import FormField from '../components/FormField.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
+import { money } from '../money.js';
 
 const ICONS = {
   wallet: '👛', cup: '☕', bus: '🚌', book: '📚', gift: '🎁', film: '🎞️',
@@ -13,10 +14,6 @@ const ICONS = {
 };
 function glyph(name) {
   return ICONS[name] || '🏷️';
-}
-
-function money(value) {
-  return `$${Number(value || 0).toFixed(2)}`;
 }
 
 function dayLabel(value) {

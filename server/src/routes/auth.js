@@ -171,10 +171,14 @@ router.get('/me', async (req, res, next) => {
   }
 });
 
-/** Theme + font size (UX-1/UX-2) persist on the account, not the device. */
+/**
+ * Display preferences (UX-1/UX-2 + the topbar pickers) persist on the
+ * account, not the device: theme, font size, display currency, language.
+ * Currency/language only change how things are SHOWN on the client.
+ */
 router.patch('/me/preferences', requireAuth, async (req, res, next) => {
   try {
-    const { theme, fontScale } = req.body;
+    const { theme, fontScale, currency, language } = req.body;
     if (theme !== undefined) {
       if (!['light', 'dark'].includes(theme)) return res.status(400).json({ error: 'Unknown theme.' });
       req.user.theme = theme;
@@ -183,6 +187,18 @@ router.patch('/me/preferences', requireAuth, async (req, res, next) => {
       const n = Number(fontScale);
       if (![1, 2, 3, 4].includes(n)) return res.status(400).json({ error: 'Font scale must be 1–4.' });
       req.user.fontScale = n;
+    }
+    if (currency !== undefined) {
+      if (typeof currency !== 'string' || !/^[A-Z]{3}$/.test(currency)) {
+        return res.status(400).json({ error: 'Unknown currency code.' });
+      }
+      req.user.currency = currency;
+    }
+    if (language !== undefined) {
+      if (typeof language !== 'string' || !/^[a-z]{2,3}(-[A-Za-z]{2,4})?$/.test(language)) {
+        return res.status(400).json({ error: 'Unknown language code.' });
+      }
+      req.user.language = language;
     }
     await req.user.save();
     res.json({ user: req.user.toPublic() });

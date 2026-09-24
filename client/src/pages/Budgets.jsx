@@ -8,10 +8,7 @@ import EmptyState from '../components/EmptyState.jsx';
 import Progress from '../components/Progress.jsx';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
-
-function money(value) {
-  return `$${Number(value || 0).toFixed(2)}`;
-}
+import { money } from '../money.js';
 
 function monthKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;

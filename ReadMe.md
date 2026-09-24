@@ -112,8 +112,7 @@ CampusCoin/
 │       ├── pages/         student screens + pages/control (admin area)
 │       └── styles/        design tokens & components (custom CSS)
 ├── db/schema.md           collections, fields, indexes, relationships
-├── docs/                  PRD, architecture, design, phases (spec pack)
-└── AI_USAGE.md            tool acknowledgment (SRS §1.7)
+└── docs/                  PRD, architecture, design, phases (spec pack)
 ```
 
 ## 6. Notable behaviours worth knowing

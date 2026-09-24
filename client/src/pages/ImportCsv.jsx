@@ -5,12 +5,9 @@ import Page from '../components/Page.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
+import { money } from '../money.js';
 
 const MAX_BYTES = 1024 * 1024;
-
-function money(value) {
-  return `$${Number(value || 0).toFixed(2)}`;
-}
 
 function dayLabel(value) {
   const [y, m, d] = String(value || '').slice(0, 10).split('-').map(Number);

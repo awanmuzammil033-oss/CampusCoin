@@ -7,6 +7,7 @@ import FormField from '../components/FormField.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
+import { money } from '../money.js';
 
 function monthTitle(key) {
   if (!key) return '';
@@ -292,7 +293,7 @@ export default function Insights() {
                 <div className="d-flex justify-content-between smallish mb-1">
                   <span>{row.name}</span>
                   <span className="num">
-                    {row.amount < 0 ? '−' : ''}${Math.abs(row.amount).toFixed(2)}
+                    {money(row.amount)}
                   </span>
                 </div>
                 <div className="progress-track">

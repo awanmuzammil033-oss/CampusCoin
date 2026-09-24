@@ -5,11 +5,7 @@ import Page from '../components/Page.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
-
-function money(value) {
-  const n = Number(value || 0);
-  return n < 0 ? `−$${Math.abs(n).toFixed(2)}` : `$${n.toFixed(2)}`;
-}
+import { money } from '../money.js';
 
 function dayLabel(value) {
   const [y, m, d] = String(value || '').slice(0, 10).split('-').map(Number);

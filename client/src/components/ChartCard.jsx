@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Chart as ChartJS, ArcElement, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Filler } from 'chart.js';
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
 
+import { money } from '../money.js';
+
 // Registering only what we draw keeps the bundle lean.
 ChartJS.register(ArcElement, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Filler);
 
@@ -39,7 +41,7 @@ export default function ChartCard({ title, type = 'doughnut', data, options, loa
     maintainAspectRatio: false,
     plugins: {
       legend: { position: type === 'doughnut' ? 'bottom' : 'bottom', labels: { usePointStyle: true, boxWidth: 10 } },
-      tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label ? `${ctx.dataset.label}: ` : ''}$${Number(ctx.parsed.y ?? ctx.parsed).toFixed(2)}` } },
+      tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label ? `${ctx.dataset.label}: ` : ''}${money(ctx.parsed.y ?? ctx.parsed)}` } },
     },
     scales: type === 'doughnut'
       ? undefined

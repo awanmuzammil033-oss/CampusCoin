@@ -7,6 +7,7 @@ import FormField from '../components/FormField.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
+import { money } from '../money.js';
 
 function monthTitle(value) {
   if (!value) return '';
@@ -147,7 +148,7 @@ export default function Bookmarks() {
                   <div className="d-flex align-items-start justify-content-between gap-2 flex-wrap">
                     <p className="smallish muted mb-1">{monthTitle(item.month)}</p>
                     <span className="smallish muted num">
-                      {item.potentialSavings > 0 ? `Save ~$${Number(item.potentialSavings).toFixed(2)}` : ''}
+                      {item.potentialSavings > 0 ? `Save ~${money(item.potentialSavings)}` : ''}
                     </span>
                   </div>
                   <p style={CLAMP} className="mb-2">

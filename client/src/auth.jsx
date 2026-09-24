@@ -64,8 +64,16 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  const updatePreferences = async ({ theme, fontScale }) => {
-    const data = await api.patch('/api/auth/me/preferences', { theme, fontScale });
+  // Theme/font stay display preferences; currency/language travel through
+  // the same endpoint but applyPreferences must not touch them — locale.jsx
+  // owns those (they change money() and <html lang/dir>, not <html> styling).
+  const updatePreferences = async ({ theme, fontScale, currency, language }) => {
+    const body = {};
+    if (theme !== undefined) body.theme = theme;
+    if (fontScale !== undefined) body.fontScale = fontScale;
+    if (currency !== undefined) body.currency = currency;
+    if (language !== undefined) body.language = language;
+    const data = await api.patch('/api/auth/me/preferences', body);
     setUser(data.user);
     applyPreferences(data.user.theme, data.user.fontScale);
     return data.user;

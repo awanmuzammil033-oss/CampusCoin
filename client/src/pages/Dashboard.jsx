@@ -8,12 +8,7 @@ import ChartCard from '../components/ChartCard.jsx';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { useToast } from '../components/Toast.jsx';
-
-/** Money always shows a currency symbol and two decimals. */
-function money(value) {
-  const n = Number(value || 0);
-  return n < 0 ? `−$${Math.abs(n).toFixed(2)}` : `$${n.toFixed(2)}`;
-}
+import { money } from '../money.js';
 
 function monthLabel() {
   return new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });

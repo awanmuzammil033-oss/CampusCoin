@@ -550,6 +550,86 @@ textarea.input {
   justify-content: center;
 }
 
+/* --------------------- currency / language pickers ----------------------- */
+
+/* The panels hold 100+ rows, so they scroll inside a capped box — they must
+   never stretch out to cover the page. */
+.dropdown-menu {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  z-index: 140;
+  width: 300px;
+  padding: 8px;
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-card);
+  box-shadow: var(--cc-shadow);
+  max-height: min(70vh, 340px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cc-border) transparent;
+}
+.dropdown-menu::-webkit-scrollbar { width: 8px; }
+.dropdown-menu::-webkit-scrollbar-track { background: transparent; }
+.dropdown-menu::-webkit-scrollbar-thumb {
+  background: var(--cc-border);
+  border-radius: var(--cc-radius-pill);
+}
+
+/* Filter box stays pinned while the long list scrolls under it. */
+.dropdown-menu .menu-search {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  min-height: 38px;
+  margin-bottom: 6px;
+}
+
+.dropdown-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: var(--cc-radius);
+  background: transparent;
+  color: var(--cc-text);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color 120ms ease-out;
+}
+.dropdown-row:hover { background: var(--cc-surface-2); }
+/* Rows sit at the panel edge — pull the ring inside so the scroll box
+   does not clip it. */
+.dropdown-row:focus-visible { outline-offset: -3px; }
+.dropdown-row[aria-pressed='true'] {
+  background: var(--cc-primary-soft);
+  color: var(--cc-primary);
+  font-weight: 600;
+}
+.dropdown-row[aria-pressed='true'] .row-name { color: var(--cc-primary); }
+.dropdown-row .row-native { white-space: nowrap; }
+.dropdown-row .row-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--cc-muted);
+}
+
+.menu-empty {
+  margin: 10px 4px;
+  font-size: 0.875rem;
+  color: var(--cc-muted);
+}
+
 .layout {
   display: flex;
   min-height: calc(100vh - var(--cc-topbar-h));
@@ -843,6 +923,9 @@ textarea.input {
   .page-head { flex-direction: column; }
   .page-actions { width: 100%; }
   .page-actions .btn { flex: 1; }
+
+  /* Phones: the language button keeps only the globe so the topbar fits. */
+  .topbar .lang-native { display: none; }
 }
 
 /* --------------------------- reduced motion ------------------------------ */

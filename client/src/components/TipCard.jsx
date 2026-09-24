@@ -1,3 +1,5 @@
+import { money } from '../money.js';
+
 /**
  * Saving tip card (TIP-2/3): one sentence, the estimated saving, and the
  * three decisions the student owns — pin, bookmark (with a note), dismiss.
@@ -14,7 +16,7 @@ export default function TipCard({ tip, onAction, busy }) {
           <p className="mb-2">{tip.text}</p>
           <div className="d-flex align-items-center gap-2 flex-wrap">
             {tip.potentialSavings > 0 && (
-              <span className="tip-saving">Save ~${Number(tip.potentialSavings).toFixed(2)}</span>
+              <span className="tip-saving">Save ~{money(tip.potentialSavings)}</span>
             )}
             {tip.isBookmarked && <span className="pill">🔖 Saved</span>}
           </div>
