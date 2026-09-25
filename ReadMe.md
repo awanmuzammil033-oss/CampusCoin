@@ -49,15 +49,19 @@ Express.js, React, Node.js … are also valid").
 cd server   && npm install
 cd ../client && npm install
 
-# 2. configure (optional for local try-out)
+# 2. configure (only for a DIFFERENT / cloud database — optional)
 copy .env.example .env        # fill MONGODB_URI for a real database
+                              # (with no .env at all, every command below
+                              #  still works: the on-disk database is used)
 
-# 3a. run against a local on-disk database (demo / try-out, no cloud needed)
+# 3a. demo / try-out (no cloud needed, works on a fresh clone)
 cd server
 $env:SEED='1'; npm run dev:local      # seeds demo accounts, serves :5000,
                                       # data kept in db/data/ across restarts
+# npm run dev   /  npm start  behave the same way (dev also reloads on
+# file changes); nothing can fail with a "database not running" error.
 
-# 3b. run against your own database
+# 3b. run against your own database (MONGODB_URI set in .env)
 npm run seed                          # first time only
 npm run dev                           # API on http://localhost:5000
 

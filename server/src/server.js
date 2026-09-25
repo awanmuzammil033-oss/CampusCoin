@@ -13,7 +13,11 @@ async function main() {
     console.log('Database connected.');
   } catch (err) {
     console.error('Could not reach the database:', err.message);
-    console.error('Check MONGODB_URI in your .env file.');
+    console.error(
+      'No .env needed: `npm run dev`, `npm start` and `npm run seed` boot the ' +
+        'on-disk database automatically. If you DID configure MONGODB_URI, check ' +
+        'its value in .env.'
+    );
     process.exit(1);
   }
 
