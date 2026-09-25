@@ -5,6 +5,7 @@ import Modal from '../components/Modal.jsx';
 import FormField from '../components/FormField.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import TipCard from '../components/TipCard.jsx';
+import Icon from '../components/Icon.jsx';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { useLocale } from '../locale.jsx';
@@ -148,7 +149,7 @@ export default function Tips() {
               aria-label={t('ui.prevMonth')}
               title={t('ui.prevMonth')}
             >
-              ‹
+              <Icon name="arrowLeft" />
             </button>
             <strong className="num" style={{ minWidth: 140, textAlign: 'center' }}>
               {monthLabel(month)}
@@ -160,7 +161,7 @@ export default function Tips() {
               aria-label={t('ui.nextMonth')}
               title={t('ui.nextMonth')}
             >
-              ›
+              <Icon name="arrowRight" />
             </button>
           </span>
           <button type="button" className="btn btn-secondary" onClick={refresh} disabled={refreshing}>
@@ -186,7 +187,7 @@ export default function Tips() {
 
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <Icon name="warning" />
           <span>{error}</span>
         </div>
       )}
@@ -203,7 +204,7 @@ export default function Tips() {
       {rows && visible.length === 0 && (
         <div className="card">
           <EmptyState
-            icon="💡"
+            icon="bulb"
             title={t('tip.emptyTabTitle', { tab: t(TABS.find((x) => x.id === tab)?.label) })}
             action={
               tab === 'active' ? (
@@ -245,7 +246,7 @@ export default function Tips() {
       )}
 
       <p className="smallish muted mt-4 mb-0">
-        <span aria-hidden="true"> ℹ️</span> {t('ui.suggestionsOnly')}
+        <Icon name="info" /> {t('ui.suggestionsOnly')}
       </p>
 
       {bookmarkFor && (

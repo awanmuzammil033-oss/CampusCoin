@@ -5,29 +5,30 @@ import { useAuth } from '../auth.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
 import { useLocale } from '../locale.jsx';
 import LocalePickers from './LocalePickers.jsx';
+import Icon from './Icon.jsx';
 
 const NAV = [
   { sectionKey: 'nav.section.money' },
-  { to: '/dashboard', labelKey: 'nav.dashboard', icon: '🏠' },
-  { to: '/transactions', labelKey: 'nav.transactions', icon: '🧾' },
-  { to: '/recurring', labelKey: 'nav.recurring', icon: '🔁' },
-  { to: '/categories', labelKey: 'nav.categories', icon: '🏷️' },
-  { to: '/budgets', labelKey: 'nav.budgets', icon: '🎯' },
+  { to: '/dashboard', labelKey: 'nav.dashboard', icon: 'home' },
+  { to: '/transactions', labelKey: 'nav.transactions', icon: 'receipt' },
+  { to: '/recurring', labelKey: 'nav.recurring', icon: 'repeat' },
+  { to: '/categories', labelKey: 'nav.categories', icon: 'tag' },
+  { to: '/budgets', labelKey: 'nav.budgets', icon: 'target' },
   { sectionKey: 'nav.section.understand' },
-  { to: '/reports', labelKey: 'nav.reports', icon: '📊' },
-  { to: '/insights', labelKey: 'nav.insights', icon: '🌤️' },
-  { to: '/tips', labelKey: 'nav.tips', icon: '💡' },
-  { to: '/bookmarks', labelKey: 'nav.bookmarks', icon: '🔖' },
+  { to: '/reports', labelKey: 'nav.reports', icon: 'chart' },
+  { to: '/insights', labelKey: 'nav.insights', icon: 'sun' },
+  { to: '/tips', labelKey: 'nav.tips', icon: 'bulb' },
+  { to: '/bookmarks', labelKey: 'nav.bookmarks', icon: 'bookmark' },
   { sectionKey: 'nav.section.account' },
-  { to: '/profile', labelKey: 'nav.profile', icon: '⚙️' },
+  { to: '/profile', labelKey: 'nav.profile', icon: 'settings' },
 ];
 
 const BOTTOM = [
-  { to: '/dashboard', labelKey: 'nav.home', icon: '🏠' },
-  { to: '/transactions/new', labelKey: 'nav.add', icon: '➕' },
-  { to: '/reports', labelKey: 'nav.reports', icon: '📊' },
-  { to: '/budgets', labelKey: 'nav.budgets', icon: '🎯' },
-  { to: '/profile', labelKey: 'nav.more', icon: '⋯' },
+  { to: '/dashboard', labelKey: 'nav.home', icon: 'home' },
+  { to: '/transactions/new', labelKey: 'nav.add', icon: 'plus' },
+  { to: '/reports', labelKey: 'nav.reports', icon: 'chart' },
+  { to: '/budgets', labelKey: 'nav.budgets', icon: 'target' },
+  { to: '/profile', labelKey: 'nav.more', icon: 'more' },
 ];
 
 /**
@@ -108,10 +109,12 @@ export default function Layout({ children }) {
         <LocalePickers onOpen={() => { setBellOpen(false); setAccountOpen(false); }} />
 
         <button type="button" className="icon-btn" onClick={() => changeFont(-1)} aria-label={t('a11y.decreaseText')} title={t('topbar.smallerText')}>
-          A−
+          <Icon name="fontSize" />
+          <Icon name="minus" />
         </button>
         <button type="button" className="icon-btn" onClick={() => changeFont(1)} aria-label={t('a11y.increaseText')} title={t('topbar.largerText')}>
-          A+
+          <Icon name="fontSize" />
+          <Icon name="plus" />
         </button>
         <ThemeToggle />
         <div className="position-relative">
@@ -122,7 +125,7 @@ export default function Layout({ children }) {
             aria-expanded={bellOpen}
             aria-label={`${t('topbar.notifications')}${unread ? `, ${unread} ${t('topbar.unread')}` : ''}`}
           >
-            🔔
+            <Icon name="bell" />
             {unread > 0 && <span className="badge-count">{unread > 9 ? '9+' : unread}</span>}
           </button>
           {bellOpen && (
@@ -143,7 +146,7 @@ export default function Layout({ children }) {
                       style={{ minHeight: 44 }}
                       onClick={() => markRead(n.id)}
                     >
-                      <span aria-hidden="true">{iconFor(n.kind)}</span>{' '}
+                      <span><Icon name={iconFor(n.kind)} /></span>{' '}
                       {!n.isRead && <strong>• </strong>}
                       {n.message}
                     </button>
@@ -161,16 +164,16 @@ export default function Layout({ children }) {
             onClick={() => { setAccountOpen((v) => !v); setBellOpen(false); }}
             aria-expanded={accountOpen}
           >
-            <span aria-hidden="true">👤</span>
+            <span><Icon name="user" /></span>
             <span className="nav-label">{user?.name?.split(' ')[0]}</span>
           </button>
           {accountOpen && (
             <div className="card position-absolute" style={{ right: 0, top: 52, width: 240, zIndex: 140 }}>
               <div className="smallish muted mb-2">{user?.email}</div>
-              <Link className="nav-link-cc" to="/profile" onClick={() => setAccountOpen(false)}>⚙️ {t('account.profileSettings')}</Link>
-              <Link className="nav-link-cc" to="/bookmarks" onClick={() => setAccountOpen(false)}>🔖 {t('account.bookmarks')}</Link>
+              <Link className="nav-link-cc" to="/profile" onClick={() => setAccountOpen(false)}><Icon name="settings" /> {t('account.profileSettings')}</Link>
+              <Link className="nav-link-cc" to="/bookmarks" onClick={() => setAccountOpen(false)}><Icon name="bookmark" /> {t('account.bookmarks')}</Link>
               <button type="button" className="nav-link-cc w-100" style={{ border: 'none', background: 'none', cursor: 'pointer' }} onClick={handleLogout}>
-                🚪 {t('account.signOut')}
+                <Icon name="logout" /> {t('account.signOut')}
               </button>
             </div>
           )}
@@ -184,7 +187,7 @@ export default function Layout({ children }) {
               <div className="nav-section" key={`s-${i}`}>{t(item.sectionKey)}</div>
             ) : (
               <NavLink key={item.to} to={item.to} className={({ isActive }) => `nav-link-cc ${isActive ? 'active' : ''}`}>
-                <span className="nav-ico" aria-hidden="true">{item.icon}</span>
+                <span className="nav-ico"><Icon name={item.icon} /></span>
                 <span className="nav-label">{t(item.labelKey)}</span>
               </NavLink>
             )
@@ -196,12 +199,12 @@ export default function Layout({ children }) {
         </main>
       </div>
 
-      <Link to="/transactions/new" className="fab" aria-label={t('a11y.addTransaction')}>＋</Link>
+      <Link to="/transactions/new" className="fab" aria-label={t('a11y.addTransaction')}><Icon name="plus" /></Link>
 
       <nav className="bottom-tabs" aria-label={t('a11y.quickNav')}>
         {BOTTOM.map((item) => (
           <NavLink key={item.to} to={item.to} className={({ isActive }) => `bottom-tab ${isActive ? 'active' : ''}`}>
-            <span className="tab-ico" aria-hidden="true">{item.icon}</span>
+            <span className="tab-ico"><Icon name={item.icon} /></span>
             <span>{t(item.labelKey)}</span>
           </NavLink>
         ))}
@@ -211,8 +214,8 @@ export default function Layout({ children }) {
 }
 
 function iconFor(kind) {
-  if (kind === 'budget_exceeded') return '⛔';
-  if (kind === 'budget_near') return '⚠️';
-  if (kind === 'announcement') return '📢';
-  return 'ℹ️';
+  if (kind === 'budget_exceeded') return 'ban';
+  if (kind === 'budget_near') return 'warning';
+  if (kind === 'announcement') return 'megaphone';
+  return 'bell';
 }

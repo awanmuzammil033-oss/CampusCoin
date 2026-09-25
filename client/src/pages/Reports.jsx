@@ -5,6 +5,7 @@ import Page from '../components/Page.jsx';
 import Modal from '../components/Modal.jsx';
 import FormField from '../components/FormField.jsx';
 import ChartCard from '../components/ChartCard.jsx';
+import Icon from '../components/Icon.jsx';
 import { categoryColor } from '../chartColors.js';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
@@ -51,25 +52,37 @@ function readCategoryRows(data, t) {
 
   const total = mapped.reduce((sum, row) => sum + row.amount, 0);
   return mapped.map((row) => {
+    // changeText is the plain "+8%" / "-8%" number; changeIcon draws the
+    // direction beside it, so no arrow character is ever typed into a string.
     let changeText = '—';
+    let changeIcon = null;
     if (row.change !== null && row.change !== undefined && row.change !== '') {
       const n = Number(row.change);
       if (Number.isNaN(n)) changeText = String(row.change);
-      else if (n > 0) changeText = `↑ +${Math.round(n)}%`;
-      else if (n < 0) changeText = `↓ ${Math.round(n)}%`;
-      else changeText = '→ 0%';
+      else if (n > 0) {
+        changeText = `+${Math.round(n)}%`;
+        changeIcon = 'trendUp';
+      } else if (n < 0) {
+        changeText = `${Math.round(n)}%`;
+        changeIcon = 'trendDown';
+      } else {
+        changeText = '0%';
+        changeIcon = 'trendFlat';
+      }
     } else if (row.previous !== null && row.previous !== undefined) {
       const prev = Number(row.previous);
       if (prev > 0) {
         const n = ((row.amount - prev) / prev) * 100;
-        changeText = n >= 0 ? `↑ +${Math.round(n)}%` : `↓ ${Math.round(n)}%`;
+        changeText = n >= 0 ? `+${Math.round(n)}%` : `${Math.round(n)}%`;
+        changeIcon = n >= 0 ? 'trendUp' : 'trendDown';
       } else if (row.amount > 0) {
         changeText = t('rep.newChange');
+        changeIcon = 'sparkle';
       }
     }
 
     const pct = row.pct !== null ? Math.round(Number(row.pct)) : total > 0 ? Math.round((row.amount / total) * 100) : 0;
-    return { ...row, pct, changeText };
+    return { ...row, pct, changeText, changeIcon };
   });
 }
 
@@ -218,6 +231,8 @@ export default function Reports() {
       table: {
         columns: [t('ui.category'), t('ui.amount'), t('ui.pctOfTotal'), t('ui.vsLastMonth')],
         rows: categoryRows.map((r) => [r.name, money(r.amount), `${r.pct}%`, r.changeText]),
+        // parallel to rows: the icon that belongs in each cell, if any
+        icons: categoryRows.map((r) => [null, null, null, r.changeIcon]),
       },
       empty: !data ? null : categoryRows.length === 0,
       emptyText: t('rep.emptyNothingLogged'),
@@ -310,7 +325,7 @@ export default function Reports() {
             aria-label={t('ui.prevMonth')}
             title={t('ui.prevMonth')}
           >
-            ‹
+            <Icon name="arrowLeft" />
           </button>
           <strong className="num" style={{ minWidth: 140, textAlign: 'center' }}>
             {monthLabel(month)}
@@ -322,27 +337,27 @@ export default function Reports() {
             aria-label={t('ui.nextMonth')}
             title={t('ui.nextMonth')}
           >
-            ›
+            <Icon name="arrowRight" />
           </button>
         </div>
       </div>
 
       <div className="d-flex gap-2 flex-wrap justify-content-end mb-3">
         <a className="btn btn-secondary btn-sm" href={`/api/reports/export/pdf?month=${month}`}>
-          {t('rep.exportPdf')}
+          <Icon name="download" size={15} /> {t('rep.exportPdf')}
         </a>
         <button type="button" className="btn btn-secondary btn-sm" onClick={exportImage} disabled={capturing}>
           {capturing && <span className="spinner" aria-hidden="true" />}
-          {capturing ? t('rep.preparing') : t('rep.exportImage')}
+          <Icon name="image" size={15} /> {capturing ? t('rep.preparing') : t('rep.exportImage')}
         </button>
         <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShareOpen(true)}>
-          {t('rep.emailBtn')}
+          <Icon name="send" size={15} /> {t('rep.emailBtn')}
         </button>
       </div>
 
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <Icon name="warning" />
           <span>{error}</span>
         </div>
       )}
@@ -391,11 +406,21 @@ export default function Reports() {
                   <tbody>
                     {view.table.rows.map((row, i) => (
                       <tr key={i}>
-                        {row.map((cell, j) => (
-                          <td key={j} className={j > 0 ? 'num' : undefined}>
-                            {cell}
-                          </td>
-                        ))}
+                        {row.map((cell, j) => {
+                          const iconName = view.table.icons?.[i]?.[j] || null;
+                          return (
+                            <td key={j} className={j > 0 ? 'num' : undefined}>
+                              {iconName ? (
+                                <span className="d-inline-flex align-items-center gap-1">
+                                  <Icon name={iconName} />
+                                  {cell}
+                                </span>
+                              ) : (
+                                cell
+                              )}
+                            </td>
+                          );
+                        })}
                       </tr>
                     ))}
                   </tbody>

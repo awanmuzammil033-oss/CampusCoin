@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import Page from '../../components/Page.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
+import Icon from '../../components/Icon.jsx';
 import { api } from '../../api.js';
 import { useToast } from '../../components/Toast.jsx';
 import { useLocale } from '../../locale.jsx';
@@ -58,7 +59,7 @@ export default function Overview() {
     >
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <span><Icon name="warning" /></span>
           <span>{error}</span>
         </div>
       )}
@@ -98,7 +99,7 @@ export default function Overview() {
               <span>{t('ctl.topCategories')}</span>
             </div>
             {stats.top.length === 0 ? (
-              <EmptyState icon="🏷️" title={t('ctl.noCategoriesTitle')}>
+              <EmptyState icon="tag" title={t('ctl.noCategoriesTitle')}>
                 {t('ctl.noCategoriesBody')}
               </EmptyState>
             ) : (
@@ -124,7 +125,7 @@ export default function Overview() {
           </section>
 
           <p className="smallish muted mt-3 mb-0">
-            <span aria-hidden="true"> ℹ️</span> {t('ctl.privacyNote')}
+            <span> <Icon name="info" /></span> {t('ctl.privacyNote')}
           </p>
         </>
       )}

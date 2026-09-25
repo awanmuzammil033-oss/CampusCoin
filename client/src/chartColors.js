@@ -25,7 +25,7 @@ const FALLBACKS = {
   '--cc-expense': '#c2410c',
 };
 
-/** 'var(--cc-chart-2)' → the colour that token is right now ('#f5b400'). */
+/** 'var(--cc-chart-2)' - the colour that token is right now ('#f5b400'). */
 export function cssColor(token) {
   if (typeof token !== 'string' || !token.startsWith('var(')) return token;
   const name = token.slice(token.indexOf('(') + 1, token.indexOf(')')).trim();

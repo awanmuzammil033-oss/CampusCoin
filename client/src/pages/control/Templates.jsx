@@ -4,6 +4,7 @@ import Page from '../../components/Page.jsx';
 import Modal from '../../components/Modal.jsx';
 import FormField from '../../components/FormField.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
+import Icon from '../../components/Icon.jsx';
 import { api, qs } from '../../api.js';
 import { useToast } from '../../components/Toast.jsx';
 import { useLocale } from '../../locale.jsx';
@@ -140,7 +141,7 @@ export default function Templates() {
     >
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <span><Icon name="warning" /></span>
           <span>{error}</span>
         </div>
       )}
@@ -163,7 +164,7 @@ export default function Templates() {
       {rows && rows.length === 0 && (
         <div className="card">
           <EmptyState
-            icon="📝"
+            icon="note"
             title={t('ctl.tplEmptyTitle')}
             action={
               <button type="button" className="btn btn-primary mt-2" onClick={openNew}>
@@ -210,7 +211,7 @@ export default function Templates() {
                   onClick={() => setRemoving(row)}
                   aria-label={t('ctl.deleteTplAria', { code: row.code || row.title })}
                 >
-                  {t('ctl.deleteTplBtn')}
+                  <Icon name="trash" size={15} /> {t('ctl.deleteTplBtn')}
                 </button>
               </div>
             </article>
@@ -237,7 +238,7 @@ export default function Templates() {
           <form id="template-form" onSubmit={saveDraft} noValidate>
             {draftError && (
               <div className="field-error mb-3" role="alert">
-                <span aria-hidden="true">⚠</span>
+                <span><Icon name="warning" /></span>
                 <span>{draftError}</span>
               </div>
             )}

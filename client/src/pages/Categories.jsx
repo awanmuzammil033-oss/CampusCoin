@@ -4,18 +4,14 @@ import Page from '../components/Page.jsx';
 import Modal from '../components/Modal.jsx';
 import FormField from '../components/FormField.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import Icon from '../components/Icon.jsx';
+import CategoryIcon from '../components/CategoryIcon.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { useLocale } from '../locale.jsx';
 
-const ICONS = {
-  wallet: '👛', cup: '☕', bus: '🚌', book: '📚', gift: '🎁', film: '🎞️',
-  play: '🎮', house: '🏠', dots: '⋯', award: '🏆', briefcase: '💼', 'plus-circle': '➕',
-};
-function glyph(name) {
-  return ICONS[name] || '🏷️';
-}
-
+/* The keys the picker offers — data the server stores, so they never change.
+   The glyph for each one is drawn by CategoryIcon. */
 const ICON_CHOICES = ['wallet', 'cup', 'bus', 'book', 'gift', 'film', 'play', 'house', 'dots', 'award', 'briefcase', 'plus-circle'];
 
 /**
@@ -147,7 +143,7 @@ export default function Categories() {
     >
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <Icon name="warning" />
           <span>{error}</span>
         </div>
       )}
@@ -174,7 +170,7 @@ export default function Categories() {
               </div>
 
               {items.length === 0 ? (
-                <EmptyState icon="🏷️" title={t('cat.emptyTitle')}>
+                <EmptyState icon="tag" title={t('cat.emptyTitle')}>
                   {t('cat.emptyBody', {
                     kind: t(group.type === 'income' ? 'cat.kindIncome' : 'cat.kindSpending'),
                   })}
@@ -184,8 +180,8 @@ export default function Categories() {
                   <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                     {items.map((category) => (
                       <li key={category.id} className="txn-row">
-                        <span className="txn-ico" aria-hidden="true">
-                          {glyph(category.icon)}
+                        <span className="txn-ico">
+                          <CategoryIcon name={category.icon} />
                         </span>
                         <span className="txn-main">
                           <span className="txn-desc">{category.name}</span>
@@ -204,7 +200,7 @@ export default function Categories() {
                               aria-label={t('tx.editAria', { name: category.name })}
                               title={t('ui.edit')}
                             >
-                              ✏️
+                              <Icon name="pencil" />
                             </button>
                             <button
                               type="button"
@@ -213,7 +209,7 @@ export default function Categories() {
                               aria-label={t('tx.deleteAria', { name: category.name })}
                               title={t('ui.delete')}
                             >
-                              🗑
+                              <Icon name="trash" />
                             </button>
                           </span>
                         )}
@@ -255,7 +251,7 @@ export default function Categories() {
           <form id="category-draft-form" onSubmit={saveDraft} noValidate>
             {draftError && (
               <div className="field-error mb-3" role="alert">
-                <span aria-hidden="true">⚠</span>
+                <Icon name="warning" />
                 <span>{draftError}</span>
               </div>
             )}
@@ -298,7 +294,7 @@ export default function Categories() {
                 >
                   {ICON_CHOICES.map((name) => (
                     <option key={name} value={name}>
-                      {glyph(name)} {t(`cat.icon.${name}`)}
+                      {t(`cat.icon.${name}`)}
                     </option>
                   ))}
                 </select>

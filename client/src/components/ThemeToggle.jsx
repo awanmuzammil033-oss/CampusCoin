@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../auth.jsx';
 import { useLocale } from '../locale.jsx';
+import Icon from './Icon.jsx';
 
 /**
  * The one theme switch for every piece of chrome: student topbar, admin
@@ -57,8 +58,9 @@ export default function ThemeToggle({ className = 'icon-btn', labels }) {
 
   return (
     <button type="button" className={className} onClick={toggle} aria-label={aria} title={title}>
-      {/* current-state icon, like the board: sun while light, moon while dark */}
-      <span aria-hidden="true">{dark ? '🌙' : '☀️'}</span>
+      {/* current-state icon, like the board: sun while light, moon while dark —
+          drawn as SVG so it matches the rest of the icon set exactly */}
+      <Icon name={dark ? 'moon' : 'sun'} size={20} />
     </button>
   );
 }

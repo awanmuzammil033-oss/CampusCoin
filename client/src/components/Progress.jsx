@@ -1,4 +1,5 @@
 import { useLocale } from '../locale.jsx';
+import Icon from './Icon.jsx';
 
 /**
  * Progress bar (BUD-2) with two readings:
@@ -25,7 +26,9 @@ export default function Progress({ pct, label, variant = 'budget' }) {
   const over = !goal && value >= 100;
 
   const tone = over ? 'over' : 'ok';
-  const icon = goal ? (reached ? '✔' : '⏳') : over ? '⛔' : '✔';
+  // Icon names, not emoji: the state reads the same on every OS and follows
+  // the theme colours (see Icon.jsx).
+  const icon = goal ? (reached ? 'checkCircle' : 'hourglass') : over ? 'ban' : 'checkCircle';
   const toneText = goal
     ? reached
       ? t('st.underBudget')
@@ -38,7 +41,7 @@ export default function Progress({ pct, label, variant = 'budget' }) {
     <div>
       <div className="d-flex justify-content-between smallish mb-1">
         <span>
-          {icon} {label}
+          <Icon name={icon} size={15} /> {label}
         </span>
         <span className="num">
           {value}% <span className="muted">({toneText})</span>

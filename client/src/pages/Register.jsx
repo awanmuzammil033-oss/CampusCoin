@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 import { useLocale } from '../locale.jsx';
 import FormField from '../components/FormField.jsx';
+import Icon from '../components/Icon.jsx';
+import AuthArt from '../components/art/AuthArt.jsx';
 
 /** Live-strength label keys — the strings themselves come from t(). */
 const LEVEL_KEYS = ['auth.tooShort', 'auth.weak', 'auth.okay', 'auth.strong'];
@@ -51,10 +53,27 @@ export default function Register() {
 
   return (
     <div className="auth-wrap">
-      <div className="card auth-card auth-register">
+      <div className="auth-split">
+        {/* Left: the promise of the account. Hidden below 1000px so the form
+            owns the whole screen on a phone. */}
+        <aside className="auth-art-col">
+          <AuthArt variant="register" />
+          <div className="auth-art-copy">
+            <h2>{t('home.cta2Title')}</h2>
+            <p>{t('home.footerBlurb')}</p>
+            <ul className="auth-points">
+              <li><Icon name="checkCircle" /> {t('home.trustFree')}</li>
+              <li><Icon name="noBank" /> {t('home.trustBank')}</li>
+              <li><Icon name="shield" /> {t('home.trustSecure')}</li>
+            </ul>
+          </div>
+        </aside>
+
+        {/* Right: the form itself. */}
+        <div className="card auth-card auth-register">
         <div className="auth-top">
           <Link to="/" className="btn btn-ghost btn-sm auth-back">
-            <span aria-hidden="true">←</span> {t('auth.backToSite')}
+            <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
           </Link>
         </div>
         <div className="auth-brand">
@@ -68,7 +87,7 @@ export default function Register() {
         <form onSubmit={onSubmit} noValidate>
           {error && (
             <div className="field-error mb-3" role="alert">
-              <span aria-hidden="true">⚠</span>
+              <Icon name="warning" size={16} />
               <span>{error}</span>
             </div>
           )}
@@ -154,6 +173,7 @@ export default function Register() {
         <p className="smallish text-center mt-3 mb-0 muted">
           {t('auth.alreadyRegistered')} <Link to="/login">{t('auth.signIn')}</Link>
         </p>
+        </div>
       </div>
     </div>
   );

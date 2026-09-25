@@ -6,6 +6,7 @@ import Modal from '../components/Modal.jsx';
 import FormField from '../components/FormField.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import Pagination from '../components/Pagination.jsx';
+import Icon from '../components/Icon.jsx';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
@@ -269,7 +270,7 @@ export default function Transactions() {
 
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <Icon name="warning" />
           <span>{error}</span>
         </div>
       )}
@@ -297,7 +298,7 @@ export default function Transactions() {
         <div className="card">
           {filtered ? (
             <EmptyState
-              icon="🔍"
+              icon="search"
               title={t('tx.noMatchTitle')}
               action={
                 <button type="button" className="btn btn-secondary mt-2" onClick={clearFilters}>
@@ -309,7 +310,7 @@ export default function Transactions() {
             </EmptyState>
           ) : (
             <EmptyState
-              icon="💰"
+              icon="wallet"
               title={t('dash.emptyTitle')}
               action={
                 <Link className="btn btn-primary mt-2" to="/transactions/new?type=expense">
@@ -349,7 +350,8 @@ export default function Transactions() {
                     </td>
                     <td>{row.description || <span className="muted">{t('ui.noDescription')}</span>}</td>
                     <td className={`num ${row.type === 'income' ? 'amount-income' : 'amount-expense'}`}>
-                      {row.type === 'income' ? `+ ↑ ${money(row.amount)}` : `− ↓ ${money(row.amount)}`}
+                      {row.type === 'income' ? '+' : '−'} <Icon name={row.type === 'income' ? 'trendUp' : 'trendDown'} />{' '}
+                      {money(row.amount)}
                     </td>
                     <td>
                       {row.flag === 'duplicate' && (
@@ -375,7 +377,7 @@ export default function Transactions() {
                           aria-label={t('tx.historyAria', { name: row.description || t('tx.thisEntry') })}
                           title={t('ui.history')}
                         >
-                          👁
+                          <Icon name="eye" />
                         </Link>
                         <Link
                           className="icon-btn"
@@ -383,7 +385,7 @@ export default function Transactions() {
                           aria-label={t('tx.editAria', { name: row.description || t('tx.thisEntry') })}
                           title={t('ui.edit')}
                         >
-                          ✏️
+                          <Icon name="pencil" />
                         </Link>
                         <button
                           type="button"
@@ -392,7 +394,7 @@ export default function Transactions() {
                           title={t('ui.delete')}
                           onClick={() => setConfirmDelete(row)}
                         >
-                          🗑
+                          <Icon name="trash" />
                         </button>
                       </div>
                     </td>

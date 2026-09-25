@@ -3,6 +3,8 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 import { useLocale } from '../locale.jsx';
 import FormField from '../components/FormField.jsx';
+import Icon from '../components/Icon.jsx';
+import AuthArt from '../components/art/AuthArt.jsx';
 
 /** Student sign-in. The administrator door lives at /control/login. */
 export default function Login() {
@@ -33,10 +35,27 @@ export default function Login() {
 
   return (
     <div className="auth-wrap">
-      <div className="card auth-card">
+      <div className="auth-split">
+        {/* Left: what the student gets. Hidden below 1000px so the form owns
+            the whole screen on a phone. */}
+        <aside className="auth-art-col">
+          <AuthArt variant="login" />
+          <div className="auth-art-copy">
+            <h2>{t('home.heroTitle')}</h2>
+            <p>{t('home.footerBlurb')}</p>
+            <ul className="auth-points">
+              <li><Icon name="bolt" /> {t('home.trustFree')}</li>
+              <li><Icon name="noBank" /> {t('home.trustBank')}</li>
+              <li><Icon name="lock" /> {t('home.trustSecure')}</li>
+            </ul>
+          </div>
+        </aside>
+
+        {/* Right: the form itself. */}
+        <div className="card auth-card">
         <div className="auth-top">
           <Link to="/" className="btn btn-ghost btn-sm auth-back">
-            <span aria-hidden="true">←</span> {t('auth.backToSite')}
+            <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
           </Link>
         </div>
         <div className="auth-brand">
@@ -50,7 +69,7 @@ export default function Login() {
         <form onSubmit={onSubmit} noValidate>
           {error && (
             <div className="field-error mb-3" role="alert">
-              <span aria-hidden="true">⚠</span>
+              <Icon name="warning" size={16} />
               <span>{error}</span>
             </div>
           )}
@@ -114,8 +133,8 @@ export default function Login() {
 
         {/* Staff door, right here — nobody needs to go back home to find it. */}
         <div className="auth-alt mt-4 pt-3 smallish">
-          <span aria-hidden="true">🛡️ </span>
-          <Link to="/control/login">{t('home.link.adminSignIn')}</Link>
+          <Icon name="shield" size={15} /> <Link to="/control/login">{t('home.link.adminSignIn')}</Link>
+        </div>
         </div>
       </div>
     </div>

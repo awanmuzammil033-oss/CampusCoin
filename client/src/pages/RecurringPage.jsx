@@ -4,20 +4,14 @@ import Page from '../components/Page.jsx';
 import Modal from '../components/Modal.jsx';
 import FormField from '../components/FormField.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import Icon from '../components/Icon.jsx';
+import CategoryIcon from '../components/CategoryIcon.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
 import { currencySymbol } from '../money.js';
 import { useLocale } from '../locale.jsx';
 import { uiLang } from '../dates.js';
-
-const ICONS = {
-  wallet: '👛', cup: '☕', bus: '🚌', book: '📚', gift: '🎁', film: '🎞️',
-  play: '🎮', house: '🏠', dots: '⋯', award: '🏆', briefcase: '💼', 'plus-circle': '➕',
-};
-function glyph(name) {
-  return ICONS[name] || '🏷️';
-}
 
 function dayLabel(value) {
   if (!value) return '—';
@@ -206,12 +200,12 @@ export default function RecurringPage() {
       }
     >
       <div className="card mb-3 smallish muted">
-        <span aria-hidden="true"> ℹ️</span> {t('rec.autoNote')}
+        <Icon name="info" /> {t('rec.autoNote')}
       </div>
 
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <Icon name="warning" />
           <span>{error}</span>
         </div>
       )}
@@ -228,7 +222,7 @@ export default function RecurringPage() {
       {rows && rows.length === 0 && (
         <div className="card">
           <EmptyState
-            icon="🔁"
+            icon="repeat"
             title={t('rec.emptyTitle')}
             action={
               <button type="button" className="btn btn-primary mt-2" onClick={() => setShowNew(true)}>
@@ -246,8 +240,8 @@ export default function RecurringPage() {
           <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {rows.map((rule) => (
               <li key={rule.id} className="txn-row flex-wrap">
-                <span className="txn-ico" aria-hidden="true">
-                  {glyph(rule.category?.icon)}
+                <span className="txn-ico">
+                  <CategoryIcon name={rule.category?.icon} />
                 </span>
                 <span className="txn-main">
                   <span className="txn-desc">{rule.description || rule.category?.name || t('rec.untitled')}</span>
@@ -259,10 +253,12 @@ export default function RecurringPage() {
                   </span>
                 </span>
                 <span className={`txn-amount ${rule.type === 'income' ? 'amount-income' : 'amount-expense'}`}>
-                  {rule.type === 'income' ? `+ ↑ ${money(rule.amount)}` : `− ↓ ${money(rule.amount)}`}
+                  {rule.type === 'income' ? '+' : '−'} <Icon name={rule.type === 'income' ? 'trendUp' : 'trendDown'} />{' '}
+                  {money(rule.amount)}
                 </span>
                 <span className={rule.isActive ? 'pill pill-income' : 'pill'}>
-                  {rule.isActive ? t('rec.active') : t('rec.paused')}
+                  <Icon name={rule.isActive ? 'checkCircle' : 'ban'} size={13} />
+                  {' '}{rule.isActive ? t('rec.active') : t('rec.paused')}
                 </span>
                 <span className="d-flex gap-1">
                   <button
@@ -281,7 +277,7 @@ export default function RecurringPage() {
                     aria-label={t('tx.editAria', { name: rule.description || t('rec.thisRule') })}
                     title={t('ui.edit')}
                   >
-                    ✏️
+                    <Icon name="pencil" />
                   </button>
                   <button
                     type="button"
@@ -290,7 +286,7 @@ export default function RecurringPage() {
                     aria-label={t('tx.deleteAria', { name: rule.description || t('rec.thisRule') })}
                     title={t('ui.delete')}
                   >
-                    🗑
+                    <Icon name="trash" />
                   </button>
                 </span>
               </li>
@@ -318,7 +314,7 @@ export default function RecurringPage() {
           <form id="recurring-new-form" onSubmit={saveNew} noValidate>
             {draftError && (
               <div className="field-error mb-3" role="alert">
-                <span aria-hidden="true">⚠</span>
+                <Icon name="warning" />
                 <span>{draftError}</span>
               </div>
             )}
@@ -375,8 +371,7 @@ export default function RecurringPage() {
                     aria-pressed={draft.categoryId === c.id}
                     onClick={() => setDraftField('categoryId', c.id)}
                   >
-                    <span aria-hidden="true">{glyph(c.icon)}</span>
-                    {c.name}
+                    <CategoryIcon name={c.icon} /> {c.name}
                   </button>
                 ))}
                 {draftOptions.length === 0 && <span className="muted smallish">{t('rec.noCats')}</span>}
@@ -448,7 +443,7 @@ export default function RecurringPage() {
           <form id="recurring-edit-form" onSubmit={saveEdit} noValidate>
             {editError && (
               <div className="field-error mb-3" role="alert">
-                <span aria-hidden="true">⚠</span>
+                <Icon name="warning" />
                 <span>{editError}</span>
               </div>
             )}

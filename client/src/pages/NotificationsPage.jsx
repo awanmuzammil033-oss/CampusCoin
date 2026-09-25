@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Page from '../components/Page.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import Icon from '../components/Icon.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { useLocale } from '../locale.jsx';
@@ -53,14 +54,14 @@ export default function NotificationsPage() {
     >
       {error && (
         <div className="field-error" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <span><Icon name="warning" /></span>
           <span>{error}</span>
         </div>
       )}
 
       {rows && rows.length === 0 && (
         <div className="card">
-          <EmptyState icon="🔕" title={t('noti.emptyTitle')}>
+          <EmptyState icon="bell" title={t('noti.emptyTitle')}>
             {t('noti.emptyF1')} <Link to="/budgets">{t('noti.budgetsLink')}</Link> {t('noti.emptyF2')}
           </EmptyState>
         </div>
@@ -77,8 +78,8 @@ export default function NotificationsPage() {
                   style={{ background: 'none', border: 'none', borderBottom: '1px solid var(--cc-border)', cursor: 'pointer' }}
                   onClick={() => markOne(row)}
                 >
-                  <span className="txn-ico" aria-hidden="true">
-                    {row.kind === 'budget_exceeded' ? '⛔' : row.kind === 'budget_near' ? '⚠️' : row.kind === 'announcement' ? '📢' : 'ℹ️'}
+                  <span className="txn-ico">
+                    <Icon name={row.kind === 'budget_exceeded' ? 'ban' : row.kind === 'budget_near' ? 'warning' : row.kind === 'announcement' ? 'megaphone' : 'info'} />
                   </span>
                   <span className="txn-main">
                     <span className="txn-desc">{row.message}</span>

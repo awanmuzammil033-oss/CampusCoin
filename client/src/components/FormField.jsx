@@ -1,3 +1,5 @@
+import Icon from './Icon.jsx';
+
 /**
  * Form field wrapper: visible label, optional help text, and an error tied
  * to the input with aria-describedby so screen readers announce it.
@@ -21,7 +23,7 @@ export default function FormField({ label, htmlFor, help, error, children, hint 
       {hint && !error && <div className="field-help">{hint}</div>}
       {error && (
         <div className="field-error" id={errorId}>
-          <span aria-hidden="true">⚠</span>
+          <Icon name="warning" size={16} />
           <span>{error}</span>
         </div>
       )}

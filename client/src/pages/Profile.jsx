@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import Page from '../components/Page.jsx';
 import FormField from '../components/FormField.jsx';
+import Icon from '../components/Icon.jsx';
 import { useAuth } from '../auth.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { useLocale } from '../locale.jsx';
@@ -115,7 +116,7 @@ export default function Profile() {
           <form onSubmit={saveDetails} noValidate>
             {error && (
               <div className="field-error mb-3" role="alert">
-                <span aria-hidden="true">⚠</span>
+                <Icon name="warning" />
                 <span>{error}</span>
               </div>
             )}
@@ -216,10 +217,10 @@ export default function Profile() {
               </span>
               <div className="chip-grid" role="group" aria-labelledby="theme-label">
                 <button type="button" className="chip" aria-pressed={theme === 'light'} onClick={() => chooseTheme('light')}>
-                  {t('prof.lightChip')}
+                  <Icon name="sun" size={16} /> {t('prof.lightChip')}
                 </button>
                 <button type="button" className="chip" aria-pressed={theme === 'dark'} onClick={() => chooseTheme('dark')}>
-                  {t('prof.darkChip')}
+                  <Icon name="moon" size={16} /> {t('prof.darkChip')}
                 </button>
               </div>
             </div>
@@ -237,7 +238,8 @@ export default function Profile() {
                   aria-label={t('prof.decrease')}
                   title={t('prof.smaller')}
                 >
-                  A−
+                  <Icon name="fontSize" />
+                  <Icon name="minus" />
                 </button>
                 <span className="num smallish" aria-live="polite">{t('prof.size', { n: fontScale })}</span>
                 <button
@@ -248,7 +250,8 @@ export default function Profile() {
                   aria-label={t('prof.increase')}
                   title={t('prof.larger')}
                 >
-                  A+
+                  <Icon name="fontSize" />
+                  <Icon name="plus" />
                 </button>
               </div>
             </div>

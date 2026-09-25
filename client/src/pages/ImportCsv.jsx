@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 import Page from '../components/Page.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import Icon from '../components/Icon.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
@@ -142,7 +143,7 @@ export default function ImportCsv() {
 
           {error && (
             <div className="field-error mt-3" role="alert">
-              <span aria-hidden="true">⚠</span>
+              <Icon name="warning" />
               <span>{error}</span>
             </div>
           )}
@@ -157,9 +158,9 @@ export default function ImportCsv() {
           </div>
 
           <div className="d-flex gap-2 flex-wrap mb-3">
-            <span className="pill pill-income num">✔ {t('imp.ready', { n: ready })}</span>
+            <span className="pill pill-income num"><Icon name="check" /> {t('imp.ready', { n: ready })}</span>
             <span className={problems ? 'pill pill-expense num' : 'pill num'}>
-              {problems ? '⚠' : '·'} {plural('imp.problems', problems, { n: problems })}
+              {problems ? <Icon name="warning" /> : '·'} {plural('imp.problems', problems, { n: problems })}
             </span>
             <span className="pill num">{plural('imp.rows', preview.total ?? ready + problems, { n: preview.total ?? ready + problems })}</span>
           </div>
@@ -170,7 +171,7 @@ export default function ImportCsv() {
               <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                 {preview.errors.map((err, i) => (
                   <li key={`${err.line}-${i}`} className="field-error">
-                    <span aria-hidden="true">⚠</span>
+                    <Icon name="warning" />
                     <span>
                       {t('imp.lineMsg', { line: err.line || '—', message: err.message })}
                     </span>
@@ -184,7 +185,7 @@ export default function ImportCsv() {
           )}
 
           {preview.rows?.length === 0 ? (
-            <EmptyState icon="📄" title={t('imp.emptyTitle')}>
+            <EmptyState icon="fileCsv" title={t('imp.emptyTitle')}>
               {t('imp.emptyBody')}
             </EmptyState>
           ) : (
@@ -238,7 +239,7 @@ export default function ImportCsv() {
 
           {error && (
             <div className="field-error mt-3" role="alert">
-              <span aria-hidden="true">⚠</span>
+              <Icon name="warning" />
               <span>{error}</span>
             </div>
           )}

@@ -5,6 +5,7 @@ import Page from '../components/Page.jsx';
 import Modal from '../components/Modal.jsx';
 import FormField from '../components/FormField.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import Icon from '../components/Icon.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
@@ -94,15 +95,15 @@ export default function Bookmarks() {
   const nothingAtAll = (tips?.length || 0) === 0 && (insights?.length || 0) === 0;
 
   const sections = [
-    { kind: 'tip', title: 'bkm.titleTips', icon: '💡', rows: tips, empty: 'bkm.emptyTips' },
-    { kind: 'insight', title: 'bkm.titleInsights', icon: '🌤️', rows: insights, empty: 'bkm.emptyInsights' },
+    { kind: 'tip', title: 'bkm.titleTips', icon: 'bulb', rows: tips, empty: 'bkm.emptyTips' },
+    { kind: 'insight', title: 'bkm.titleInsights', icon: 'sparkles', rows: insights, empty: 'bkm.emptyInsights' },
   ];
 
   return (
     <Page trail={[{ label: t('nav.bookmarks') }]} title={t('bkm.pageTitle')} subtitle={t('bkm.pageSubtitle')}>
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <Icon name="warning" />
           <span>{error}</span>
         </div>
       )}
@@ -118,7 +119,7 @@ export default function Bookmarks() {
       {nothingAtAll && !loading && (
         <div className="card">
           <EmptyState
-            icon="🔖"
+            icon="bookmark"
             title={t('bkm.emptyTitle')}
             action={
               <div className="d-flex gap-2 justify-content-center flex-wrap mt-2">
@@ -141,7 +142,7 @@ export default function Bookmarks() {
           <section className="card mb-3" key={section.kind}>
             <div className="card-title">
               <span>
-                {section.icon} {t(section.title)}
+                <Icon name={section.icon} /> {t(section.title)}
               </span>
               <span className="pill num">{section.rows.length}</span>
             </div>
@@ -161,7 +162,7 @@ export default function Bookmarks() {
 
                   {item.note && (
                     <p className="smallish muted mb-2">
-                      <span aria-hidden="true">📝</span> {item.note}
+                      <Icon name="note" /> {item.note}
                     </p>
                   )}
 
@@ -181,7 +182,7 @@ export default function Bookmarks() {
                       onClick={() => remove(section.kind, item.id)}
                       aria-label={t('bkm.removeAria', { kind: t(section.kind === 'tip' ? 'bkm.kindTip' : 'bkm.kindInsight') })}
                     >
-                      {t('bkm.removeBtn')}
+                      <Icon name="trash" size={15} /> {t('bkm.removeBtn')}
                     </button>
                   </div>
                 </li>
@@ -196,7 +197,7 @@ export default function Bookmarks() {
           <section className="card mb-3" key={`${section.kind}-empty`}>
             <div className="card-title">
               <span>
-                {section.icon} {t(section.title)}
+                <Icon name={section.icon} /> {t(section.title)}
               </span>
             </div>
             <p className="muted smallish mb-0">{t(section.empty)}</p>

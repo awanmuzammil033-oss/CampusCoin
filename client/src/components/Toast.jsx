@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { useLocale } from '../locale.jsx';
+import Icon from './Icon.jsx';
 
 const ToastContext = createContext(null);
 
@@ -31,7 +32,7 @@ export function ToastProvider({ children }) {
         {toasts.map((toast) => (
           <div key={toast.id} className={`toast ${toast.kind === 'error' ? 'toast-error' : ''}`}>
             <div className="d-flex align-items-start gap-2">
-              <span aria-hidden="true">{toast.kind === 'error' ? '⚠' : '✓'}</span>
+              <Icon name={toast.kind === 'error' ? 'warning' : 'checkCircle'} size={19} />
               <span>{toast.message}</span>
               <button
                 type="button"
@@ -39,7 +40,7 @@ export function ToastProvider({ children }) {
                 onClick={() => dismiss(toast.id)}
                 aria-label={t('ui.dismiss')}
               >
-                ✕
+                <Icon name="close" size={15} />
               </button>
             </div>
           </div>

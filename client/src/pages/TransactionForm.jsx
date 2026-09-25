@@ -3,18 +3,12 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import Page from '../components/Page.jsx';
 import FormField from '../components/FormField.jsx';
+import Icon from '../components/Icon.jsx';
+import CategoryIcon from '../components/CategoryIcon.jsx';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { useLocale } from '../locale.jsx';
 import { currencySymbol } from '../money.js';
-
-const ICONS = {
-  wallet: '👛', cup: '☕', bus: '🚌', book: '📚', gift: '🎁', film: '🎞️',
-  play: '🎮', house: '🏠', dots: '⋯', award: '🏆', briefcase: '💼', 'plus-circle': '➕',
-};
-function glyph(name) {
-  return ICONS[name] || '🏷️';
-}
 
 /** Local calendar day, so "today" never lands on yesterday after midnight UTC. */
 function todayISO() {
@@ -259,7 +253,7 @@ export default function TransactionForm() {
         <form onSubmit={(e) => save(e, false)} noValidate>
           {formError && (
             <div className="field-error mb-3" role="alert">
-              <span aria-hidden="true">⚠</span>
+              <Icon name="warning" />
               <span>{formError}</span>
             </div>
           )}
@@ -300,7 +294,7 @@ export default function TransactionForm() {
 
           {suggestion && (
             <div className="d-flex align-items-center gap-2 flex-wrap" style={{ marginTop: -8, marginBottom: 14 }} role="status">
-              <span className="pill pill-suggest">✨ {t('txf.suggested', { name: suggestion.name })}</span>
+              <span className="pill pill-suggest"><Icon name="sparkles" /> {t('txf.suggested', { name: suggestion.name })}</span>
               <button
                 type="button"
                 className="btn btn-ghost btn-sm"
@@ -355,8 +349,7 @@ export default function TransactionForm() {
                   aria-pressed={form.categoryId === c.id}
                   onClick={() => pickCategory(c.id)}
                 >
-                  <span aria-hidden="true">{glyph(c.icon)}</span>
-                  {c.name}
+                  <CategoryIcon name={c.icon} /> {c.name}
                 </button>
               ))}
               {options.length === 0 && <span className="muted smallish">{t('txf.noCats')}</span>}

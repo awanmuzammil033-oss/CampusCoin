@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import Page from '../components/Page.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import Icon from '../components/Icon.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
@@ -55,13 +56,13 @@ export default function DeletedBin() {
       subtitle={t('tx.binSubtitle')}
       actions={
         <Link className="btn btn-ghost" to="/transactions">
-          ← {t('tx.backPlain')}
+          <Icon name="arrowLeft" /> {t('tx.backPlain')}
         </Link>
       }
     >
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <Icon name="warning" />
           <span>{error}</span>
         </div>
       )}
@@ -77,7 +78,7 @@ export default function DeletedBin() {
 
       {rows && rows.length === 0 && (
         <div className="card">
-          <EmptyState icon="🗂️" title={t('tx.binEmptyTitle')} action={
+          <EmptyState icon="trash" title={t('tx.binEmptyTitle')} action={
             <Link className="btn btn-secondary mt-2" to="/transactions">
               {t('tx.backPlain')}
             </Link>
@@ -92,8 +93,8 @@ export default function DeletedBin() {
           <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {rows.map((row) => (
               <li key={row.id} className="txn-row">
-                <span className="txn-ico" aria-hidden="true">
-                  🧾
+                <span className="txn-ico">
+                  <Icon name="receipt" />
                 </span>
                 <span className="txn-main">
                   <span className="txn-desc">{row.description || t('dash.untitled')}</span>
@@ -102,7 +103,8 @@ export default function DeletedBin() {
                   </span>
                 </span>
                 <span className={`txn-amount ${row.type === 'income' ? 'amount-income' : 'amount-expense'}`}>
-                  {row.type === 'income' ? `+ ↑ ${money(row.amount)}` : `− ↓ ${money(row.amount)}`}
+                  {row.type === 'income' ? '+' : '−'} <Icon name={row.type === 'income' ? 'trendUp' : 'trendDown'} />{' '}
+                  {money(row.amount)}
                 </span>
                 <button
                   type="button"

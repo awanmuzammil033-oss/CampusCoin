@@ -5,15 +5,9 @@ import Modal from '../../components/Modal.jsx';
 import FormField from '../../components/FormField.jsx';
 import { api } from '../../api.js';
 import { useToast } from '../../components/Toast.jsx';
+import Icon from '../../components/Icon.jsx';
 import { useLocale } from '../../locale.jsx';
-
-const ICONS = {
-  wallet: '👛', cup: '☕', bus: '🚌', book: '📚', gift: '🎁', film: '🎞️',
-  play: '🎮', house: '🏠', dots: '⋯', award: '🏆', briefcase: '💼', 'plus-circle': '➕',
-};
-function glyph(name) {
-  return ICONS[name] || '🏷️';
-}
+import CategoryIcon from '../../components/CategoryIcon.jsx';
 
 const ICON_CHOICES = ['wallet', 'cup', 'bus', 'book', 'gift', 'film', 'play', 'house', 'dots', 'award', 'briefcase', 'plus-circle'];
 
@@ -120,7 +114,7 @@ export default function ControlCategories() {
     >
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <Icon name="warning" size={16} />
           <span>{error}</span>
         </div>
       )}
@@ -160,7 +154,7 @@ export default function ControlCategories() {
                       <tr key={row.id}>
                         <td>
                           <span className="d-inline-flex align-items-center gap-2">
-                            <span aria-hidden="true">{glyph(row.icon)}</span>
+                            <CategoryIcon name={row.icon} size={18} />
                             <strong>{row.name}</strong>
                           </span>
                         </td>
@@ -169,7 +163,7 @@ export default function ControlCategories() {
                           {row.isActive === false ? (
                             <span className="pill">{t('ctl.retired')}</span>
                           ) : (
-                            <span className="pill pill-income">{t('ctl.activePill')}</span>
+                            <span className="pill pill-income"><Icon name="checkCircle" size={13} /> {t('ctl.activePill')}</span>
                           )}
                         </td>
                         <td>
@@ -215,7 +209,7 @@ export default function ControlCategories() {
           <form id="control-category-form" onSubmit={saveDraft} noValidate>
             {draftError && (
               <div className="field-error mb-3" role="alert">
-                <span aria-hidden="true">⚠</span>
+                <Icon name="warning" size={16} />
                 <span>{draftError}</span>
               </div>
             )}
@@ -260,19 +254,26 @@ export default function ControlCategories() {
 
             <FormField label={t('ui.icon')} htmlFor="control-category-icon">
               {(a) => (
-                <select
-                  id="control-category-icon"
-                  className="input"
-                  value={draft.icon}
-                  onChange={(e) => setDraft((d) => ({ ...d, icon: e.target.value }))}
-                  {...a}
-                >
-                  {ICON_CHOICES.map((name) => (
-                    <option key={name} value={name}>
-                      {glyph(name)} {t(`cat.icon.${name}`)}
-                    </option>
-                  ))}
-                </select>
+                /* A <select> cannot contain an SVG, so the choice list is text
+                   only and the drawing sits beside it as a live preview. */
+                <div className="d-flex align-items-center gap-2">
+                  <span className="cat-icon-preview">
+                    <CategoryIcon name={draft.icon} size={20} />
+                  </span>
+                  <select
+                    id="control-category-icon"
+                    className="input"
+                    value={draft.icon}
+                    onChange={(e) => setDraft((d) => ({ ...d, icon: e.target.value }))}
+                    {...a}
+                  >
+                    {ICON_CHOICES.map((name) => (
+                      <option key={name} value={name}>
+                        {t(`cat.icon.${name}`)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               )}
             </FormField>
           </form>

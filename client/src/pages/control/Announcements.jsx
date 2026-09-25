@@ -4,6 +4,7 @@ import Page from '../../components/Page.jsx';
 import Modal from '../../components/Modal.jsx';
 import FormField from '../../components/FormField.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
+import Icon from '../../components/Icon.jsx';
 import { api } from '../../api.js';
 import { useToast } from '../../components/Toast.jsx';
 import { useLocale } from '../../locale.jsx';
@@ -141,7 +142,7 @@ export default function Announcements() {
     >
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <span><Icon name="warning" /></span>
           <span>{error}</span>
         </div>
       )}
@@ -157,7 +158,7 @@ export default function Announcements() {
       {rows && rows.length === 0 && (
         <div className="card">
           <EmptyState
-            icon="📢"
+            icon="megaphone"
             title={t('ctl.annEmptyTitle')}
             action={
               <button type="button" className="btn btn-primary mt-2" onClick={openNew}>
@@ -179,13 +180,13 @@ export default function Announcements() {
                 {row.isActive === false ? (
                   <span className="pill">{t('ctl.inactive')}</span>
                 ) : (
-                  <span className="pill pill-income">{t('ctl.activePill')}</span>
+                  <span className="pill pill-income"><Icon name="checkCircle" size={13} /> {t('ctl.activePill')}</span>
                 )}
               </div>
               <p className="mb-2">{row.body}</p>
               <p className="smallish muted mb-3">
-                {dayLabel(row.startsAt || row.startDate) || t('ctl.startsToday')}
-                {' → '}
+                {dayLabel(row.startsAt || row.startDate) || t('ctl.startsToday')}{' '}
+                <Icon name="arrowRight" />{' '}
                 {row.endsAt || row.endDate ? dayLabel(row.endsAt || row.endDate) : t('ctl.noEndDate')}
               </p>
               <div className="d-flex gap-2 flex-wrap">
@@ -193,7 +194,7 @@ export default function Announcements() {
                   {t('ui.edit')}
                 </button>
                 <button type="button" className="btn btn-ghost btn-sm" onClick={() => setRemoving(row)}>
-                  {t('ctl.removeBtn')}
+                  <Icon name="trash" size={15} /> {t('ctl.removeBtn')}
                 </button>
               </div>
             </article>
@@ -220,7 +221,7 @@ export default function Announcements() {
           <form id="announcement-form" onSubmit={saveDraft} noValidate>
             {draftError && (
               <div className="field-error mb-3" role="alert">
-                <span aria-hidden="true">⚠</span>
+                <span><Icon name="warning" /></span>
                 <span>{draftError}</span>
               </div>
             )}

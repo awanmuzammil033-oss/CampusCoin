@@ -42,7 +42,7 @@ export function getDisplayCurrency() {
  */
 export function money(value) {
   const parsed = Number(value);
-  const safe = Number.isFinite(parsed) ? parsed : 0; // NaN / null / undefined → 0
+  const safe = Number.isFinite(parsed) ? parsed : 0; // NaN / null / undefined - 0
   const negative = safe < 0;
   const amount = Math.abs(safe); // also turns -0 into plain 0
 

@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 import { useLocale } from '../locale.jsx';
 import FormField from '../components/FormField.jsx';
+import Icon from '../components/Icon.jsx';
+import AuthArt from '../components/art/AuthArt.jsx';
 
 /**
  * Administrator sign-in (AUTH-3). It lives at its own address, is styled
@@ -42,16 +44,34 @@ export default function AdminLogin() {
 
   return (
     <div className="auth-wrap">
-      <div className="card auth-card admin-mode">
+      <div className="auth-split">
+        {/* Left: what the staff door is for. Hidden below 1000px. */}
+        <aside className="auth-art-col">
+          <AuthArt variant="admin" />
+          <div className="auth-art-copy">
+            <h2>{t('auth.controlPanel')}</h2>
+            <p>{t('auth.controlSubtitle')}</p>
+            <ul className="auth-points">
+              <li><Icon name="users" /> {t('ctl.navUsers')}</li>
+              <li><Icon name="tag" /> {t('ctl.navCategories')}</li>
+              <li><Icon name="clipboard" /> {t('ctl.navTemplates')}</li>
+            </ul>
+          </div>
+        </aside>
+
+        {/* Right: the form itself. */}
+        <div className="card auth-card admin-mode">
         <div className="auth-top">
           <Link to="/" className="btn btn-ghost btn-sm auth-back">
-            <span aria-hidden="true">←</span> {t('auth.backToSite')}
+            <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
           </Link>
         </div>
         <div className="auth-brand">
           <span className="brand-mark" aria-hidden="true">C</span>
         </div>
-        <span className="pill pill-suggest d-table mx-auto mb-3">🔐 {t('auth.administrator')}</span>
+        <span className="pill pill-suggest d-table mx-auto mb-3">
+          <Icon name="lock" size={14} /> {t('auth.administrator')}
+        </span>
         <h1 className="text-center" style={{ marginBottom: 4 }}>{t('auth.controlPanel')}</h1>
         <p className="text-center muted" style={{ marginBottom: 24 }}>
           {t('auth.controlSubtitle')}
@@ -60,7 +80,7 @@ export default function AdminLogin() {
         <form onSubmit={onSubmit} noValidate>
           {error && (
             <div className="field-error mb-3" role="alert">
-              <span aria-hidden="true">⚠</span>
+              <Icon name="warning" size={16} />
               <span>{error}</span>
             </div>
           )}
@@ -101,6 +121,7 @@ export default function AdminLogin() {
         <p className="smallish text-center mt-4 mb-0 muted">
           {t('auth.studentPrompt')} <Link to="/login">{t('auth.goToStudentSignIn')}</Link>
         </p>
+        </div>
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import Page from '../components/Page.jsx';
 import Modal from '../components/Modal.jsx';
 import FormField from '../components/FormField.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import Icon from '../components/Icon.jsx';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
@@ -48,11 +49,13 @@ function readFlags(value, t) {
   }
   if (!Array.isArray(flags)) return [];
   return flags.map((flag) => {
-    if (typeof flag === 'string') return { text: flag };
+    if (typeof flag === 'string') return { text: flag, dir: null };
     const name = typeof flag.category === 'string' ? flag.category : flag.category?.name || flag.name || t('ui.category');
     const pct = flag.pct_change ?? flag.pctChange ?? flag.pct;
-    const text = pct !== undefined && pct !== null ? `${name} ${Number(pct) >= 0 ? '↑' : '↓'}${Math.abs(Math.round(Number(pct)))}%` : name;
-    return { text };
+    // The direction rides along as an icon name so the arrow is drawn, not typed.
+    if (pct === undefined || pct === null) return { text: name, dir: null };
+    const up = Number(pct) >= 0;
+    return { text: `${name} ${Math.abs(Math.round(Number(pct)))}%`, dir: up ? 'trendUp' : 'trendDown' };
   });
 }
 
@@ -188,7 +191,7 @@ export default function Insights() {
 
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <Icon name="warning" />
           <span>{error}</span>
         </div>
       )}
@@ -225,7 +228,7 @@ export default function Insights() {
           )}
           {detail !== null && !detail && (
             <div className="card">
-              <EmptyState icon="🌤️" title={t('ins.noInsightTitle')}>
+              <EmptyState icon="sparkles" title={t('ins.noInsightTitle')}>
                 {t('ins.noInsightBody', { month: monthTitle(selectedMonth) })}
               </EmptyState>
             </div>
@@ -250,7 +253,7 @@ export default function Insights() {
           {rows && rows.length === 0 && (
             <div className="card">
               <EmptyState
-                icon="🌤️"
+                icon="sparkles"
                 title={t('ins.emptyTitle')}
                 action={
                   <button type="button" className="btn btn-primary mt-2" onClick={generate} disabled={generating}>
@@ -365,7 +368,9 @@ function InsightCard({ insight, onBookmark }) {
       <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
         <h2 className="mb-0">{monthTitle(ym) || t('ins.insightWord')}</h2>
         <span className="d-flex gap-2 align-items-center">
-          {insight.isBookmarked && <span className="pill">{t('ins.bookmarkedPill')}</span>}
+          {insight.isBookmarked && (
+            <span className="pill"><Icon name="bookmark" size={14} /> {t('ins.bookmarkedPill')}</span>
+          )}
           <Link className="btn btn-ghost btn-sm" to={`/insights?month=${ym}`}>
             {t('ins.openMonth')}
           </Link>
@@ -379,7 +384,7 @@ function InsightCard({ insight, onBookmark }) {
         <div className="d-flex gap-2 flex-wrap mb-2" role="list" aria-label={t('ins.movedAria')}>
           {flags.map((flag, i) => (
             <span className="pill pill-expense" role="listitem" key={`${flag.text}-${i}`}>
-              {flag.text}
+              {flag.dir && <Icon name={flag.dir} />} {flag.text}
             </span>
           ))}
         </div>
@@ -392,12 +397,13 @@ function InsightCard({ insight, onBookmark }) {
       )}
 
       <p className="smallish muted mb-3">
-        <span aria-hidden="true">ℹ️</span> {t('ui.suggestionsOnly')}
+        <Icon name="info" /> {t('ui.suggestionsOnly')}
       </p>
 
       <div className="d-flex gap-2 flex-wrap">
         <button type="button" className="btn btn-secondary btn-sm" onClick={() => onBookmark(insight)}>
-          {insight.isBookmarked ? t('ins.bookmarkEdit') : t('ins.bookmarkBtn')}
+          <Icon name={insight.isBookmarked ? 'pencil' : 'bookmark'} size={15} />
+          {' '}{insight.isBookmarked ? t('ins.bookmarkEdit') : t('ins.bookmarkBtn')}
         </button>
       </div>
     </article>

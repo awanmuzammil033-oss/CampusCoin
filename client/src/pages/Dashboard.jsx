@@ -5,21 +5,14 @@ import Page from '../components/Page.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import Progress from '../components/Progress.jsx';
 import ChartCard from '../components/ChartCard.jsx';
+import Icon from '../components/Icon.jsx';
+import CategoryIcon from '../components/CategoryIcon.jsx';
 import { categoryColor } from '../chartColors.js';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
 import { useLocale } from '../locale.jsx';
-
-/** Category icons are stored as names, so a tiny glyph map keeps rows visual. */
-const ICONS = {
-  wallet: '👛', cup: '☕', bus: '🚌', book: '📚', gift: '🎁', film: '🎞️',
-  play: '🎮', house: '🏠', dots: '⋯', award: '🏆', briefcase: '💼', 'plus-circle': '➕',
-};
-function glyph(name) {
-  return ICONS[name] || '🏷️';
-}
 
 /**
  * The home screen once signed in: this month's money at a glance, the two
@@ -28,7 +21,7 @@ function glyph(name) {
 export default function Dashboard() {
   const { t, language, plural } = useLocale();
   const { user } = useAuth();
-  // Month/day names follow the active language (en → 'September 2026', tr → 'Eylül 2026').
+  // Month/day names follow the active language ('September 2026' in en, 'Eylül 2026' in tr).
   const monthLabel = () => new Date().toLocaleDateString(language || 'en', { month: 'long', year: 'numeric' });
   const dayLabel = (value) => {
     const [y, m, d] = String(value || '').slice(0, 10).split('-').map(Number);
@@ -85,7 +78,11 @@ export default function Dashboard() {
   return (
     <Page
       trail={[{ label: t('nav.dashboard') }]}
-      title={t('dash.hi', { name: firstName })}
+      title={
+        <>
+          {t('dash.hi', { name: firstName })} <Icon name="hand" size={22} />
+        </>
+      }
       subtitle={monthLabel()}
       actions={
         <>
@@ -100,7 +97,7 @@ export default function Dashboard() {
     >
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <Icon name="warning" />
           <span>{t('dash.errorSafe', { msg: error })}</span>
         </div>
       )}
@@ -131,11 +128,11 @@ export default function Dashboard() {
               <div className="balance-display">{money(summary.balance)}</div>
               <div className="d-flex gap-4 mt-2 flex-wrap">
                 <div>
-                  <div className="amount-income num">+ ↑ {money(summary.income)}</div>
+                  <div className="amount-income num">+ <Icon name="trendUp" /> {money(summary.income)}</div>
                   <div className="smallish muted">{plural('dash.incomeCount', summary.counts?.income ?? 0, { n: summary.counts?.income ?? 0 })}</div>
                 </div>
                 <div>
-                  <div className="amount-expense num">− ↓ {money(summary.expense)}</div>
+                  <div className="amount-expense num">− <Icon name="trendDown" /> {money(summary.expense)}</div>
                   <div className="smallish muted">{plural('dash.expenseCount', summary.counts?.expense ?? 0, { n: summary.counts?.expense ?? 0 })}</div>
                 </div>
               </div>
@@ -171,8 +168,8 @@ export default function Dashboard() {
               </div>
               {summary.topCategory ? (
                 <div className="d-flex align-items-center gap-3">
-                  <span className="txn-ico" aria-hidden="true">
-                    {glyph(summary.topCategory.icon)}
+                  <span className="txn-ico">
+                    <CategoryIcon name={summary.topCategory.icon} />
                   </span>
                   <div className="flex-grow-1">
                     <div style={{ fontWeight: 600 }}>{summary.topCategory.name}</div>
@@ -211,7 +208,7 @@ export default function Dashboard() {
           {nothingYet ? (
             <div className="card mt-3">
               <EmptyState
-                icon="💰"
+                icon="wallet"
                 title={t('dash.emptyTitle')}
                 action={
                   <div className="d-flex gap-2 justify-content-center flex-wrap mt-2">
@@ -257,7 +254,7 @@ export default function Dashboard() {
 
               <section className="mt-4">
                 <div className="d-flex align-items-center justify-content-between mb-2">
-                  <h2 className="mb-0">💡 {t('dash.tipsTitle')}</h2>
+                  <h2 className="mb-0"><Icon name="bulb" /> {t('dash.tipsTitle')}</h2>
                   <Link className="btn btn-ghost btn-sm" to="/tips">
                     {t('dash.seeAllTips')}
                   </Link>
@@ -292,8 +289,8 @@ export default function Dashboard() {
                             className="txn-row"
                             style={{ color: 'inherit', textDecoration: 'none' }}
                           >
-                            <span className="txn-ico" aria-hidden="true">
-                              🧾
+                            <span className="txn-ico">
+                              <Icon name="receipt" />
                             </span>
                             <span className="txn-main">
                               <span className="txn-desc">{row.description || t('dash.untitled')}</span>
@@ -304,7 +301,8 @@ export default function Dashboard() {
                             <span
                               className={`txn-amount ${row.type === 'income' ? 'amount-income' : 'amount-expense'}`}
                             >
-                              {row.type === 'income' ? `+ ↑ ${money(row.amount)}` : `− ↓ ${money(row.amount)}`}
+                              {row.type === 'income' ? '+' : '−'} <Icon name={row.type === 'income' ? 'trendUp' : 'trendDown'} />{' '}
+                              {money(row.amount)}
                             </span>
                           </Link>
                         </li>

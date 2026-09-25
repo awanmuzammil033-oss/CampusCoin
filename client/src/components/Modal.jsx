@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocale } from '../locale.jsx';
+import Icon from './Icon.jsx';
 
 /**
  * Modal (design.md §5): focus moves in on open, Tab stays inside,
@@ -57,7 +58,9 @@ export default function Modal({ title, onClose, children, footer, labelledBy }) 
       >
         <div className="d-flex align-items-center justify-content-between mb-3">
           <h2 id="modal-title" className="mb-0">{title}</h2>
-          <button type="button" className="icon-btn" onClick={onClose} aria-label={t('ui.closeDialog')}>✕</button>
+          <button type="button" className="icon-btn" onClick={onClose} aria-label={t('ui.closeDialog')}>
+            <Icon name="close" size={17} />
+          </button>
         </div>
         {children}
         {footer && <div className="d-flex gap-2 justify-content-end mt-4">{footer}</div>}

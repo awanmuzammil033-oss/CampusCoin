@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { api } from '../api.js';
 import FormField from '../components/FormField.jsx';
+import Icon from '../components/Icon.jsx';
 import { useLocale } from '../locale.jsx';
 
 /** Step 3: the emailed token lands here in the URL. The server checks it is
@@ -40,7 +41,7 @@ export default function ResetPassword() {
       <div className="card auth-card">
         <div className="auth-top">
           <Link to="/" className="btn btn-ghost btn-sm auth-back">
-            <span aria-hidden="true">←</span> {t('auth.backToSite')}
+            <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
           </Link>
         </div>
         <div className="auth-brand">
@@ -65,7 +66,7 @@ export default function ResetPassword() {
             <form onSubmit={onSubmit} noValidate>
               {error && (
                 <div className="field-error mb-3" role="alert">
-                  <span aria-hidden="true">⚠</span>
+                  <Icon name="warning" size={16} />
                   <span>{error}</span>
                 </div>
               )}

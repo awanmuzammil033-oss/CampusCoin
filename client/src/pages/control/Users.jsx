@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import Page from '../../components/Page.jsx';
 import FormField from '../../components/FormField.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
+import Icon from '../../components/Icon.jsx';
 import Pagination from '../../components/Pagination.jsx';
 import { api, qs } from '../../api.js';
 import { useAuth } from '../../auth.jsx';
@@ -126,7 +127,7 @@ export default function ControlUsers() {
 
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <span><Icon name="warning" /></span>
           <span>{error}</span>
         </div>
       )}
@@ -143,7 +144,7 @@ export default function ControlUsers() {
       {data && rows.length === 0 && (
         <div className="card">
           <EmptyState
-            icon="👥"
+            icon="users"
             title={searched ? t('ctl.noMatch') : t('ctl.noAccounts')}
             action={
               searched ? (
@@ -227,7 +228,7 @@ export default function ControlUsers() {
       )}
 
       <p className="smallish muted mt-3 mb-0">
-        <span aria-hidden="true"> ℹ️</span> {t('ctl.usersPrivacy')}
+        <span> <Icon name="info" /></span> {t('ctl.usersPrivacy')}
       </p>
     </Page>
   );

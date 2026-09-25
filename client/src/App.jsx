@@ -5,6 +5,7 @@ import { useAuth } from './auth.jsx';
 import { useLocale } from './locale.jsx';
 import { ToastProvider } from './components/Toast.jsx';
 import Layout from './components/Layout.jsx';
+import Icon from './components/Icon.jsx';
 
 import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
@@ -136,7 +137,7 @@ function NotFound() {
   return (
     <div className="auth-wrap">
       <div className="card auth-card" style={{ textAlign: 'center' }}>
-        <span style={{ fontSize: '2.5rem' }} aria-hidden="true">🧭</span>
+        <span style={{ fontSize: '2.5rem' }}><Icon name="info" /></span>
         <h1>{t('app.notFoundTitle')}</h1>
         <p className="muted">{t('app.notFoundBody')}</p>
         <a className="btn btn-primary" href="/">{t('app.backHome')}</a>

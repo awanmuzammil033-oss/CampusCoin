@@ -3,13 +3,14 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth.jsx';
 import { useLocale } from '../../locale.jsx';
 import ThemeToggle from '../../components/ThemeToggle.jsx';
+import Icon from '../../components/Icon.jsx';
 
 const NAV = [
-  { to: '/control', label: 'ctl.navOverview', icon: '📊', end: true },
-  { to: '/control/categories', label: 'ctl.navCategories', icon: '🏷️' },
-  { to: '/control/templates', label: 'ctl.navTemplates', icon: '📝' },
-  { to: '/control/announcements', label: 'ctl.navAnnouncements', icon: '📢' },
-  { to: '/control/users', label: 'ctl.navUsers', icon: '👥' },
+  { to: '/control', label: 'ctl.navOverview', icon: 'chart', end: true },
+  { to: '/control/categories', label: 'ctl.navCategories', icon: 'tag' },
+  { to: '/control/templates', label: 'ctl.navTemplates', icon: 'note' },
+  { to: '/control/announcements', label: 'ctl.navAnnouncements', icon: 'megaphone' },
+  { to: '/control/users', label: 'ctl.navUsers', icon: 'users' },
 ];
 
 /**
@@ -58,7 +59,7 @@ export default function ControlLayout() {
               end={item.end}
               className={({ isActive }) => `nav-link-cc ${isActive ? 'active' : ''}`}
             >
-              <span className="nav-ico" aria-hidden="true">{item.icon}</span>
+              <span className="nav-ico"><Icon name={item.icon} /></span>
               <span className="nav-label">{t(item.label)}</span>
             </NavLink>
           ))}

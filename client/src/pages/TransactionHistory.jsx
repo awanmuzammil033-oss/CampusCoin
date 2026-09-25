@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 
 import Page from '../components/Page.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import Icon from '../components/Icon.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
@@ -10,10 +11,10 @@ import { useLocale } from '../locale.jsx';
 import { dayLabel, uiLang } from '../dates.js';
 
 const ACTIONS = {
-  create: { icon: '➕', label: 'hist.created' },
-  update: { icon: '✏️', label: 'hist.edited' },
-  delete: { icon: '🗑', label: 'hist.deleted' },
-  restore: { icon: '♻️', label: 'hist.restored' },
+  create: { icon: 'plus', label: 'hist.created' },
+  update: { icon: 'pencil', label: 'hist.edited' },
+  delete: { icon: 'trash', label: 'hist.deleted' },
+  restore: { icon: 'repeat', label: 'hist.restored' },
 };
 
 // Field labels come from the shared table vocabulary.
@@ -87,13 +88,13 @@ export default function TransactionHistory() {
       subtitle={t('hist.subtitle')}
       actions={
         <Link className="btn btn-ghost" to="/transactions">
-          ← {t('tx.backPlain')}
+          <Icon name="arrowLeft" /> {t('tx.backPlain')}
         </Link>
       }
     >
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <Icon name="warning" />
           <span>{error}</span>
         </div>
       )}
@@ -109,7 +110,7 @@ export default function TransactionHistory() {
 
       {rows && rows.length === 0 && (
         <div className="card">
-          <EmptyState icon="📜" title={t('hist.emptyTitle')} action={
+          <EmptyState icon="history" title={t('hist.emptyTitle')} action={
             <Link className="btn btn-secondary mt-2" to="/transactions">
               {t('tx.backPlain')}
             </Link>
@@ -122,7 +123,7 @@ export default function TransactionHistory() {
       {rows && rows.length > 0 && (
         <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {rows.map((row) => {
-            const action = ACTIONS[row.action] || { icon: '•', label: row.action };
+            const action = ACTIONS[row.action] || { icon: 'info', label: row.action };
             const before = row.before || null;
             const after = row.after || null;
             const changed = FIELDS.filter((field) => String(before?.[field]) !== String(after?.[field]));
@@ -130,8 +131,8 @@ export default function TransactionHistory() {
             return (
               <li key={row.id} className="card mb-3">
                 <div className="d-flex align-items-center gap-3">
-                  <span className="txn-ico" aria-hidden="true">
-                    {action.icon}
+                  <span className="txn-ico">
+                    <Icon name={action.icon} />
                   </span>
                   <div>
                     <strong>{t(action.label)}</strong>{' '}
@@ -157,7 +158,7 @@ export default function TransactionHistory() {
                           {t(FIELD_KEYS[field])}
                         </span>
                         <s className="muted">{showValue(field, before, names, t)}</s>
-                        <span aria-hidden="true">→</span>
+                        <Icon name="arrowRight" />
                         <strong>{showValue(field, after, names, t)}</strong>
                       </div>
                     ))}

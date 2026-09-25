@@ -6,6 +6,8 @@ import Modal from '../components/Modal.jsx';
 import FormField from '../components/FormField.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import Progress from '../components/Progress.jsx';
+import Icon from '../components/Icon.jsx';
+import CategoryIcon from '../components/CategoryIcon.jsx';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
@@ -25,14 +27,6 @@ function monthLabel(key) {
 function shiftMonth(key, delta) {
   const [y, m] = key.split('-').map(Number);
   return monthKey(new Date(y, m - 1 + delta, 1));
-}
-
-const ICONS = {
-  wallet: '👛', cup: '☕', bus: '🚌', book: '📚', gift: '🎁', film: '🎞️',
-  play: '🎮', house: '🏠', dots: '⋯', award: '🏆', briefcase: '💼', 'plus-circle': '➕',
-};
-function glyph(name) {
-  return ICONS[name] || '🏷️';
 }
 
 /**
@@ -172,7 +166,7 @@ export default function Budgets() {
               aria-label={t('ui.prevMonth')}
               title={t('ui.prevMonth')}
             >
-              ‹
+              <Icon name="arrowLeft" />
             </button>
             <strong className="num" style={{ minWidth: 150, textAlign: 'center' }}>
               {monthLabel(month)}
@@ -184,7 +178,7 @@ export default function Budgets() {
               aria-label={t('ui.nextMonth')}
               title={t('ui.nextMonth')}
             >
-              ›
+              <Icon name="arrowRight" />
             </button>
           </span>
           <button type="button" className="btn btn-secondary" onClick={copyPrevious}>
@@ -194,12 +188,12 @@ export default function Budgets() {
       }
     >
       <p className="smallish muted">
-        <span aria-hidden="true"> ℹ️</span> {t('bud.nudgeNote')}
+        <Icon name="info" /> {t('bud.nudgeNote')}
       </p>
 
       {error && (
         <div className="field-error mb-3" role="alert">
-          <span aria-hidden="true">⚠</span>
+          <Icon name="warning" />
           <span>{error}</span>
         </div>
       )}
@@ -234,8 +228,8 @@ export default function Budgets() {
                   <tr key={row.id}>
                     <td>
                       <span className="d-inline-flex align-items-center gap-2">
-                        <span className="txn-ico" aria-hidden="true" style={{ width: 32, height: 32 }}>
-                          {glyph(row.category?.icon)}
+                        <span className="txn-ico" style={{ width: 32, height: 32 }}>
+                          <CategoryIcon name={row.category?.icon} />
                         </span>
                         <strong>{row.category?.name || t('ui.category')}</strong>
                       </span>
@@ -275,7 +269,7 @@ export default function Budgets() {
                           aria-label={t('bud.removeAria', { name: row.category?.name })}
                           title={t('ui.remove')}
                         >
-                          🗑
+                          <Icon name="trash" />
                         </button>
                       </div>
                     </td>
@@ -289,7 +283,7 @@ export default function Budgets() {
 
       {rows && rows.length === 0 && (
         <div className="card">
-          <EmptyState icon="🎯" title={t('bud.emptyTitle', { month: monthLabel(month) })}>
+          <EmptyState icon="target" title={t('bud.emptyTitle', { month: monthLabel(month) })}>
             {t('bud.emptyBody')}
           </EmptyState>
         </div>
@@ -301,7 +295,7 @@ export default function Budgets() {
         </div>
         {addError && (
           <div className="field-error mb-3" role="alert">
-            <span aria-hidden="true">⚠</span>
+            <Icon name="warning" />
             <span>{addError}</span>
           </div>
         )}

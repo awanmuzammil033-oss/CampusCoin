@@ -3,6 +3,7 @@ import { useLocale } from '../locale.jsx';
 import { CURRENCIES } from '../data/currencies.js';
 import { LANGUAGES } from '../data/languages.js';
 import dictionaries from '../i18n/index.js';
+import Icon from './Icon.jsx';
 
 /** True when the interface actually speaks this language (not just listed). */
 function hasUi(code) {
@@ -130,7 +131,7 @@ export default function LocalePickers({ onOpen, variant }) {
                 <span aria-hidden="true">{c.symbol}</span>
                 <strong>{c.code}</strong>
                 <span className="row-name">{c.name}</span>
-                {c.code === currency && <span aria-hidden="true">✓</span>}
+                {c.code === currency && <Icon name="check" size={15} />}
               </button>
             ))}
           </div>
@@ -150,11 +151,11 @@ export default function LocalePickers({ onOpen, variant }) {
           {navMode ? (
             <>
               <span className="picker-code">{language.split('-')[0].toUpperCase()}</span>
-              <span className="picker-caret" aria-hidden="true">▾</span>
+              <Icon name="chevronDown" size={14} className="picker-caret" />
             </>
           ) : (
             <>
-              <span aria-hidden="true">🌐</span>
+              <Icon name="globe" size={18} />
               <span className="nav-label lang-native">{activeLanguage?.native || language}</span>
             </>
           )}
@@ -183,16 +184,14 @@ export default function LocalePickers({ onOpen, variant }) {
                 }}
               >
                 <span className="row-native" aria-hidden="true">{l.native}</span>
-                <span aria-hidden="true">—</span>
                 <span className="row-name">{l.name}</span>
                 <span
                   className={`row-ui-tag${hasUi(l.code) ? ' row-ui-full' : ''}`}
-                  aria-hidden="true"
                   title={hasUi(l.code) ? t('lp.langTranslated') : t('lp.langEnglishOnly')}
                 >
-                  {hasUi(l.code) ? '✓ UI' : 'EN'}
+                  {hasUi(l.code) ? <><Icon name="check" size={11} /> UI</> : 'EN'}
                 </span>
-                {l.code.toLowerCase() === language.toLowerCase() && <span aria-hidden="true">✓</span>}
+                {l.code.toLowerCase() === language.toLowerCase() && <Icon name="check" size={15} />}
               </button>
             ))}
           </div>

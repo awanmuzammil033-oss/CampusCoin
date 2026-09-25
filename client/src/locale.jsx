@@ -28,7 +28,7 @@ function persist(key, value) {
 // paint — so seed it from localStorage here, at import time, not in an effect.
 setDisplayCurrency(readStored('cc.currency', 'USD'));
 
-/** Exact code first, then base language ('pa-Arab' → 'pa'), else nothing. */
+/** Exact code first, then base language ('pa-Arab' - 'pa'), else nothing. */
 function languageEntry(code) {
   const wanted = String(code || '').toLowerCase();
   return (
@@ -121,7 +121,7 @@ export function LocaleProvider({ children }) {
     [language, user, updatePreferences]
   );
 
-  // Per-key fallback: active language → English → the key string itself, so
+  // Per-key fallback: active language - English - the key string itself, so
   // an untranslated (or misspelled) key still shows something readable.
   // `vars` fills {placeholders}: t('dash.hi', { name: 'Aisha' }).
   const format = (s, vars) =>
