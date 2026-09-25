@@ -102,6 +102,7 @@ export default {
   'home.heroTagline':
     'Harçlığınızı ve harcamalarınızı saniyeler içinde kaydedin, paranın tam olarak nereye gittiğini görün ve kendi sayılarınızdan doğan basit ipuçları alın.',
   'home.getStarted': 'Ücretsiz başla',
+  'home.adminPanel': 'Yönetim paneli',
   'home.iHaveAnAccount': 'Hesabım var',
   'home.sitemap': 'Site haritası',
   'home.sitemapSubtitle': 'Campus Coin’in her köşesi, tek bir listede.',

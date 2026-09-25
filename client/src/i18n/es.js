@@ -102,6 +102,7 @@ export default {
   'home.heroTagline':
     'Registra tu mesada y tus gastos en segundos, mira exactamente a dónde va el dinero y recibe consejos sencillos basados en tus propias cifras.',
   'home.getStarted': 'Empieza gratis',
+  'home.adminPanel': 'Panel de administración',
   'home.iHaveAnAccount': 'Ya tengo una cuenta',
   'home.sitemap': 'Mapa del sitio',
   'home.sitemapSubtitle': 'Cada rincón de Campus Coin, en una sola lista.',

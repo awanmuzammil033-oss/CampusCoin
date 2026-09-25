@@ -102,6 +102,7 @@ export default {
   'home.heroTagline':
     'Catat uang saku dan pengeluaran dalam hitungan detik, lihat persis ke mana uang pergi, dan dapatkan tips sederhana dari angkamu sendiri.',
   'home.getStarted': 'Mulai gratis',
+  'home.adminPanel': 'Panel admin',
   'home.iHaveAnAccount': 'Saya sudah punya akun',
   'home.sitemap': 'Peta situs',
   'home.sitemapSubtitle': 'Setiap sudut Campus Coin, dalam satu daftar.',

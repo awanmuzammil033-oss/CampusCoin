@@ -57,7 +57,7 @@ export default {
   'auth.signInSubtitle': 'Sign in to keep tracking your spending.',
   'auth.email': 'Email',
   'auth.password': 'Password',
-  'auth.signIn': 'Sign in',
+  'auth.signIn': 'Sign In',
   'auth.signingIn': 'Signing in…',
   'auth.forgotPassword': 'Forgot password?',
   'auth.newHere': 'New here?',
@@ -103,7 +103,8 @@ export default {
   'home.heroTitle': 'Smart Spending, Student Style',
   'home.heroTagline':
     'Track your allowance and expenses in seconds, see exactly where the money goes, and get simple tips built from your own numbers.',
-  'home.getStarted': 'Get started free',
+  'home.getStarted': 'Get Started',
+  'home.adminPanel': 'Admin panel',
   'home.iHaveAnAccount': 'I have an account',
   'home.sitemap': 'Sitemap',
   'home.sitemapSubtitle': 'Every corner of Campus Coin, in one list.',

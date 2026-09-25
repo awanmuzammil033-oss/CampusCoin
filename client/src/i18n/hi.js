@@ -102,6 +102,7 @@ export default {
   'home.heroTagline':
     'सेकंडों में अपनी पॉकेट मनी और खर्च दर्ज करें, पता करें कि पैसा कहाँ जा रहा है, और अपने ही आँकड़ों से बने आसान सुझाव पाएँ।',
   'home.getStarted': 'मुफ़्त शुरू करें',
+  'home.adminPanel': 'एडमिन पैनल',
   'home.iHaveAnAccount': 'मेरे पास खाता है',
   'home.sitemap': 'साइट नक्शा',
   'home.sitemapSubtitle': 'Campus Coin का हर कोना, एक सूची में।',

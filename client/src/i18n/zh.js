@@ -101,6 +101,7 @@ export default {
   'home.heroTagline':
     '几秒钟记录零花钱和支出，看清钱到底去了哪里，还能根据你自己的数字拿到简单实用的建议。',
   'home.getStarted': '免费开始',
+  'home.adminPanel': '管理面板',
   'home.iHaveAnAccount': '我已有账户',
   'home.sitemap': '站点地图',
   'home.sitemapSubtitle': 'Campus Coin 的每个角落，尽在一份清单。',

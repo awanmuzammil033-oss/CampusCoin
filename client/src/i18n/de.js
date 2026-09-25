@@ -102,6 +102,7 @@ export default {
   'home.heroTagline':
     'Erfasse Taschengeld und Ausgaben in Sekunden, sieh genau, wohin das Geld fließt und erhalte einfache Tipps aus deinen eigenen Zahlen.',
   'home.getStarted': 'Kostenlos starten',
+  'home.adminPanel': 'Admin-Bereich',
   'home.iHaveAnAccount': 'Ich habe bereits ein Konto',
   'home.sitemap': 'Sitemap',
   'home.sitemapSubtitle': 'Jede Ecke von Campus Coin, in einer Liste.',

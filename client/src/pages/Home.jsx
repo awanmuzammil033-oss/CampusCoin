@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../auth.jsx';
 import { useLocale } from '../locale.jsx';
 import LocalePickers from '../components/LocalePickers.jsx';
 import ThemeToggle from '../components/ThemeToggle.jsx';
@@ -41,8 +42,10 @@ const PHONE_LEGEND = [
 
 export default function Home() {
   const { t } = useLocale();
+  const { user, loading, logout } = useAuth() || {};
   const [active, setActive] = useState('top');
   const [showTop, setShowTop] = useState(false);
+  const [stuck, setStuck] = useState(false);
 
   /* Scroll reveal: everything marked .lp-reveal rises in the first time it
      enters the viewport; no observer support = show immediately. */
@@ -67,10 +70,11 @@ export default function Home() {
     return () => io.disconnect();
   }, []);
 
-  /* Nav highlight + back-to-top visibility. */
+  /* Nav highlight + back-to-top visibility (+ header glass when scrolled). */
   useEffect(() => {
     function onScroll() {
       setShowTop(window.scrollY > 560);
+      setStuck(window.scrollY > 8);
       let cur = 'top';
       NAV.forEach(({ id }) => {
         const el = document.getElementById(id);
@@ -91,8 +95,12 @@ export default function Home() {
     <div className="landing">
       <a className="skip-link" href="#main-content">{t('a11y.skipToContent')}</a>
 
+      {/* Anchor for the "Home" nav link — the header itself is position:fixed
+          and cannot be a scroll target. */}
+      <span id="top" aria-hidden="true" />
+
       {/* ------------------------- sticky glass header ------------------------ */}
-      <header className="lp-nav" id="top">
+      <header className={`lp-nav${stuck ? ' is-stuck' : ''}`}>
         <Link to="/" className="brand lp-brand">
           <span className="brand-mark" aria-hidden="true">C</span>
           <span className="brand-name">{t('app.name')}</span>
@@ -112,9 +120,31 @@ export default function Home() {
 
         <div className="lp-nav-right">
           <ThemeToggle className="icon-btn lp-nav-icon" />
-          <LocalePickers />
-          <Link className="lp-nav-link lp-nav-signin" to="/login">{t('auth.signIn')}</Link>
-          <Link className="btn btn-grad btn-sm" to="/register">{t('home.getStarted')}</Link>
+          <LocalePickers variant="nav" />
+          {loading ? null : user ? (
+            <>
+              {/* Signed in: the board's Sign in / Get started pair becomes
+                  Sign out + a way straight back into the visitor's own app. */}
+              <button
+                type="button"
+                className="lp-nav-link lp-nav-signin"
+                onClick={async () => { await logout(); }}
+              >
+                {t('account.signOut')}
+              </button>
+              <Link
+                className="btn btn-grad btn-sm"
+                to={user.role === 'admin' ? '/control' : '/dashboard'}
+              >
+                {user.role === 'admin' ? t('home.adminPanel') : t('nav.dashboard')}
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link className="lp-nav-link lp-nav-signin" to="/login">{t('auth.signIn')}</Link>
+              <Link className="btn btn-grad btn-sm" to="/register">{t('home.getStarted')}</Link>
+            </>
+          )}
         </div>
       </header>
 

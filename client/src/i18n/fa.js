@@ -102,6 +102,7 @@ export default {
   'home.heroTagline':
     'وجوی روزمره و هزینه‌هایتان را در چند ثانیه ثبت کنید، دقیق ببینید پول کجا می‌رود، و پیشنهادهای ساده‌ای از روی اعداد خودتان بگیرید.',
   'home.getStarted': 'شروع رایگان',
+  'home.adminPanel': 'پنل مدیریت',
   'home.iHaveAnAccount': 'حساب دارم',
   'home.sitemap': 'نقشهٔ سایت',
   'home.sitemapSubtitle': 'هر گوشهٔ Campus Coin، در یک فهرست.',

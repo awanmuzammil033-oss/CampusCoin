@@ -57,7 +57,8 @@ export default function ThemeToggle({ className = 'icon-btn', labels }) {
 
   return (
     <button type="button" className={className} onClick={toggle} aria-label={aria} title={title}>
-      <span aria-hidden="true">{dark ? '☀️' : '🌙'}</span>
+      {/* current-state icon, like the board: sun while light, moon while dark */}
+      <span aria-hidden="true">{dark ? '🌙' : '☀️'}</span>
     </button>
   );
 }

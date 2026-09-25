@@ -102,6 +102,7 @@ export default {
   'home.heroTagline':
     'Notez votre argent de poche et vos dépenses en quelques secondes, voyez exactement où part l’argent et recevez des conseils simples tirés de vos propres chiffres.',
   'home.getStarted': 'Commencer gratuitement',
+  'home.adminPanel': 'Panneau d\'admin',
   'home.iHaveAnAccount': 'J’ai déjà un compte',
   'home.sitemap': 'Plan du site',
   'home.sitemapSubtitle': 'Tous les recoins de Campus Coin, en une liste.',

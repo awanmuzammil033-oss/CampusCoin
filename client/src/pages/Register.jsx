@@ -51,7 +51,7 @@ export default function Register() {
 
   return (
     <div className="auth-wrap">
-      <div className="card auth-card">
+      <div className="card auth-card auth-register">
         <div className="auth-top">
           <Link to="/" className="btn btn-ghost btn-sm auth-back">
             <span aria-hidden="true">←</span> {t('auth.backToSite')}
@@ -60,8 +60,8 @@ export default function Register() {
         <div className="auth-brand">
           <span className="brand-mark" aria-hidden="true">C</span>
         </div>
-        <h1 className="text-center" style={{ marginBottom: 4 }}>{t('auth.createYourAccount')}</h1>
-        <p className="text-center muted" style={{ marginBottom: 24 }}>
+        <h1 className="text-center" style={{ marginBottom: 2 }}>{t('auth.createYourAccount')}</h1>
+        <p className="text-center muted" style={{ marginBottom: 14 }}>
           {t('auth.registerSubtitle')}
         </p>
 
@@ -73,73 +73,77 @@ export default function Register() {
             </div>
           )}
 
-          <FormField label={t('auth.fullName')} htmlFor="name">
-            {(a) => (
-              <input id="name" className="input" autoComplete="name" required value={form.name} onChange={update('name')} {...a} />
-            )}
-          </FormField>
+          {/* Two columns on wide screens so the whole card fits a laptop
+              viewport without scrolling (1366x768 and shorter). */}
+          <div className="auth-grid">
+            <FormField label={t('auth.fullName')} htmlFor="name">
+              {(a) => (
+                <input id="name" className="input" autoComplete="name" required value={form.name} onChange={update('name')} {...a} />
+              )}
+            </FormField>
 
-          <FormField label={t('auth.email')} htmlFor="email" help={t('auth.emailHelp')}>
-            {(a) => (
-              <input id="email" type="email" className="input" autoComplete="email" required value={form.email} onChange={update('email')} {...a} />
-            )}
-          </FormField>
+            <FormField label={t('auth.email')} htmlFor="email" help={t('auth.emailHelp')}>
+              {(a) => (
+                <input id="email" type="email" className="input" autoComplete="email" required value={form.email} onChange={update('email')} {...a} />
+              )}
+            </FormField>
 
-          <FormField
-            label={t('auth.password')}
-            htmlFor="password"
-            help={t('auth.passwordHelp')}
-            hint={
-              form.password ? (
-                <span>
-                  {t('auth.strength')}{' '}
-                  <strong>{t(LEVEL_KEYS[strength.level])}</strong>
-                  {' · '}
-                  <span className="muted">{t(TIP_KEYS[strength.tipLevel])}</span>
-                </span>
-              ) : undefined
-            }
-          >
-            {(a) => (
-              <div className="position-relative">
+            <FormField
+              label={t('auth.password')}
+              htmlFor="password"
+              help={t('auth.passwordHelp')}
+              hint={
+                form.password ? (
+                  <span>
+                    {t('auth.strength')}{' '}
+                    <strong>{t(LEVEL_KEYS[strength.level])}</strong>
+                    {' · '}
+                    <span className="muted">{t(TIP_KEYS[strength.tipLevel])}</span>
+                  </span>
+                ) : undefined
+              }
+            >
+              {(a) => (
+                <div className="position-relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    className="input"
+                    autoComplete="new-password"
+                    required
+                    value={form.password}
+                    onChange={update('password')}
+                    style={{ paddingRight: 72 }}
+                    {...a}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm position-absolute"
+                    style={{ right: 6, top: 6 }}
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-pressed={showPassword}
+                  >
+                    {showPassword ? t('auth.hide') : t('auth.show')}
+                  </button>
+                </div>
+              )}
+            </FormField>
+
+            <FormField label={t('auth.confirmPassword')} htmlFor="confirm">
+              {(a) => (
                 <input
-                  id="password"
+                  id="confirm"
                   type={showPassword ? 'text' : 'password'}
                   className="input"
                   autoComplete="new-password"
                   required
-                  value={form.password}
-                  onChange={update('password')}
-                  style={{ paddingRight: 72 }}
+                  value={form.confirm}
+                  onChange={update('confirm')}
                   {...a}
                 />
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm position-absolute"
-                  style={{ right: 6, top: 6 }}
-                  onClick={() => setShowPassword((v) => !v)}
-                  aria-pressed={showPassword}
-                >
-                  {showPassword ? t('auth.hide') : t('auth.show')}
-                </button>
-              </div>
-            )}
-          </FormField>
-
-          <FormField label={t('auth.confirmPassword')} htmlFor="confirm">
-            {(a) => (
-              <input
-                id="confirm"
-                type={showPassword ? 'text' : 'password'}
-                className="input"
-                autoComplete="new-password"
-                required
-                value={form.confirm}
-                onChange={update('confirm')}
-                {...a}
-              />
-            )}
-          </FormField>
+              )}
+            </FormField>
+          </div>
 
           <button type="submit" className="btn btn-primary w-100" disabled={busy}>
             {busy && <span className="spinner" aria-hidden="true" />}
@@ -147,7 +151,7 @@ export default function Register() {
           </button>
         </form>
 
-        <p className="smallish text-center mt-4 mb-0 muted">
+        <p className="smallish text-center mt-3 mb-0 muted">
           {t('auth.alreadyRegistered')} <Link to="/login">{t('auth.signIn')}</Link>
         </p>
       </div>

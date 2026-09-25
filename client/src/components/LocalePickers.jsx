@@ -17,8 +17,13 @@ function hasUi(code) {
  * public home header. `onOpen` lets the host close its sibling popovers
  * (bell, account menu) — and the outside-click listener below closes these
  * whenever the host opens one of those, so neither side needs deep wiring.
+ *
+ * variant="nav" is the public-header edition from the design board: a single
+ * slim "EN ⌄" glass pill with the picked language's UI code (the board shows
+ * no currency control up there — currency stays in the dashboard topbar).
  */
-export default function LocalePickers({ onOpen }) {
+export default function LocalePickers({ onOpen, variant }) {
+  const navMode = variant === 'nav';
   const { t, currency, setCurrency, language, setLanguage } = useLocale();
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
@@ -91,7 +96,9 @@ export default function LocalePickers({ onOpen }) {
 
   return (
     <>
-      {/* Currency picker — display preference only, never a conversion. */}
+      {/* Currency picker — display preference only, never a conversion.
+          Hidden on the public header (the board shows only the EN pill). */}
+      {!navMode && (
       <div className="position-relative" ref={currencyRef}>
         <button type="button" className="icon-btn" aria-label={t('picker.currency')} aria-expanded={currencyOpen} onClick={openCurrency}>
           <span aria-hidden="true">{activeCurrency?.symbol || currency}</span>
@@ -129,12 +136,28 @@ export default function LocalePickers({ onOpen }) {
           </div>
         )}
       </div>
+      )}
 
       {/* Language picker — switches chrome text via the dictionaries. */}
       <div className="position-relative" ref={languageRef}>
-        <button type="button" className="icon-btn" aria-label={t('picker.language')} aria-expanded={languageOpen} onClick={openLanguage}>
-          <span aria-hidden="true">🌐</span>
-          <span className="nav-label lang-native">{activeLanguage?.native || language}</span>
+        <button
+          type="button"
+          className={navMode ? 'icon-btn picker-nav' : 'icon-btn'}
+          aria-label={t('picker.language')}
+          aria-expanded={languageOpen}
+          onClick={openLanguage}
+        >
+          {navMode ? (
+            <>
+              <span className="picker-code">{language.split('-')[0].toUpperCase()}</span>
+              <span className="picker-caret" aria-hidden="true">▾</span>
+            </>
+          ) : (
+            <>
+              <span aria-hidden="true">🌐</span>
+              <span className="nav-label lang-native">{activeLanguage?.native || language}</span>
+            </>
+          )}
         </button>
         {languageOpen && (
           <div className="dropdown-menu" role="group" aria-label={t('picker.language')}>

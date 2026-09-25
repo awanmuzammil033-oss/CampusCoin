@@ -102,6 +102,7 @@ export default {
   'home.heroTagline':
     'お小遣いと支出を数秒で記録し、お金がどこへ行っているのか正確に把握。あなた自身の数字から生まれた簡単なヒントももらえます。',
   'home.getStarted': '無料で始める',
+  'home.adminPanel': '管理画面',
   'home.iHaveAnAccount': 'アカウントを持っている',
   'home.sitemap': 'サイトマップ',
   'home.sitemapSubtitle': 'Campus Coin のすべてを1つのリストで。',

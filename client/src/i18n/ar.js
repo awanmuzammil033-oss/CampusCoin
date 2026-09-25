@@ -102,6 +102,7 @@ export default {
   'home.heroTagline':
     'تابع المصروف والمكافأة خلال ثوانٍ، واعرف بالضبط أين يذهب المال، واحصل على نصائح بسيطة مبنية على أرقامك أنت.',
   'home.getStarted': 'ابدأ مجانًا',
+  'home.adminPanel': 'لوحة الإدارة',
   'home.iHaveAnAccount': 'لدي حساب',
   'home.sitemap': 'خريطة الموقع',
   'home.sitemapSubtitle': 'كل زوايا كامب كوين في قائمة واحدة.',
