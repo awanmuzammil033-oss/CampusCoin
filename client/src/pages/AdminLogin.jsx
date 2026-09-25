@@ -122,6 +122,32 @@ export default function AdminLogin() {
           {t('auth.studentPrompt')} <Link to="/login">{t('auth.goToStudentSignIn')}</Link>
         </p>
         </div>
+
+        {/* Right: what the staff door is for. */}
+        <aside className="auth-value-col">
+          <div className="card auth-value">
+            <h2>{t('home.section.staff')}</h2>
+            <ul>
+              <li>
+                <span className="auth-value-ico"><Icon name="users" /></span>
+                <span><strong>{t('ctl.navUsers')}</strong>{t('ctl.usersPrivacy')}</span>
+              </li>
+              <li>
+                <span className="auth-value-ico"><Icon name="tag" /></span>
+                <span><strong>{t('ctl.navCategories')}</strong></span>
+              </li>
+              <li>
+                <span className="auth-value-ico"><Icon name="clipboard" /></span>
+                <span><strong>{t('ctl.navTemplates')}</strong></span>
+              </li>
+              <li>
+                <span className="auth-value-ico"><Icon name="megaphone" /></span>
+                <span><strong>{t('ctl.navAnnouncements')}</strong></span>
+              </li>
+            </ul>
+            <p className="smallish muted mb-0">{t('ctl.privacyNote')}</p>
+          </div>
+        </aside>
       </div>
     </div>
   );

@@ -1,14 +1,14 @@
 /* ==========================================================================
-   Campus Coin — design tokens and components
+   Campus Coin â€” design tokens and components
    Built by hand on Bootstrap's grid/utilities. Every colour pair here was
    picked to clear WCAG AA (4.5:1 for text, 3:1 for large UI), and every
-   status also carries an icon or a sign in the markup — never colour alone.
+   status also carries an icon or a sign in the markup â€” never colour alone.
    ========================================================================== */
 
 /* The light palette is re-declared for any element that pins
    data-theme="light", so a component can guarantee a bright surface
-   whatever theme the visitor runs. The public landing no longer pins one —
-   it follows the visitor's choice (light by default, dark persists) — but
+   whatever theme the visitor runs. The public landing no longer pins one â€”
+   it follows the visitor's choice (light by default, dark persists) â€” but
    the override stays available for future components. */
 :root,
 [data-theme='light'] {
@@ -38,7 +38,7 @@
   --cc-danger-soft: #fdeaea;
   --cc-focus: #1d4ed8;
 
-  /* chart palette — chosen to stay readable for common colour vision gaps */
+  /* chart palette â€” chosen to stay readable for common colour vision gaps */
   --cc-chart-1: #0f766e;
   --cc-chart-2: #f5b400;
   --cc-chart-3: #c2410c;
@@ -92,7 +92,7 @@
 }
 
 html {
-  font-size: 16px; /* overridden 14–20px by the A− A+ control (UX-2) */
+  font-size: 16px; /* overridden 14â€“20px by the Aâˆ’ A+ control (UX-2) */
 }
 
 body {
@@ -353,8 +353,8 @@ textarea.input {
   border-radius: inherit;
   transition: width 400ms ease-out;
 }
-/* "Under budget" draws in the app's coin-gold — the yellow students
-   already know from the brand — with a 1px warning edge so the fill's
+/* "Under budget" draws in the app's coin-gold â€” the yellow students
+   already know from the brand â€” with a 1px warning edge so the fill's
    boundary still clears 3:1 against the track. The state itself is in
    the icon + words, never colour alone. */
 .progress-ok .progress-fill {
@@ -565,7 +565,7 @@ textarea.input {
 
 /* --------------------- currency / language pickers ----------------------- */
 
-/* The panels hold 100+ rows, so they scroll inside a capped box — they must
+/* The panels hold 100+ rows, so they scroll inside a capped box â€” they must
    never stretch out to cover the page. */
 .dropdown-menu {
   position: absolute;
@@ -618,7 +618,7 @@ textarea.input {
   transition: background-color 120ms ease-out;
 }
 .dropdown-row:hover { background: var(--cc-surface-2); }
-/* Rows sit at the panel edge — pull the ring inside so the scroll box
+/* Rows sit at the panel edge â€” pull the ring inside so the scroll box
    does not clip it. */
 .dropdown-row:focus-visible { outline-offset: -3px; }
 .dropdown-row[aria-pressed='true'] {
@@ -644,7 +644,7 @@ textarea.input {
 }
 
 /* Tells the picker row at a glance whether this language has a translated
-   interface or keeps English text — a language being listed does not mean
+   interface or keeps English text â€” a language being listed does not mean
    every string in it exists yet. */
 .dropdown-row .row-ui-tag {
   flex: none;
@@ -848,7 +848,7 @@ textarea.input {
    The public face rebuilt to the approved design board: a deep-green glass
    hero with the phone mock and floating cards, a light (or dark, when the
    visitor picks dark) body of rounded cards, handwritten notes, and motion
-   on every layer — scroll reveals, card lifts, floating mocks, button
+   on every layer â€” scroll reveals, card lifts, floating mocks, button
    pushes. The wrapper no longer pins a theme: index.html defaults to light,
    the header carries the toggle, and a picked theme persists on the device
    (and the account) until the visitor switches back by hand. */
@@ -915,7 +915,7 @@ textarea.input {
 
 /* The board's header floats transparently over the dark hero (the wave
    streaks run behind it) and only grows its glass panel once the page is
-   scrolled — position: fixed keeps it overlaying the hero from the very
+   scrolled â€” position: fixed keeps it overlaying the hero from the very
    first pixel, .is-stuck (toggled in Home.jsx) restores the readable glass. */
 .lp-nav {
   position: fixed;
@@ -1010,7 +1010,7 @@ button.lp-nav-link {
   font-weight: 700;
   font-size: 0.78rem;
 }
-/* the board's "EN ⌄" pill: slim, fully rounded, glass on the dark header */
+/* the board's "EN âŒ„" pill: slim, fully rounded, glass on the dark header */
 .lp-nav .picker-nav {
   min-width: 0;
   padding: 0 14px;
@@ -1549,10 +1549,10 @@ button.lp-nav-link {
   font-size: 1.3rem;
   flex-shrink: 0;
 }
-.lp2-stat-ico.s1 { background: #fef3c7; }
-.lp2-stat-ico.s2 { background: #dbeafe; }
-.lp2-stat-ico.s3 { background: #d1fae5; }
-.lp2-stat-ico.s4 { background: #ede9fe; }
+.lp2-stat-ico.s1 { background: #fde68a; }
+.lp2-stat-ico.s2 { background: #bfdbfe; }
+.lp2-stat-ico.s3 { background: #a7f3d0; }
+.lp2-stat-ico.s4 { background: #ddd6fe; }
 
 /* ------------------------------ sections --------------------------------- */
 
@@ -1588,19 +1588,29 @@ button.lp-nav-link {
   margin: 0 0 22px;
 }
 
-/* icon tints shared by feature cards, pills, mock rows */
-
+/* Icon tints shared by feature cards, pills, mock rows.
+   The chips keep a soft pastel fill in BOTH themes, so the glyph inside has to
+   carry its own dark ink â€” it used to be an emoji, which brought its own
+   colours; an SVG inherits currentColor, and on the dark landing the page text
+   is near-white, which made every glyph vanish into the pastel. */
+.lp2-f-ico,
+.mp-ico,
+.pp-ico,
+.lp2-stat-ico,
+.lp2-shield {
+  color: #0a3a2c;
+}
 .lp2-f-ico,
 .mp-ico {
   display: grid;
   place-items: center;
   flex-shrink: 0;
 }
-.lp2-f-ico.t1, .mp-ico.t1 { background: #d1fae5; }
-.lp2-f-ico.t2, .mp-ico.t2 { background: #ede9fe; }
-.lp2-f-ico.t3, .mp-ico.t3 { background: #dbeafe; }
-.lp2-f-ico.t4, .mp-ico.t4 { background: #fef3c7; }
-.lp2-f-ico.t5, .mp-ico.t5 { background: #fce7f3; }
+.lp2-f-ico.t1, .mp-ico.t1 { background: #a7f3d0; }
+.lp2-f-ico.t2, .mp-ico.t2 { background: #ddd6fe; }
+.lp2-f-ico.t3, .mp-ico.t3 { background: #bfdbfe; }
+.lp2-f-ico.t4, .mp-ico.t4 { background: #fde68a; }
+.lp2-f-ico.t5, .mp-ico.t5 { background: #fbcfe8; }
 
 /* ------------------------------ features --------------------------------- */
 
@@ -2804,7 +2814,7 @@ button.lp-nav-link {
   .topbar .lang-native { display: none; }
 }
 
-/* Phones: squeeze the topbar onto one line — coin mark instead of the
+/* Phones: squeeze the topbar onto one line â€” coin mark instead of the
    full wordmark, currency symbol instead of "$ USD". The pickers and
    both auth buttons stay visible and tappable. */
 @media (max-width: 560px) {
@@ -2827,7 +2837,7 @@ button.lp-nav-link {
 }
 
 /* ==========================================================================
-   Design-board pass, part 2 — the pieces the first splice left bare
+   Design-board pass, part 2 â€” the pieces the first splice left bare
    (How It Works cards, the sitemap), the header mark to the picture, and
    the SAME language carried across the whole signed-in app: deep emerald
    chrome, light rounded content, gradient pill actions. Every colour reads
@@ -3192,7 +3202,7 @@ textarea.input:focus {
 /* ---------- design-board pass, part 3: header/panels/register ------------ */
 
 /* The topbar paints its own links mint-on-emerald (chrome), but its OPEN
-   panels are white cards in light theme — the chrome colour leaked onto the
+   panels are white cards in light theme â€” the chrome colour leaked onto the
    dropdown links and made 2 of the 3 account items unreadable (the Sign out
    <button> escaped the `a` rule, which is why only that one showed). Panels
    always speak the surface's text colour instead. */
@@ -3210,10 +3220,14 @@ textarea.input:focus {
 /* register: two columns so a 1366x768 laptop (or a short browser window)
    shows the whole card without a scrollbar */
 .auth-wrap { padding: 16px; }
-.auth-card.auth-register {
-  max-width: 580px;
-  padding: 24px 26px;
+.auth-card.auth-register { padding: 24px 26px; }
+.auth-register .auth-grid .field { margin-bottom: 8px; }
+.auth-register .field-help {
+  font-size: 0.76rem;
+  line-height: 1.3;
+  margin-top: 2px;
 }
+.auth-register form > .btn { margin-top: 2px; }
 .auth-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -3250,7 +3264,7 @@ textarea.input:focus {
 /* The three lines are static on purpose. They drifted sideways in the first
    pass, which read as ropes sliding through the middle of the hero, and the
    movement stuttered on a normal laptop. They now sit behind the copy in the
-   lower half of the hero and never move — no animation, no repaint, no jank. */
+   lower half of the hero and never move â€” no animation, no repaint, no jank. */
 .lp2-waves { overflow: hidden; }
 .lp2-waves::after { content: none; background: none; }
 .lp2-waves-svg {
@@ -3263,7 +3277,7 @@ textarea.input:focus {
 
 /* --------------------------- hero phone mock ----------------------------- */
 /* The board's own mock: a div-based phone that bobs gently. It is the version
-   that was approved, so nothing here is redrawn — only the two floating cards
+   that was approved, so nothing here is redrawn â€” only the two floating cards
    and the handwritten nudge keep their soft motion, which is transform-only
    and therefore smooth. */
 .lp2-phone-svg {
@@ -3288,65 +3302,102 @@ textarea.input:focus {
   max-width: 430px;
   margin-inline: auto;
 }
-.faq-art .a-halo { fill: var(--cc-primary-soft); opacity: 0.75; }
-.faq-art .a-bubble rect { fill: var(--cc-surface); stroke: var(--cc-border); stroke-width: 1.5; }
-.faq-art .a-bubble path { fill: var(--cc-surface); stroke: var(--cc-border); stroke-width: 1.5; }
-.faq-art .a-bubble-out rect,
-.faq-art .a-bubble-out path { fill: var(--cc-primary-soft); stroke: var(--cc-primary); }
-.faq-art .a-line { fill: var(--cc-border); }
-.faq-art .a-bubble-out .a-line { fill: color-mix(in srgb, var(--cc-primary) 45%, var(--cc-surface)); }
-.faq-art .a-badge { fill: var(--cc-primary); }
-.faq-art .a-chip rect { fill: var(--cc-surface); stroke: var(--cc-border); stroke-width: 1.5; }
-.faq-art .a-person circle,
-.faq-art .a-person path { fill: var(--cc-primary); stroke: none; }
-.faq-art .a-coin circle { fill: var(--cc-accent-soft); stroke: var(--cc-accent); stroke-width: 2; }
-.faq-art .a-spark path { fill: var(--cc-primary); }
-.faq-art .a-spark.small path { opacity: 0.6; }
-.faq-art .a-c { fill: var(--cc-primary); }
-.faq-art .a-coin .a-c { fill: var(--cc-accent); }
 @media (max-width: 980px) {
   .lp2-faq { grid-template-columns: 1fr; gap: 28px; }
   .faq-art { max-width: 330px; }
 }
 
-/* ------------------- auth pages: art left, form right -------------------- */
+/* ------------------- auth pages: art left, form middle, reasons right ----- */
+/* Three panels on a laptop: the picture, the form, and a small card of
+   reasons. The form sits in the middle so nothing important is pushed towards
+   the edge of the screen. */
 .auth-split {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(400px, 460px);
-  gap: 48px;
+  grid-template-columns: minmax(0, 1.05fr) minmax(370px, 430px) minmax(0, 0.8fr);
+  gap: 34px;
   align-items: center;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1320px;
 }
 .auth-art-col {
   display: grid;
   justify-items: start;
-  gap: 14px;
+  gap: 12px;
   min-width: 0;
 }
 .auth-art {
-  width: min(100%, 440px);
-  max-height: 52vh;
+  width: min(100%, 400px);
 }
 .auth-art svg { width: 100%; height: auto; display: block; }
 .auth-art-copy h2 {
-  font-size: clamp(1.5rem, 2.2vw, 2.1rem);
+  font-size: clamp(1.4rem, 1.9vw, 1.9rem);
   line-height: 1.15;
   margin: 0;
   color: var(--cc-text);
 }
-.auth-art-copy p { margin: 0; color: var(--cc-muted); max-width: 46ch; }
+.auth-art-copy p { margin: 0; color: var(--cc-muted); max-width: 42ch; }
 .auth-points {
   list-style: none;
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   padding: 0;
   display: grid;
-  gap: 9px;
+  gap: 8px;
   color: var(--cc-text);
-  font-size: 0.94rem;
+  font-size: 0.92rem;
 }
 .auth-points li { display: flex; align-items: center; gap: 9px; }
 .auth-points .cc-icon { color: var(--cc-primary); }
+
+/* the third panel */
+.auth-value-col { min-width: 0; }
+.auth-value {
+  padding: 24px 22px;
+  display: grid;
+  gap: 15px;
+  box-shadow: 0 18px 40px rgba(4, 40, 32, 0.1);
+}
+.auth-value h2 {
+  margin: 0;
+  font-size: 1.24rem;
+  line-height: 1.25;
+  color: var(--cc-text);
+}
+.auth-value ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 13px;
+}
+.auth-value li {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  color: var(--cc-muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+.auth-value .auth-value-ico {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--cc-primary-soft);
+  color: var(--cc-primary);
+}
+.auth-value strong { display: block; color: var(--cc-text); font-size: 0.97rem; }
+
+@media (max-width: 1240px) {
+  .auth-split { grid-template-columns: minmax(0, 1fr) minmax(370px, 430px); }
+  .auth-value-col { display: none; }
+}
+
+@media (max-width: 1000px) {
+  .auth-split { grid-template-columns: 1fr; gap: 0; }
+  .auth-art-col { display: none; }
+}
 
 /* currency dropdown: the rate line, so a conversion is never a surprise */
 .menu-fx {
@@ -3372,32 +3423,6 @@ textarea.input:focus {
   border: 1px solid var(--cc-border);
 }
 
-/* the drawings themselves */
-.auth-art .a-halo { fill: var(--cc-primary-soft); opacity: 0.8; }
-.auth-art .a-phone rect { fill: var(--cc-surface); stroke: var(--cc-border); stroke-width: 2; }
-.auth-art .a-screen { fill: var(--cc-bg); }
-.auth-art .a-notch { fill: var(--cc-border); }
-.auth-art .a-board rect { fill: var(--cc-surface); stroke: var(--cc-border); stroke-width: 2; }
-.auth-art .a-bar { fill: var(--cc-border); }
-.auth-art .a-bar.strong { fill: color-mix(in srgb, var(--cc-primary) 35%, var(--cc-surface)); }
-.auth-art .a-bar.accent { fill: var(--cc-primary); }
-.auth-art .a-float rect,
-.auth-art .a-float circle {
-  fill: var(--cc-surface);
-  stroke: var(--cc-primary);
-  stroke-width: 2;
-  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.12));
-}
-.auth-art .a-float .cc-icon { color: var(--cc-primary); }
-.auth-art .a-person circle,
-.auth-art .a-person path { fill: var(--cc-primary); stroke: none; }
-.auth-art .a-key rect,
-.auth-art .a-key circle { fill: var(--cc-accent-soft); stroke: var(--cc-accent); stroke-width: 2.5; }
-.auth-art .a-coin circle { fill: var(--cc-accent-soft); stroke: var(--cc-accent); stroke-width: 2.5; }
-.auth-art .a-coin .a-c { fill: var(--cc-accent); }
-.auth-art .a-spark path { fill: var(--cc-primary); }
-.auth-art .a-spark.small path { opacity: 0.6; }
-.auth-art .a-c { fill: var(--cc-primary); }
 
 @media (max-width: 1000px) {
   .auth-split { grid-template-columns: 1fr; gap: 0; }

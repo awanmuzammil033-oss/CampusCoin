@@ -136,6 +136,31 @@ export default function Login() {
           <Icon name="shield" size={15} /> <Link to="/control/login">{t('home.link.adminSignIn')}</Link>
         </div>
         </div>
+        {/* Right: the three reasons as their own card, so the form is not
+            pushed to the edge of the screen. */}
+        <aside className="auth-value-col">
+          <div className="card auth-value">
+            <h2>{t('home.heroTitle')}</h2>
+            <ul>
+              <li>
+                <span className="auth-value-ico"><Icon name="bolt" /></span>
+                <span><strong>{t('home.stat1a')}</strong>{t('home.stat1b')}</span>
+              </li>
+              <li>
+                <span className="auth-value-ico"><Icon name="grid" /></span>
+                <span><strong>{t('home.stat3a')}</strong>{t('home.stat3b')}</span>
+              </li>
+              <li>
+                <span className="auth-value-ico"><Icon name="shield" /></span>
+                <span><strong>{t('home.privC1')}</strong>{t('home.privC2')}</span>
+              </li>
+              <li>
+                <span className="auth-value-ico"><Icon name="noBank" /></span>
+                <span><strong>{t('home.privC3')}</strong>{t('home.privC4')}</span>
+              </li>
+            </ul>
+          </div>
+        </aside>
       </div>
     </div>
   );

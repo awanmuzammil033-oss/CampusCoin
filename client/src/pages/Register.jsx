@@ -206,6 +206,31 @@ export default function Register() {
           {t('auth.alreadyRegistered')} <Link to="/login">{t('auth.signIn')}</Link>
         </p>
         </div>
+
+        {/* Right: the same card of reasons, so the form sits in the middle. */}
+        <aside className="auth-value-col">
+          <div className="card auth-value">
+            <h2>{t('home.cta2Title')}</h2>
+            <ul>
+              <li>
+                <span className="auth-value-ico"><Icon name="bolt" /></span>
+                <span><strong>{t('home.stat1a')}</strong>{t('home.stat1b')}</span>
+              </li>
+              <li>
+                <span className="auth-value-ico"><Icon name="grid" /></span>
+                <span><strong>{t('home.stat3a')}</strong>{t('home.stat3b')}</span>
+              </li>
+              <li>
+                <span className="auth-value-ico"><Icon name="shield" /></span>
+                <span><strong>{t('home.privC1')}</strong>{t('home.privC2')}</span>
+              </li>
+              <li>
+                <span className="auth-value-ico"><Icon name="noBank" /></span>
+                <span><strong>{t('home.privC3')}</strong>{t('home.privC4')}</span>
+              </li>
+            </ul>
+          </div>
+        </aside>
       </div>
     </div>
   );
