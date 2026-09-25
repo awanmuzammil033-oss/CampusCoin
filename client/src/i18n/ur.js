@@ -69,8 +69,6 @@ export default {
   /* رجسٹریشن */
   'auth.createYourAccount': 'اپنا اکاؤنٹ بنائیں',
   'auth.registerSubtitle': 'طلباء کے لیے مفت — نہ کارڈ، نہ بینک کنکشن۔',
-  'auth.ownCurrency': 'میری کرنسی',
-  'auth.ownCurrencyHelp': 'وہ کرنسی جس میں آپ کی رقمیں محفوظ ہوتی ہیں۔ آپ کسی بھی وقت انہیں کسی اور کرنسی میں دکھا سکتے ہیں۔',
   'auth.fullName': 'پورا نام',
   'auth.emailHelp': 'آپ اسی ای میل پتے سے سائن ان کریں گے۔',
   'auth.passwordHelp': 'کم از کم 8 حروف — الفاظ اور اعداد ملائیں۔',

@@ -69,8 +69,6 @@ export default {
   /* 登録 */
   'auth.createYourAccount': 'アカウントを作成しましょう',
   'auth.registerSubtitle': '学生は無料 — カード不要、銀行連携も不要。',
-  'auth.ownCurrency': '自分の通貨',
-  'auth.ownCurrencyHelp': '金額を保存する通貨です。いつでも別の通貨で表示できます。',
   'auth.fullName': '氏名',
   'auth.emailHelp': 'このアドレスでサインインします。',
   'auth.passwordHelp': '8文字以上 — 単語と数字を混ぜてください。',

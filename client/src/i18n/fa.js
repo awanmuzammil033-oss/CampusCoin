@@ -69,8 +69,6 @@ export default {
   /* ثبت‌نام */
   'auth.createYourAccount': 'حساب خود را بسازید',
   'auth.registerSubtitle': 'رایگان برای دانشجویان — بدون کارت، بدون اتصال بانک.',
-  'auth.ownCurrency': 'ارز من',
-  'auth.ownCurrencyHelp': 'ارزی که مبالغ شما در آن نگهداری می‌شود. هر وقت خواستید می‌توانید آن‌ها را به ارز دیگری نمایش دهید.',
   'auth.fullName': 'نام کامل',
   'auth.emailHelp': 'شما با همین نشانی وارد می‌شوید.',
   'auth.passwordHelp': 'دست‌کم ۸ نویسه — کلمه و عدد را با هم بگذارید.',

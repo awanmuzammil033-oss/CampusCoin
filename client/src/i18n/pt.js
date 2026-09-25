@@ -69,8 +69,6 @@ export default {
   /* cadastro */
   'auth.createYourAccount': 'Crie sua conta',
   'auth.registerSubtitle': 'Grátis para estudantes — sem cartão, sem banco.',
-  'auth.ownCurrency': 'A minha moeda',
-  'auth.ownCurrencyHelp': 'A moeda em que os seus valores são guardados. Pode mostrá-los noutra moeda a qualquer momento.',
   'auth.fullName': 'Nome completo',
   'auth.emailHelp': 'Você vai entrar com este endereço.',
   'auth.passwordHelp': 'Ao menos 8 caracteres — misture palavras e números.',

@@ -3244,7 +3244,7 @@ textarea.input:focus {
 
 /* ---------- design-board pass 4: SVG icons, flowing waves, art panels ---- */
 
-/* Every glyph in the product is an inline SVG (components/Icon.jsx) instead
+/* Every glyph in the product is a drawn SVG (components/Icon.jsx) instead
    of an emoji: it inherits currentColor, scales with the font and renders
    identically on Windows, macOS and phones. No size means "same size as the
    text around it". */
@@ -3256,9 +3256,21 @@ textarea.input:focus {
   vertical-align: -0.14em;
 }
 
+/* The glyph itself can be a colour emoji (the app's original look) or the
+   drawn SVG; both share the metrics so nothing shifts when it changes. */
+.cc-emoji {
+  font-size: 1em;
+  line-height: 1;
+  flex: none;
+  display: inline-block;
+  vertical-align: -0.12em;
+  font-family: "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif;
+}
+
 /* Icon inside a coloured chip keeps the chip's padding honest */
-.lp2-f-ico, .pp-ico, .mp-ico { line-height: 0; }
+.lp2-f-ico, .pp-ico, .mp-ico { line-height: 1; }
 .lp2-f-ico .cc-icon, .pp-ico .cc-icon, .mp-ico .cc-icon { width: 1.25em; height: 1.25em; }
+.lp2-f-ico .cc-emoji, .pp-ico .cc-emoji, .mp-ico .cc-emoji { font-size: 1.1em; }
 
 /* ------------------------- calm hero waves -------------------------------- */
 /* The three lines are static on purpose. They drifted sideways in the first
@@ -3307,17 +3319,17 @@ textarea.input:focus {
   .faq-art { max-width: 330px; }
 }
 
-/* ------------------- auth pages: art left, form middle, reasons right ----- */
-/* Three panels on a laptop: the picture, the form, and a small card of
-   reasons. The form sits in the middle so nothing important is pushed towards
-   the edge of the screen. */
+/* ------------------- auth pages: art left, form right -------------------- */
+/* Two panels on a laptop: the picture on the left, the form on the right and
+   nothing else competing with it. Below 1000px the picture goes and the form
+   owns the screen. */
 .auth-split {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(370px, 430px) minmax(0, 0.8fr);
-  gap: 34px;
+  grid-template-columns: minmax(0, 1fr) minmax(370px, 450px);
+  gap: 40px;
   align-items: center;
   width: 100%;
-  max-width: 1320px;
+  max-width: 1200px;
 }
 .auth-art-col {
   display: grid;
@@ -3326,7 +3338,7 @@ textarea.input:focus {
   min-width: 0;
 }
 .auth-art {
-  width: min(100%, 400px);
+  width: min(100%, 420px);
 }
 .auth-art svg { width: 100%; height: auto; display: block; }
 .auth-art-copy h2 {
@@ -3347,52 +3359,6 @@ textarea.input:focus {
 }
 .auth-points li { display: flex; align-items: center; gap: 9px; }
 .auth-points .cc-icon { color: var(--cc-primary); }
-
-/* the third panel */
-.auth-value-col { min-width: 0; }
-.auth-value {
-  padding: 24px 22px;
-  display: grid;
-  gap: 15px;
-  box-shadow: 0 18px 40px rgba(4, 40, 32, 0.1);
-}
-.auth-value h2 {
-  margin: 0;
-  font-size: 1.24rem;
-  line-height: 1.25;
-  color: var(--cc-text);
-}
-.auth-value ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 13px;
-}
-.auth-value li {
-  display: flex;
-  align-items: flex-start;
-  gap: 11px;
-  color: var(--cc-muted);
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-.auth-value .auth-value-ico {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: var(--cc-primary-soft);
-  color: var(--cc-primary);
-}
-.auth-value strong { display: block; color: var(--cc-text); font-size: 0.97rem; }
-
-@media (max-width: 1240px) {
-  .auth-split { grid-template-columns: minmax(0, 1fr) minmax(370px, 430px); }
-  .auth-value-col { display: none; }
-}
 
 @media (max-width: 1000px) {
   .auth-split { grid-template-columns: 1fr; gap: 0; }

@@ -69,8 +69,6 @@ export default {
   /* pendaftaran */
   'auth.createYourAccount': 'Buat akunmu',
   'auth.registerSubtitle': 'Gratis untuk pelajar — tanpa kartu, tanpa rekening bank.',
-  'auth.ownCurrency': 'Mata uang saya',
-  'auth.ownCurrencyHelp': 'Mata uang tempat jumlah Anda disimpan. Anda bisa menampilkannya dalam mata uang lain kapan saja.',
   'auth.fullName': 'Nama lengkap',
   'auth.emailHelp': 'Kamu akan masuk dengan alamat ini.',
   'auth.passwordHelp': 'Minimal 8 karakter — campur kata dan angka.',

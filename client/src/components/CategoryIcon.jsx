@@ -25,10 +25,17 @@ const ICON_NAMES = {
   'plus-circle': 'plusCircle',
 };
 
+// A few keys had their own glyph before the vector pass: the wallet category
+// was a purse, not a money bag, and dots was an ellipsis.
+const GLYPH = {
+  wallet: '👛',
+  dots: '⋯',
+};
+
 export function categoryIconName(key) {
   return ICON_NAMES[key] || 'wallet';
 }
 
 export default function CategoryIcon({ name, size, className }) {
-  return <Icon name={categoryIconName(name)} size={size} className={className} />;
+  return <Icon name={categoryIconName(name)} glyph={GLYPH[name]} size={size} className={className} />;
 }

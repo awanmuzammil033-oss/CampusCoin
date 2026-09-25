@@ -16,7 +16,7 @@ const NAV = [
   { to: '/budgets', labelKey: 'nav.budgets', icon: 'target' },
   { sectionKey: 'nav.section.understand' },
   { to: '/reports', labelKey: 'nav.reports', icon: 'chart' },
-  { to: '/insights', labelKey: 'nav.insights', icon: 'sun' },
+  { to: '/insights', labelKey: 'nav.insights', icon: 'insightWeather' },
   { to: '/tips', labelKey: 'nav.tips', icon: 'bulb' },
   { to: '/bookmarks', labelKey: 'nav.bookmarks', icon: 'bookmark' },
   { sectionKey: 'nav.section.account' },

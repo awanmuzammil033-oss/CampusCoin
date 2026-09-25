@@ -69,8 +69,6 @@ export default {
   /* registro */
   'auth.createYourAccount': 'Crea tu cuenta',
   'auth.registerSubtitle': 'Gratis para estudiantes — sin tarjeta ni banco.',
-  'auth.ownCurrency': 'Mi moneda',
-  'auth.ownCurrencyHelp': 'La moneda en la que se guardan tus importes. Puedes mostrarlos en otra cuando quieras.',
   'auth.fullName': 'Nombre completo',
   'auth.emailHelp': 'Usarás esta dirección para iniciar sesión.',
   'auth.passwordHelp': 'Al menos 8 caracteres — combina palabras y números.',

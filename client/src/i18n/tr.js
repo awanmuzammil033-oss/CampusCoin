@@ -69,8 +69,6 @@ export default {
   /* kayıt */
   'auth.createYourAccount': 'Hesabınızı oluşturun',
   'auth.registerSubtitle': 'Öğrenciler için ücretsiz — kart yok, banka bağlantısı yok.',
-  'auth.ownCurrency': 'Para birimim',
-  'auth.ownCurrencyHelp': 'Tutarlarınızın saklandığı para birimi. İstediğiniz zaman başka bir para biriminde gösterebilirsiniz.',
   'auth.fullName': 'Ad soyad',
   'auth.emailHelp': 'Bu adresle giriş yapacaksınız.',
   'auth.passwordHelp': 'En az 8 karakter — kelime ve rakamları karıştırın.',

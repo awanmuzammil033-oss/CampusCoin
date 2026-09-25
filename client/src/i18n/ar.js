@@ -69,8 +69,6 @@ export default {
   /* التسجيل */
   'auth.createYourAccount': 'أنشئ حسابك',
   'auth.registerSubtitle': 'مجاني للطلاب — بلا بطاقة ولا حساب بنكي.',
-  'auth.ownCurrency': 'عملتي',
-  'auth.ownCurrencyHelp': 'العملة التي تُحفظ بها مبالغك. يمكنك عرضها بعملة أخرى في أي وقت.',
   'auth.fullName': 'الاسم الكامل',
   'auth.emailHelp': 'ستستخدم هذا العنوان لتسجيل الدخول.',
   'auth.passwordHelp': '٨ محارف على الأقل — امزج الكلمات والأرقام.',

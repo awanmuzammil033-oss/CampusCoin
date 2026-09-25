@@ -71,8 +71,6 @@ export default {
   /* registration */
   'auth.createYourAccount': 'Create your account',
   'auth.registerSubtitle': 'Free for students — no card, no bank connection.',
-  'auth.ownCurrency': 'My currency',
-  'auth.ownCurrencyHelp': 'What your amounts are kept in. You can display them in another currency any time.',
   'auth.fullName': 'Full name',
   'auth.emailHelp': 'You will sign in with this address.',
   'auth.passwordHelp': 'At least 8 characters — mix words and numbers.',

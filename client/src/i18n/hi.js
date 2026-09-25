@@ -69,8 +69,6 @@ export default {
   /* पंजीकरण */
   'auth.createYourAccount': 'अपना खाता बनाएँ',
   'auth.registerSubtitle': 'छात्रों के लिए मुफ़्त — न कार्ड, न बैंक कनेक्शन।',
-  'auth.ownCurrency': 'मेरी मुद्रा',
-  'auth.ownCurrencyHelp': 'वह मुद्रा जिसमें आपकी राशि रखी जाती है। आप उन्हें कभी भी दूसरी मुद्रा में दिखा सकते हैं।',
   'auth.fullName': 'पूरा नाम',
   'auth.emailHelp': 'आप इसी पते से साइन इन करेंगे।',
   'auth.passwordHelp': 'कम से कम 8 अक्षर — शब्द और अंकों को मिलाएँ।',

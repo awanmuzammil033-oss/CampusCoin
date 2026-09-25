@@ -69,8 +69,6 @@ export default {
   /* Registrierung */
   'auth.createYourAccount': 'Erstelle dein Konto',
   'auth.registerSubtitle': 'Kostenlos für Studierende — ohne Karte, ohne Bankverbindung.',
-  'auth.ownCurrency': 'Meine Währung',
-  'auth.ownCurrencyHelp': 'Die Währung, in der deine Beträge gespeichert sind. Du kannst sie jederzeit in einer anderen anzeigen.',
   'auth.fullName': 'Vollständiger Name',
   'auth.emailHelp': 'Mit dieser Adresse meldest du dich an.',
   'auth.passwordHelp': 'Mindestens 8 Zeichen — Wörter und Zahlen mischen.',

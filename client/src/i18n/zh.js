@@ -68,8 +68,6 @@ export default {
   /* 注册 */
   'auth.createYourAccount': '创建你的账户',
   'auth.registerSubtitle': '学生免费 — 不用银行卡，不连银行。',
-  'auth.ownCurrency': '我的货币',
-  'auth.ownCurrencyHelp': '保存您金额的货币。您随时可以用另一种货币显示这些金额。',
   'auth.fullName': '姓名',
   'auth.emailHelp': '你将用这个地址登录。',
   'auth.passwordHelp': '至少 8 个字符 — 混合字母和数字。',
