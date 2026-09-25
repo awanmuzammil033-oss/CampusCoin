@@ -4,6 +4,7 @@ import { CURRENCIES } from '../data/currencies.js';
 import { LANGUAGES } from '../data/languages.js';
 import dictionaries from '../i18n/index.js';
 import Icon from './Icon.jsx';
+import { rateInfo } from '../money.js';
 
 /** True when the interface actually speaks this language (not just listed). */
 function hasUi(code) {
@@ -134,6 +135,25 @@ export default function LocalePickers({ onOpen, variant }) {
                 {c.code === currency && <Icon name="check" size={15} />}
               </button>
             ))}
+            {/* The honest bit: this picker CONVERTS the display, it does not
+                relabel stored amounts, so the rate in use is stated here. */}
+            {(() => {
+              const info = rateInfo();
+              if (info.same) return <p className="menu-fx">{t('picker.fxSame')}</p>;
+              if (!info.ok) {
+                return <p className="menu-fx">{t('picker.fxNoRate', { from: info.from, to: info.to })}</p>;
+              }
+              return (
+                <p className="menu-fx">
+                  {t('picker.fxRate', {
+                    from: info.from,
+                    to: info.to,
+                    date: info.date,
+                    rate: info.rate >= 0.01 ? String(Number(info.rate.toFixed(4))) : String(Number(info.rate.toPrecision(3))),
+                  })}
+                </p>
+              );
+            })()}
           </div>
         )}
       </div>

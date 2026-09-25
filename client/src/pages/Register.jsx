@@ -5,6 +5,7 @@ import { useLocale } from '../locale.jsx';
 import FormField from '../components/FormField.jsx';
 import Icon from '../components/Icon.jsx';
 import AuthArt from '../components/art/AuthArt.jsx';
+import { CURRENCIES } from '../data/currencies.js';
 
 /** Live-strength label keys — the strings themselves come from t(). */
 const LEVEL_KEYS = ['auth.tooShort', 'auth.weak', 'auth.okay', 'auth.strong'];
@@ -16,7 +17,7 @@ export default function Register() {
   const { register } = useAuth();
   const { t } = useLocale();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '', currency: 'USD' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -42,7 +43,12 @@ export default function Register() {
 
     setBusy(true);
     try {
-      await register({ name: form.name, email: form.email, password: form.password });
+      await register({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        currency: form.currency,
+      });
       navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.message);
@@ -160,6 +166,32 @@ export default function Register() {
                   onChange={update('confirm')}
                   {...a}
                 />
+              )}
+            </FormField>
+
+            {/* What the student's amounts are in. The topbar picker only
+                changes how they are shown; this is the currency the ledger
+                is actually kept in. */}
+            <FormField
+              label={t('auth.ownCurrency')}
+              htmlFor="currency"
+              help={t('auth.ownCurrencyHelp')}
+            >
+              {(a) => (
+                <select
+                  id="currency"
+                  name="currency"
+                  className="input"
+                  value={form.currency}
+                  onChange={update('currency')}
+                  {...a}
+                >
+                  {CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.code} — {c.name}
+                    </option>
+                  ))}
+                </select>
               )}
             </FormField>
           </div>

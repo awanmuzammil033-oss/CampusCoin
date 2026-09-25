@@ -9,7 +9,7 @@ import CategoryIcon from '../components/CategoryIcon.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
-import { currencySymbol } from '../money.js';
+import { ledgerCurrencySymbol } from '../money.js';
 import { useLocale } from '../locale.jsx';
 import { uiLang } from '../dates.js';
 
@@ -345,7 +345,7 @@ export default function RecurringPage() {
 
             <FormField label={t('ui.amount')} htmlFor="recurring-amount">
               <div className="amount-wrap">
-                <span className="amount-prefix" aria-hidden="true">{currencySymbol()}</span>
+                <span className="amount-prefix" aria-hidden="true">{ledgerCurrencySymbol()}</span>
                 <input
                   id="recurring-amount"
                   className="input"
@@ -450,7 +450,7 @@ export default function RecurringPage() {
 
             <FormField label={t('ui.amount')} htmlFor="edit-amount">
               <div className="amount-wrap">
-                <span className="amount-prefix" aria-hidden="true">{currencySymbol()}</span>
+                <span className="amount-prefix" aria-hidden="true">{ledgerCurrencySymbol()}</span>
                 <input
                   id="edit-amount"
                   className="input"

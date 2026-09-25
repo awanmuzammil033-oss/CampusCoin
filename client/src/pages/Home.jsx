@@ -6,7 +6,6 @@ import LocalePickers from '../components/LocalePickers.jsx';
 import ThemeToggle from '../components/ThemeToggle.jsx';
 import Icon from '../components/Icon.jsx';
 import HeroWaves from '../components/art/HeroWaves.jsx';
-import HeroPhoneArt from '../components/art/HeroPhoneArt.jsx';
 import FaqArt from '../components/art/FaqArt.jsx';
 
 /**
@@ -185,7 +184,88 @@ export default function Home() {
           </div>
 
           <div className="lp2-hero-visual lp-reveal">
-            <HeroPhoneArt t={t} legend={PHONE_LEGEND} />
+            {/* phone: the board's own mock — kept exactly as approved, the
+                hand-drawn SVG replacement was not what the design called for */}
+            <div className="lp2-phone" role="img" aria-label={t('home.previewAria')}>
+              <div className="pp-notch" aria-hidden="true" />
+              <div className="pp-head">
+                <span className="brand-mark pp-mark" aria-hidden="true">C</span>
+                <strong>{t('app.name')}</strong>
+                <span className="pp-avatar" aria-hidden="true">👩‍🎓</span>
+              </div>
+              <div className="pp-greet">
+                <strong>{t('home.mockGreeting')}</strong>
+                <span>{t('home.mockGreetingSub')}</span>
+              </div>
+              <div className="pp-total">
+                <span className="pp-label"><span aria-hidden="true">🔒</span> {t('home.mockTotal')}</span>
+                <strong>$1,240.50</strong>
+                <span className="pp-chip">+12%</span>
+              </div>
+              <div className="pp-grid">
+                <div className="pp-mini">
+                  <span className="pp-ico g" aria-hidden="true">💵</span>
+                  <span className="pp-label">{t('home.mockBalance')}</span>
+                  <strong>$1,800.00</strong>
+                </div>
+                <div className="pp-mini">
+                  <span className="pp-ico p" aria-hidden="true">💸</span>
+                  <span className="pp-label">{t('home.mockExpense')}</span>
+                  <strong>$559.50</strong>
+                </div>
+              </div>
+              <div className="pp-section">
+                <span className="pp-label"><span aria-hidden="true">📊</span> {t('home.mockOverview')}</span>
+                <div className="pp-chart">
+                  <span className="pp-donut" aria-hidden="true" />
+                  <div className="pp-legend">
+                    {PHONE_LEGEND.map((row) => (
+                      <span key={row.key}>
+                        <i className="dot" style={{ background: row.color }} aria-hidden="true" />
+                        {t(row.key)} <b>{row.pct}%</b>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="pp-tabs" aria-hidden="true">
+                <span className="pp-tab active">⌂<em>{t('home.mockTabHome')}</em></span>
+                <span className="pp-tab">⇄<em>{t('nav.transactions')}</em></span>
+                <span className="pp-tab">◎<em>{t('nav.budgets')}</em></span>
+                <span className="pp-tab">⋯<em>{t('home.mockMore')}</em></span>
+              </div>
+            </div>
+
+            {/* floating glass cards */}
+            <div className="lp2-float f1" aria-hidden="true">
+              <span className="lp2-f-ico coin">🪙</span>
+              <div>
+                <strong>+$500</strong>
+                <span>{t('home.floatAllowanceT')}</span>
+                <small>{t('home.floatAllowanceD')}</small>
+              </div>
+            </div>
+            <div className="lp2-float f2" aria-hidden="true">
+              <span className="lp2-f-ico">🍔</span>
+              <div>
+                <strong>{t('home.floatFoodT')} 72%</strong>
+                <span className="lp2-f-track"><span style={{ width: '72%' }} /></span>
+                <small>$180 / $250</small>
+              </div>
+            </div>
+            <div className="lp2-float f3" aria-hidden="true">
+              <span className="lp2-f-ico bulb">💡</span>
+              <div>
+                <strong>{t('home.floatSaveT')}</strong>
+                <small>{t('home.floatSaveW')}</small>
+                <span>{t('home.floatSaveS')}</span>
+              </div>
+            </div>
+
+            <div className="lp2-hand hp1" aria-hidden="true">
+              {t('home.handSteps')}
+              <svg viewBox="0 0 60 34" className="lp2-hand-arrow"><path d="M2 4 C 22 2, 46 8, 54 26 M46 24 l9 4 -3 -10" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /></svg>
+            </div>
           </div>
         </section>
 

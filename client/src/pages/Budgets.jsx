@@ -12,7 +12,7 @@ import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
 import { useLocale } from '../locale.jsx';
-import { currencySymbol } from '../money.js';
+import { ledgerCurrencySymbol } from '../money.js';
 import { uiLang } from '../dates.js';
 
 function monthKey(date) {
@@ -236,7 +236,7 @@ export default function Budgets() {
                     </td>
                     <td>
                       <span className="amount-wrap" style={{ display: 'inline-block', width: 120 }}>
-<span className="amount-prefix" aria-hidden="true">{currencySymbol()}</span>
+<span className="amount-prefix" aria-hidden="true">{ledgerCurrencySymbol()}</span>
                         <input
                           className="input"
                           type="text"
@@ -323,7 +323,7 @@ export default function Budgets() {
           <div style={{ flex: '1 1 150px' }}>
             <FormField label={t('ui.monthlyLimit')} htmlFor="budget-limit">
               <div className="amount-wrap">
-<span className="amount-prefix" aria-hidden="true">{currencySymbol()}</span>
+<span className="amount-prefix" aria-hidden="true">{ledgerCurrencySymbol()}</span>
                 <input
                   id="budget-limit"
                   className="input"

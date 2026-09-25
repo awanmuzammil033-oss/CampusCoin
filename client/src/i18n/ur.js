@@ -45,6 +45,9 @@ export default {
 
   /* کرنسی اور زبان کے پکرز */
   'picker.currency': 'کرنسی',
+  'picker.fxSame': 'آپ کی رقمیں پہلے ہی آپ کی اپنی کرنسی میں دکھائی دی جا رہی ہیں۔',
+  'picker.fxRate': '1 {from} = {rate} {to} · حوالہ شرحیں {date}',
+  'picker.fxNoRate': '{from}/{to} کے لیے حوالہ شرح موجود نہیں — رقمیں جیسی درج کی گئی ویسی دکھائی دی جاتی ہیں۔',
   'picker.language': 'زبان',
   'picker.searchCurrency': 'کرنسی تلاش کریں',
   'picker.searchLanguage': 'زبان تلاش کریں',
@@ -66,6 +69,8 @@ export default {
   /* رجسٹریشن */
   'auth.createYourAccount': 'اپنا اکاؤنٹ بنائیں',
   'auth.registerSubtitle': 'طلباء کے لیے مفت — نہ کارڈ، نہ بینک کنکشن۔',
+  'auth.ownCurrency': 'میری کرنسی',
+  'auth.ownCurrencyHelp': 'وہ کرنسی جس میں آپ کی رقمیں محفوظ ہوتی ہیں۔ آپ کسی بھی وقت انہیں کسی اور کرنسی میں دکھا سکتے ہیں۔',
   'auth.fullName': 'پورا نام',
   'auth.emailHelp': 'آپ اسی ای میل پتے سے سائن ان کریں گے۔',
   'auth.passwordHelp': 'کم از کم 8 حروف — الفاظ اور اعداد ملائیں۔',
@@ -624,6 +629,11 @@ export default {
   'prof.smaller': 'چھوٹا متن',
   'prof.larger': 'بڑا متن',
   'prof.security': 'سیکیورٹی',
+  'prof.currencySection': 'کرنسی',
+  'prof.ledgerCurrency': 'میری کرنسی (میری رقم کی کرنسی)',
+  'prof.ledgerHelp': 'آپ کی رقمیں اصل میں اسی کرنسی میں ہیں۔ اوپر والا انتخاب صرف دکھاوٹ بدلتا ہے — محفوظ رقمیں کبھی دوبارہ نہیں لکھی جاتیں۔',
+  'prof.ledgerSame': 'رقمیں {code} میں دکھائی دی جاتی ہیں۔',
+  'prof.ledgerConverted': 'آپ کی رقمیں {code} میں ہیں؛ {date} کی حوالہ شرحوں سے {show} میں دکھائی دی جاتی ہیں۔',
   'prof.securityBody': 'پاس ورڈ تبدیل کرنے پر آپ کے ان باکس میں محدود مدت کا لنک بھیجا جاتا ہے — وہی جو “پاس ورڈ بھول گئے” صفحہ استعمال کرتا ہے۔',
   'prof.changePassword': 'پاس ورڈ تبدیل کریں',
   'prof.signingOut': 'لاگ آؤٹ ہو رہا ہے…',

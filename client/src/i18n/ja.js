@@ -45,6 +45,9 @@ export default {
 
   /* 通貨と言語の選択 */
   'picker.currency': '通貨',
+  'picker.fxSame': '金額はすでにお使いの通貨で表示されています。',
+  'picker.fxRate': '1 {from} = {rate} {to} · 参照レート {date}',
+  'picker.fxNoRate': '{from}/{to} の参照レートはありません — 入力した 그대로表示されます。',
   'picker.language': '言語',
   'picker.searchCurrency': '通貨を検索',
   'picker.searchLanguage': '言語を検索',
@@ -66,6 +69,8 @@ export default {
   /* 登録 */
   'auth.createYourAccount': 'アカウントを作成しましょう',
   'auth.registerSubtitle': '学生は無料 — カード不要、銀行連携も不要。',
+  'auth.ownCurrency': '自分の通貨',
+  'auth.ownCurrencyHelp': '金額を保存する通貨です。いつでも別の通貨で表示できます。',
   'auth.fullName': '氏名',
   'auth.emailHelp': 'このアドレスでサインインします。',
   'auth.passwordHelp': '8文字以上 — 単語と数字を混ぜてください。',
@@ -625,6 +630,11 @@ export default {
   'prof.smaller': '小さい文字',
   'prof.larger': '大きい文字',
   'prof.security': 'セキュリティ',
+  'prof.currencySection': '通貨',
+  'prof.ledgerCurrency': '自分の通貨（金額の単位）',
+  'prof.ledgerHelp': '金額は実際にこの通貨で記録されています。上の選択は表示のしか変えず、保存済みの金額を書き換えることはありません。',
+  'prof.ledgerSame': '金額は{code}で表示されています。',
+  'prof.ledgerConverted': '金額は{code}で、参照レート（{date}）を使って{show}で表示しています。',
   'prof.securityBody': 'パスワードを変更すると、有効期限付きのリンクを受信トレイに送ります——「パスワードをお忘れですか？」ページと同じものです。',
   'prof.changePassword': 'パスワードを変更',
   'prof.signingOut': 'サインアウトしています…',

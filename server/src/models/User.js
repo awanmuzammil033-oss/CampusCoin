@@ -23,8 +23,16 @@ const userSchema = new mongoose.Schema(
     fontScale: { type: Number, min: 1, max: 4, default: 2 },
 
     // Display preferences picked in the topbar: how amounts are formatted and
-    // which language the chrome speaks. Display only — never a conversion rate.
+    // which language the chrome speaks.
+    //
+    // `currency` is the DISPLAY currency (what the picker shows) and
+    // `ledgerCurrency` is what the student's amounts are actually denominated
+    // in — stored numbers never change, so the two must be kept apart or
+    // "400 PKR" would quietly become "400 dollars" the moment the display
+    // currency moved. Conversion happens in the reader, from a dated reference
+    // table (client/src/data/fx.js); no rate is ever written to a record.
     currency: { type: String, uppercase: true, trim: true, match: /^[A-Z]{3}$/, default: 'USD' },
+    ledgerCurrency: { type: String, uppercase: true, trim: true, match: /^[A-Z]{3}$/, default: 'USD' },
     language: { type: String, trim: true, match: /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/, default: 'en' },
 
     // Password reset (AUTH-5): we store only the hash of the token that was
@@ -48,6 +56,7 @@ userSchema.methods.toPublic = function toPublic() {
     theme: this.theme,
     fontScale: this.fontScale,
     currency: this.currency,
+    ledgerCurrency: this.ledgerCurrency || this.currency,
     language: this.language,
     isActive: this.isActive,
     createdAt: this.createdAt,

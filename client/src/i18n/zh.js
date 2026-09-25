@@ -44,6 +44,9 @@ export default {
 
   /* 货币与语言选择器 */
   'picker.currency': '货币',
+  'picker.fxSame': '您的金额已经以您自己的货币显示。',
+  'picker.fxRate': '1 {from} = {rate} {to} · 参考汇率 {date}',
+  'picker.fxNoRate': '没有 {from}/{to} 的参考汇率 — 金额按录入值显示。',
   'picker.language': '语言',
   'picker.searchCurrency': '搜索货币',
   'picker.searchLanguage': '搜索语言',
@@ -65,6 +68,8 @@ export default {
   /* 注册 */
   'auth.createYourAccount': '创建你的账户',
   'auth.registerSubtitle': '学生免费 — 不用银行卡，不连银行。',
+  'auth.ownCurrency': '我的货币',
+  'auth.ownCurrencyHelp': '保存您金额的货币。您随时可以用另一种货币显示这些金额。',
   'auth.fullName': '姓名',
   'auth.emailHelp': '你将用这个地址登录。',
   'auth.passwordHelp': '至少 8 个字符 — 混合字母和数字。',
@@ -623,6 +628,11 @@ export default {
   'prof.smaller': '小号文字',
   'prof.larger': '大号文字',
   'prof.security': '安全',
+  'prof.currencySection': '货币',
+  'prof.ledgerCurrency': '我的货币（我的金额单位）',
+  'prof.ledgerHelp': '您的金额实际就是以该货币计的。顶栏选择器只改变显示方式 — 已保存的金额绝不会被改写。',
+  'prof.ledgerSame': '金额以 {code} 显示。',
+  'prof.ledgerConverted': '您的金额为 {code}，按 {date} 的参考汇率换算为 {show} 显示。',
   'prof.securityBody': '修改密码时，我们会向你的收件箱发送一个限时链接——和“忘记密码”页面用的是同一个。',
   'prof.changePassword': '修改密码',
   'prof.signingOut': '正在退出…',

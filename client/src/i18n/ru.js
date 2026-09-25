@@ -45,6 +45,9 @@ export default {
 
   /* выбор валюты и языка */
   'picker.currency': 'Валюта',
+  'picker.fxSame': 'Суммы уже показаны в вашей валюте.',
+  'picker.fxRate': '1 {from} = {rate} {to} · справочные курсы {date}',
+  'picker.fxNoRate': 'Нет справочного курса для {from}/{to} — суммы показаны как введено.',
   'picker.language': 'Язык',
   'picker.searchCurrency': 'Поиск валюты',
   'picker.searchLanguage': 'Поиск языка',
@@ -66,6 +69,8 @@ export default {
   /* регистрация */
   'auth.createYourAccount': 'Создайте свой аккаунт',
   'auth.registerSubtitle': 'Бесплатно для студентов — без карты и банковских данных.',
+  'auth.ownCurrency': 'Моя валюта',
+  'auth.ownCurrencyHelp': 'Валюта, в которой хранятся ваши суммы. Их можно показывать в любой другой в любой момент.',
   'auth.fullName': 'Полное имя',
   'auth.emailHelp': 'Вы будете входить по этому адресу.',
   'auth.passwordHelp': 'Не меньше 8 символов — смешивайте слова и цифры.',
@@ -626,6 +631,11 @@ export default {
   'prof.smaller': 'Меньше текст',
   'prof.larger': 'Больше текст',
   'prof.security': 'Безопасность',
+  'prof.currencySection': 'Валюта',
+  'prof.ledgerCurrency': 'Моя валюта (валюта моих сумм)',
+  'prof.ledgerHelp': 'В этой валюте фактически ваши суммы. Выбор в верхней панели меняет только отображение — сохранённые суммы не переписываются.',
+  'prof.ledgerSame': 'Суммы показаны в {code}.',
+  'prof.ledgerConverted': 'Ваши суммы в {code}; они показаны в {show} по справочным курсам от {date}.',
   'prof.securityBody': 'Смена пароля отправляет ссылку со сроком действия на вашу почту — ту же самую, что использует страница “Забыли пароль?”.',
   'prof.changePassword': 'Сменить пароль',
   'prof.signingOut': 'Выходим…',

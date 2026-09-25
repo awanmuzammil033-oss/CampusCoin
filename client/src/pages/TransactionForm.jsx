@@ -8,7 +8,7 @@ import CategoryIcon from '../components/CategoryIcon.jsx';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { useLocale } from '../locale.jsx';
-import { currencySymbol } from '../money.js';
+import { ledgerCurrencySymbol } from '../money.js';
 
 /** Local calendar day, so "today" never lands on yesterday after midnight UTC. */
 function todayISO() {
@@ -260,7 +260,7 @@ export default function TransactionForm() {
 
           <FormField label={t('ui.amount')} htmlFor="amount" error={amountError}>
             <div className="amount-wrap">
-              <span className="amount-prefix" aria-hidden="true">{currencySymbol()}</span>
+              <span className="amount-prefix" aria-hidden="true">{ledgerCurrencySymbol()}</span>
               <input
                 id="amount"
                 className={`input ${amountError ? 'input-error' : ''}`}

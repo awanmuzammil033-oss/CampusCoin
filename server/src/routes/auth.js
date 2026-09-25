@@ -19,13 +19,16 @@ const router = Router();
 
 router.post('/register', accountLimiter, async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, currency } = req.body;
 
     const emailErr = emailProblem(email);
     if (emailErr) return res.status(400).json({ error: emailErr });
     const pwErr = passwordProblem(password);
     if (pwErr) return res.status(400).json({ error: pwErr });
     if (!String(name || '').trim()) return res.status(400).json({ error: 'Please enter your name.' });
+    if (currency !== undefined && (typeof currency !== 'string' || !/^[A-Z]{3}$/.test(currency))) {
+      return res.status(400).json({ error: 'Unknown currency code.' });
+    }
 
     const cleanEmail = String(email).trim().toLowerCase();
     if (await User.exists({ email: cleanEmail })) {
@@ -39,6 +42,10 @@ router.post('/register', accountLimiter, async (req, res, next) => {
       email: cleanEmail,
       passwordHash: await hashPassword(password),
       role: 'student',
+      // What the student picks at sign-up is what their amounts are in. The
+      // topbar picker can display them in anything else later, but the ledger
+      // itself starts — and stays — in their own currency.
+      ...(currency ? { currency, ledgerCurrency: currency } : {}),
     });
 
     startSession(req, user);
@@ -178,7 +185,7 @@ router.get('/me', async (req, res, next) => {
  */
 router.patch('/me/preferences', requireAuth, async (req, res, next) => {
   try {
-    const { theme, fontScale, currency, language } = req.body;
+    const { theme, fontScale, currency, ledgerCurrency, language } = req.body;
     if (theme !== undefined) {
       if (!['light', 'dark'].includes(theme)) return res.status(400).json({ error: 'Unknown theme.' });
       req.user.theme = theme;
@@ -193,6 +200,15 @@ router.patch('/me/preferences', requireAuth, async (req, res, next) => {
         return res.status(400).json({ error: 'Unknown currency code.' });
       }
       req.user.currency = currency;
+    }
+    // The student's own currency — what the stored amounts are in. Kept apart
+    // from the display currency so switching the picker converts the display
+    // instead of mislabelling the ledger.
+    if (ledgerCurrency !== undefined) {
+      if (typeof ledgerCurrency !== 'string' || !/^[A-Z]{3}$/.test(ledgerCurrency)) {
+        return res.status(400).json({ error: 'Unknown currency code.' });
+      }
+      req.user.ledgerCurrency = ledgerCurrency;
     }
     if (language !== undefined) {
       if (typeof language !== 'string' || !/^[a-z]{2,3}(-[A-Za-z]{2,4})?$/.test(language)) {

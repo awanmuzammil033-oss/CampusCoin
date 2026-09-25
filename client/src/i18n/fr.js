@@ -45,6 +45,9 @@ export default {
 
   /* sélecteurs de devise et de langue */
   'picker.currency': 'Devise',
+  'picker.fxSame': 'Vos montants sont déjà affichés dans votre devise.',
+  'picker.fxRate': '1 {from} = {rate} {to} · taux de référence {date}',
+  'picker.fxNoRate': 'Aucun taux de référence pour {from}/{to} — les montants sont affichés tels que saisis.',
   'picker.language': 'Langue',
   'picker.searchCurrency': 'Rechercher une devise',
   'picker.searchLanguage': 'Rechercher une langue',
@@ -66,6 +69,8 @@ export default {
   /* inscription */
   'auth.createYourAccount': 'Créez votre compte',
   'auth.registerSubtitle': 'Gratuit pour les étudiants — sans carte ni banque.',
+  'auth.ownCurrency': 'Ma devise',
+  'auth.ownCurrencyHelp': 'La devise dans laquelle vos montants sont conservés. Vous pouvez les afficher dans une autre à tout moment.',
   'auth.fullName': 'Nom complet',
   'auth.emailHelp': 'Vous vous connecterez avec cette adresse.',
   'auth.passwordHelp': 'Au moins 8 caractères — mêlez mots et chiffres.',
@@ -626,6 +631,11 @@ export default {
   'prof.smaller': 'Texte plus petit',
   'prof.larger': 'Texte plus grand',
   'prof.security': 'Sécurité',
+  'prof.currencySection': 'Devise',
+  'prof.ledgerCurrency': 'Ma devise (celle de mes montants)',
+  'prof.ledgerHelp': 'C\'est la devise réelle de vos montants. Le sélecteur en haut ne change que l\'affichage — les montants enregistrés ne sont jamais réécrits.',
+  'prof.ledgerSame': 'Les montants sont affichés en {code}.',
+  'prof.ledgerConverted': 'Vos montants sont en {code} ; ils sont affichés en {show} avec les taux de référence du {date}.',
   'prof.securityBody': 'Changer votre mot de passe envoie un lien limité dans le temps dans votre boîte de réception — le même que la page “mot de passe oublié”.',
   'prof.changePassword': 'Changer le mot de passe',
   'prof.signingOut': 'Déconnexion…',

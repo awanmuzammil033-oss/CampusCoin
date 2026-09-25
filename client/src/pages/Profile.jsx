@@ -7,7 +7,9 @@ import Icon from '../components/Icon.jsx';
 import { useAuth } from '../auth.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { useLocale } from '../locale.jsx';
-import { currencySymbol } from '../money.js';
+import { ledgerCurrencySymbol } from '../money.js';
+import { CURRENCIES } from '../data/currencies.js';
+import { FX_AS_OF } from '../data/fx.js';
 
 const YEARS = ['1st year', '2nd year', '3rd year', '4th year'];
 
@@ -22,7 +24,7 @@ export default function Profile() {
   const { user, updatePreferences, updateProfile, logout } = useAuth();
   const { push } = useToast();
   const navigate = useNavigate();
-  const { t } = useLocale();
+  const { t, currency, ledgerCurrency, setLedgerCurrency } = useLocale();
 
   const [form, setForm] = useState({
     name: '',
@@ -170,7 +172,7 @@ export default function Profile() {
 
             <FormField label={t('prof.allowanceLabel')} htmlFor="profile-allowance" help={t('prof.allowanceHelp')}>
               <div className="amount-wrap">
-<span className="amount-prefix" aria-hidden="true">{currencySymbol()}</span>
+<span className="amount-prefix" aria-hidden="true">{ledgerCurrencySymbol()}</span>
                 <input
                   id="profile-allowance"
                   className="input"
@@ -185,7 +187,7 @@ export default function Profile() {
 
             <FormField label={t('prof.goalLabel')} htmlFor="profile-goal" help={t('prof.goalHelp')}>
               <div className="amount-wrap">
-<span className="amount-prefix" aria-hidden="true">{currencySymbol()}</span>
+<span className="amount-prefix" aria-hidden="true">{ledgerCurrencySymbol()}</span>
                 <input
                   id="profile-goal"
                   className="input"
@@ -254,6 +256,35 @@ export default function Profile() {
                   <Icon name="plus" />
                 </button>
               </div>
+            </div>
+          </section>
+
+          <section className="card">
+            <div className="card-title">
+              <span>{t('prof.currencySection')}</span>
+            </div>
+            <div className="field mb-0">
+              <label htmlFor="profile-ledger-currency" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: 6 }}>
+                {t('prof.ledgerCurrency')}
+              </label>
+              <select
+                id="profile-ledger-currency"
+                className="input"
+                value={ledgerCurrency}
+                onChange={(e) => setLedgerCurrency(e.target.value)}
+              >
+                {CURRENCIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.code} — {c.name}
+                  </option>
+                ))}
+              </select>
+              <p className="field-help">{t('prof.ledgerHelp')}</p>
+              <p className="field-help">
+                {ledgerCurrency === currency
+                  ? t('prof.ledgerSame', { code: ledgerCurrency })
+                  : t('prof.ledgerConverted', { code: ledgerCurrency, show: currency, date: FX_AS_OF })}
+              </p>
             </div>
           </section>
 

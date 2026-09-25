@@ -45,6 +45,9 @@ export default {
 
   /* मुद्रा और भाषा चुनने वाले */
   'picker.currency': 'मुद्रा',
+  'picker.fxSame': 'आपकी राशि पहले से ही आपकी ही मुद्रा में दिखाई जा रही है।',
+  'picker.fxRate': '1 {from} = {rate} {to} · संदर्भ विनिमय दरें {date}',
+  'picker.fxNoRate': '{from}/{to} के लिए संदर्भ विनिमय दर नहीं है — राशियाँ जैसी दर्ज की गई वैसी दिखाई जाती हैं।',
   'picker.language': 'भाषा',
   'picker.searchCurrency': 'मुद्रा खोजें',
   'picker.searchLanguage': 'भाषा खोजें',
@@ -66,6 +69,8 @@ export default {
   /* पंजीकरण */
   'auth.createYourAccount': 'अपना खाता बनाएँ',
   'auth.registerSubtitle': 'छात्रों के लिए मुफ़्त — न कार्ड, न बैंक कनेक्शन।',
+  'auth.ownCurrency': 'मेरी मुद्रा',
+  'auth.ownCurrencyHelp': 'वह मुद्रा जिसमें आपकी राशि रखी जाती है। आप उन्हें कभी भी दूसरी मुद्रा में दिखा सकते हैं।',
   'auth.fullName': 'पूरा नाम',
   'auth.emailHelp': 'आप इसी पते से साइन इन करेंगे।',
   'auth.passwordHelp': 'कम से कम 8 अक्षर — शब्द और अंकों को मिलाएँ।',
@@ -625,6 +630,11 @@ export default {
   'prof.smaller': 'छोटा टेक्स्ट',
   'prof.larger': 'बड़ा टेक्स्ट',
   'prof.security': 'सुरक्षा',
+  'prof.currencySection': 'मुद्रा',
+  'prof.ledgerCurrency': 'मेरी मुद्रा (मेरी राशि की)',
+  'prof.ledgerHelp': 'आपकी राशि वास्तव में इसी मुद्रा में है। ऊपर का पिकर केवल दिखावट बदलता है — सहेजी गई राशि कभी दोबारा नहीं लिखी जाती।',
+  'prof.ledgerSame': 'राशियाँ {code} में दिखाई जाती हैं।',
+  'prof.ledgerConverted': 'आपकी राशि {code} में है; संदर्भ विनिमय दरों ({date}) से इन्हें {show} में दिखाया जा रहा है।',
   'prof.securityBody': 'पासवर्ड बदलने पर आपके इनबॉक्स में एक सीमित समय वाला लिंक भेजा जाता है — वही जो “पासवर्ड भूल गए” पेज इस्तेमाल करता है।',
   'prof.changePassword': 'पासवर्ड बदलें',
   'prof.signingOut': 'साइन आउट हो रहा है…',

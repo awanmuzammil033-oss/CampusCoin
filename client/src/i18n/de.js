@@ -45,6 +45,9 @@ export default {
 
   /* Währungs- und Sprachauswahl */
   'picker.currency': 'Währung',
+  'picker.fxSame': 'Deine Beträge werden bereits in deiner Währung angezeigt.',
+  'picker.fxRate': '1 {from} = {rate} {to} · Referenzkurse {date}',
+  'picker.fxNoRate': 'Kein Referenzkurs für {from}/{to} — Beträge werden wie eingegeben angezeigt.',
   'picker.language': 'Sprache',
   'picker.searchCurrency': 'Währung suchen',
   'picker.searchLanguage': 'Sprache suchen',
@@ -66,6 +69,8 @@ export default {
   /* Registrierung */
   'auth.createYourAccount': 'Erstelle dein Konto',
   'auth.registerSubtitle': 'Kostenlos für Studierende — ohne Karte, ohne Bankverbindung.',
+  'auth.ownCurrency': 'Meine Währung',
+  'auth.ownCurrencyHelp': 'Die Währung, in der deine Beträge gespeichert sind. Du kannst sie jederzeit in einer anderen anzeigen.',
   'auth.fullName': 'Vollständiger Name',
   'auth.emailHelp': 'Mit dieser Adresse meldest du dich an.',
   'auth.passwordHelp': 'Mindestens 8 Zeichen — Wörter und Zahlen mischen.',
@@ -625,6 +630,11 @@ export default {
   'prof.smaller': 'Kleinerer Text',
   'prof.larger': 'Größerer Text',
   'prof.security': 'Sicherheit',
+  'prof.currencySection': 'Währung',
+  'prof.ledgerCurrency': 'Meine Währung (die Währung meiner Beträge)',
+  'prof.ledgerHelp': 'In dieser Währung sind deine Beträge tatsächlich. Die Auswahl oben ändert nur die Anzeige — gespeicherte Beträge werden nie umgeschrieben.',
+  'prof.ledgerSame': 'Beträge werden in {code} angezeigt.',
+  'prof.ledgerConverted': 'Deine Beträge sind in {code}; sie werden mit Referenzkursen vom {date} in {show} angezeigt.',
   'prof.securityBody': 'Beim Ändern deines Passworts wird ein zeitlich begrenzter Link an dein Postfach gesendet — derselbe wie auf der Seite „Passwort vergessen“.',
   'prof.changePassword': 'Passwort ändern',
   'prof.signingOut': 'Abmeldung läuft…',

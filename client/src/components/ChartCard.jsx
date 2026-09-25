@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Chart as ChartJS, ArcElement, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Filler } from 'chart.js';
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
 
-import { money, currencySymbol } from '../money.js';
+import { money, currencySymbol, convert, onCurrencyChange } from '../money.js';
 import { useLocale } from '../locale.jsx';
 import { cssColor, withAlpha } from '../chartColors.js';
 
@@ -27,6 +27,10 @@ export default function ChartCard({ title, type = 'doughnut', data, options, loa
   const { t } = useLocale();
   const [showTable, setShowTable] = useState(false);
   const [themeTick, setThemeTick] = useState(0);
+  // Charts hold raw numbers, so a currency change has to redraw them.
+  const [fxTick, setFxTick] = useState(0);
+
+  useEffect(() => onCurrencyChange(() => setFxTick((n) => n + 1)), []);
 
   useEffect(() => {
     if (!loading) setShowTable(false);
@@ -67,6 +71,10 @@ export default function ChartCard({ title, type = 'doughnut', data, options, loa
 
       return {
         ...ds,
+        // The pages build these numbers in the student's own currency, so the
+        // chart has to convert them like money() does — otherwise the axis
+        // keeps saying 400 while the card above it says $1.44.
+        data: Array.isArray(ds.data) ? ds.data.map((v) => (typeof v === 'number' ? convert(v) : v)) : ds.data,
         backgroundColor,
         borderColor,
         borderWidth: ds.borderWidth ?? (type === 'doughnut' ? 2 : isLine ? 2.5 : 0),
@@ -76,7 +84,7 @@ export default function ChartCard({ title, type = 'doughnut', data, options, loa
     });
     return { ...data, datasets };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, type, themeTick]);
+  }, [data, type, themeTick, fxTick]);
 
   const merged = useMemo(() => {
     const defaults = {
@@ -101,7 +109,7 @@ export default function ChartCard({ title, type = 'doughnut', data, options, loa
     };
     return { ...defaults, ...options, plugins: { ...defaults.plugins, ...(options?.plugins || {}) } };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type, options, themeTick]);
+  }, [type, options, themeTick, fxTick]);
   const Chart = type === 'doughnut' ? Doughnut : type === 'line' ? Line : Bar;
 
   const hasData = Boolean(data?.labels?.length);

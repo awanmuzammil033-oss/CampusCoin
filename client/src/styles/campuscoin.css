@@ -3246,51 +3246,32 @@ textarea.input:focus {
 .lp2-f-ico, .pp-ico, .mp-ico { line-height: 0; }
 .lp2-f-ico .cc-icon, .pp-ico .cc-icon, .mp-ico .cc-icon { width: 1.25em; height: 1.25em; }
 
-/* ------------------------- flowing hero waves ----------------------------- */
-/* The three lines across the hero were a stretched background image, which
-   flattened the curves into straight rules. They are real paths now: each
-   line is two wave periods wide and drifts exactly one period, so the loop
-   is seamless at any width. */
+/* ------------------------- calm hero waves -------------------------------- */
+/* The three lines are static on purpose. They drifted sideways in the first
+   pass, which read as ropes sliding through the middle of the hero, and the
+   movement stuttered on a normal laptop. They now sit behind the copy in the
+   lower half of the hero and never move — no animation, no repaint, no jank. */
 .lp2-waves { overflow: hidden; }
 .lp2-waves::after { content: none; background: none; }
 .lp2-waves-svg {
   position: absolute;
-  left: -18%;
-  width: 136%;
-  top: 6%;
-  height: 88%;
-}
-.lp2-wave {
-  animation-name: cc-wave-drift;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  will-change: transform;
-}
-@keyframes cc-wave-drift {
-  from { transform: translateX(0); }
-  to { transform: translateX(-600px); }
+  left: 0;
+  width: 100%;
+  top: 26%;
+  height: 74%;
 }
 
-/* --------------------------- hero phone art ------------------------------ */
+/* --------------------------- hero phone mock ----------------------------- */
+/* The board's own mock: a div-based phone that bobs gently. It is the version
+   that was approved, so nothing here is redrawn — only the two floating cards
+   and the handwritten nudge keep their soft motion, which is transform-only
+   and therefore smooth. */
 .lp2-phone-svg {
   display: block;
   width: min(100%, 560px);
   height: auto;
   overflow: visible;
   animation: lp-bob 6s ease-in-out infinite alternate;
-}
-.lp2-float-svg,
-.lp2-hand-svg {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: lp-float-card 5.6s ease-in-out infinite alternate;
-}
-.lp2-float-svg.f2 { animation-duration: 6.7s; animation-delay: 0.9s; }
-.lp2-float-svg.f3 { animation-duration: 7.5s; animation-delay: 1.7s; }
-.lp2-hand-svg { animation-duration: 7.2s; }
-@keyframes lp-float-card {
-  from { transform: translateY(-6px); }
-  to { transform: translateY(7px); }
 }
 
 /* ------------------------------ FAQ + art -------------------------------- */
@@ -3367,6 +3348,16 @@ textarea.input:focus {
 .auth-points li { display: flex; align-items: center; gap: 9px; }
 .auth-points .cc-icon { color: var(--cc-primary); }
 
+/* currency dropdown: the rate line, so a conversion is never a surprise */
+.menu-fx {
+  margin: 8px 10px 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--cc-border);
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: var(--cc-muted);
+}
+
 /* live preview of the category icon next to the (text-only) icon select */
 .cat-icon-preview {
   display: inline-flex;
@@ -3415,7 +3406,7 @@ textarea.input:focus {
 
 @media (prefers-reduced-motion: reduce) {
   .lp2-wave,
-  .lp2-float-svg,
-  .lp2-hand-svg,
-  .lp2-phone-svg { animation: none; }
+  .lp2-phone,
+  .lp2-float,
+  .lp2-hand { animation: none; }
 }

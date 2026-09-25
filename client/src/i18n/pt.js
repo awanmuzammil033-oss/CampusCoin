@@ -45,6 +45,9 @@ export default {
 
   /* seletores de moeda e idioma */
   'picker.currency': 'Moeda',
+  'picker.fxSame': 'Os seus valores já são exibidos na sua moeda.',
+  'picker.fxRate': '1 {from} = {rate} {to} · taxas de referência {date}',
+  'picker.fxNoRate': 'Não há taxa de referência para {from}/{to} — os valores aparecem como registados.',
   'picker.language': 'Idioma',
   'picker.searchCurrency': 'Buscar moeda',
   'picker.searchLanguage': 'Buscar idioma',
@@ -66,6 +69,8 @@ export default {
   /* cadastro */
   'auth.createYourAccount': 'Crie sua conta',
   'auth.registerSubtitle': 'Grátis para estudantes — sem cartão, sem banco.',
+  'auth.ownCurrency': 'A minha moeda',
+  'auth.ownCurrencyHelp': 'A moeda em que os seus valores são guardados. Pode mostrá-los noutra moeda a qualquer momento.',
   'auth.fullName': 'Nome completo',
   'auth.emailHelp': 'Você vai entrar com este endereço.',
   'auth.passwordHelp': 'Ao menos 8 caracteres — misture palavras e números.',
@@ -625,6 +630,11 @@ export default {
   'prof.smaller': 'Texto menor',
   'prof.larger': 'Texto maior',
   'prof.security': 'Segurança',
+  'prof.currencySection': 'Moeda',
+  'prof.ledgerCurrency': 'A minha moeda (a dos meus valores)',
+  'prof.ledgerHelp': 'Esta é a moeda real dos seus valores. O seletor no topo só muda a forma como são mostrados — os valores guardados nunca são reescritos.',
+  'prof.ledgerSame': 'Os valores são mostrados em {code}.',
+  'prof.ledgerConverted': 'Os seus valores estão em {code}; são mostrados em {show} com as taxas de referência de {date}.',
   'prof.securityBody': 'Trocar sua senha envia um link com prazo de validade para sua caixa de entrada — o mesmo usado na página “esqueceu a senha”.',
   'prof.changePassword': 'Trocar senha',
   'prof.signingOut': 'Saindo…',

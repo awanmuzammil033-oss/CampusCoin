@@ -45,6 +45,9 @@ export default {
 
   /* منتقيا العملة واللغة */
   'picker.currency': 'العملة',
+  'picker.fxSame': 'مبالغك معروضة بالفعل بعملتك.',
+  'picker.fxRate': '١ {from} = {rate} {to} · أسعار مرجعية {date}',
+  'picker.fxNoRate': 'لا يوجد سعر مرجعي لـ {from}/{to} — تُعرض المبالغ كما أدخلتها.',
   'picker.language': 'اللغة',
   'picker.searchCurrency': 'ابحث عن عملة',
   'picker.searchLanguage': 'ابحث عن لغة',
@@ -66,6 +69,8 @@ export default {
   /* التسجيل */
   'auth.createYourAccount': 'أنشئ حسابك',
   'auth.registerSubtitle': 'مجاني للطلاب — بلا بطاقة ولا حساب بنكي.',
+  'auth.ownCurrency': 'عملتي',
+  'auth.ownCurrencyHelp': 'العملة التي تُحفظ بها مبالغك. يمكنك عرضها بعملة أخرى في أي وقت.',
   'auth.fullName': 'الاسم الكامل',
   'auth.emailHelp': 'ستستخدم هذا العنوان لتسجيل الدخول.',
   'auth.passwordHelp': '٨ محارف على الأقل — امزج الكلمات والأرقام.',
@@ -625,6 +630,11 @@ export default {
   'prof.smaller': 'نص أصغر',
   'prof.larger': 'نص أكبر',
   'prof.security': 'الأمان',
+  'prof.currencySection': 'العملة',
+  'prof.ledgerCurrency': 'عملتي (العملة التي مبالغي بها)',
+  'prof.ledgerHelp': 'هذه هي العملة التي مبالغك بها فعلياً. منتقي الشريط العلوي يغيّر طريقة العرض فقط — لا تُكتب المبالغ من جديد.',
+  'prof.ledgerSame': 'تُعرض المبالغ بـ {code}.',
+  'prof.ledgerConverted': 'مبالغك بـ {code}، وتُعرض بـ {show} بأسعار مرجعية من {date}.',
   'prof.securityBody': 'تغيير كلمة المرور يرسل رابطًا صالحًا لفترة محدودة إلى بريدك — وهو الرابط نفسه الذي تستخدمه صفحة «نسيت كلمة المرور».',
   'prof.changePassword': 'تغيير كلمة المرور',
   'prof.signingOut': 'جارٍ تسجيل الخروج…',

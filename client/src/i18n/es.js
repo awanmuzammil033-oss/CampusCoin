@@ -45,6 +45,9 @@ export default {
 
   /* selectores de moneda e idioma */
   'picker.currency': 'Moneda',
+  'picker.fxSame': 'Tus importes ya se muestran en tu moneda.',
+  'picker.fxRate': '1 {from} = {rate} {to} · tipos de cambio de referencia {date}',
+  'picker.fxNoRate': 'No hay tipo de cambio de referencia para {from}/{to}: los importes se muestran tal como se introdujeron.',
   'picker.language': 'Idioma',
   'picker.searchCurrency': 'Buscar moneda',
   'picker.searchLanguage': 'Buscar idioma',
@@ -66,6 +69,8 @@ export default {
   /* registro */
   'auth.createYourAccount': 'Crea tu cuenta',
   'auth.registerSubtitle': 'Gratis para estudiantes — sin tarjeta ni banco.',
+  'auth.ownCurrency': 'Mi moneda',
+  'auth.ownCurrencyHelp': 'La moneda en la que se guardan tus importes. Puedes mostrarlos en otra cuando quieras.',
   'auth.fullName': 'Nombre completo',
   'auth.emailHelp': 'Usarás esta dirección para iniciar sesión.',
   'auth.passwordHelp': 'Al menos 8 caracteres — combina palabras y números.',
@@ -650,6 +655,11 @@ export default {
   'prof.smaller': 'Texto más pequeño',
   'prof.larger': 'Texto más grande',
   'prof.security': 'Seguridad',
+  'prof.currencySection': 'Moneda',
+  'prof.ledgerCurrency': 'Mi moneda (la de mis importes)',
+  'prof.ledgerHelp': 'Esta es la moneda real de tus importes. El selector de la barra superior solo cambia cómo se muestran: nunca se reescriben los importes guardados.',
+  'prof.ledgerSame': 'Los importes se muestran en {code}.',
+  'prof.ledgerConverted': 'Tus importes están en {code}; se muestran en {show} con tipos de cambio de referencia del {date}.',
   'prof.securityBody': 'Cambiar tu contraseña envía un enlace con caducidad a tu bandeja de entrada — el mismo que usa la página de “olvidé mi contraseña”.',
   'prof.changePassword': 'Cambiar contraseña',
   'prof.signingOut': 'Cerrando sesión…',

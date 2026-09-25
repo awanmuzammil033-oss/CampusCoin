@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from './auth.jsx';
-import { setDisplayCurrency } from './money.js';
+import { setDisplayCurrency, setLedgerCurrency } from './money.js';
 import { LANGUAGES } from './data/languages.js';
 import dictionaries from './i18n/index.js';
 
@@ -24,9 +24,10 @@ function persist(key, value) {
   } catch {}
 }
 
-// money() reads a module-level code, and it may render during the very first
-// paint — so seed it from localStorage here, at import time, not in an effect.
-setDisplayCurrency(readStored('cc.currency', 'USD'));
+// money() reads module-level codes and may render during the very first paint,
+// so seed them from localStorage here, at import time, not in an effect.
+const storedLedger = readStored('cc.ledgerCurrency', '') || readStored('cc.currency', 'USD');
+setDisplayCurrency(readStored('cc.currency', 'USD'), storedLedger);
 
 /** Exact code first, then base language ('pa-Arab' - 'pa'), else nothing. */
 function languageEntry(code) {
@@ -44,6 +45,7 @@ export function LocaleProvider({ children }) {
   const { user, updatePreferences } = useAuth() || {};
   const [language, setLanguageState] = useState(() => readStored('cc.language', 'en'));
   const [currency, setCurrencyState] = useState(() => readStored('cc.currency', 'USD'));
+  const [ledgerCurrency, setLedgerState] = useState(() => readStored('cc.ledgerCurrency', '') || readStored('cc.currency', 'USD'));
   const reconciledFor = useRef(null);
 
   const dir = useMemo(() => (languageEntry(language)?.rtl ? 'rtl' : 'ltr'), [language]);
@@ -51,9 +53,17 @@ export function LocaleProvider({ children }) {
   // Every currency change — from the picker or from the account reconcile
   // below — must reach money() and localStorage, whichever path changed it.
   useEffect(() => {
-    setDisplayCurrency(currency);
+    setDisplayCurrency(currency, ledgerCurrency);
     persist('cc.currency', currency);
-  }, [currency]);
+  }, [currency, ledgerCurrency]);
+
+  // The student's own currency (what their amounts are in) is a separate
+  // setting: changing the display currency must never move this one, or
+  // "400 PKR" would quietly become "400 dollars".
+  useEffect(() => {
+    setLedgerCurrency(ledgerCurrency);
+    persist('cc.ledgerCurrency', ledgerCurrency);
+  }, [ledgerCurrency]);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -93,7 +103,19 @@ export function LocaleProvider({ children }) {
       setDisplayCurrency(user.currency);
       persist('cc.currency', user.currency);
     }
-  }, [user, updatePreferences, language, currency]);
+
+    // The account's own currency (what the stored amounts are in) always wins
+    // over this device unless the student changed it here on purpose.
+    const accountLedger = user.ledgerCurrency || user.currency;
+    const pickedLedger = readStored('cc.ledgerCurrency.picked', '') === '1' ? readStored('cc.ledgerCurrency', '') : '';
+    if (pickedLedger && accountLedger && pickedLedger !== accountLedger) {
+      updatePreferences?.({ ledgerCurrency: pickedLedger });
+    } else if (!pickedLedger && accountLedger && accountLedger !== ledgerCurrency) {
+      setLedgerState(accountLedger);
+      setLedgerCurrency(accountLedger);
+      persist('cc.ledgerCurrency', accountLedger);
+    }
+  }, [user, updatePreferences, language, currency, ledgerCurrency]);
 
   // Choosing in a picker records an explicit local mark — reconcile (above)
   // uses it to tell "the user just clicked this" apart from "the account
@@ -108,6 +130,20 @@ export function LocaleProvider({ children }) {
       if (user) updatePreferences?.({ currency: code });
     },
     [currency, user, updatePreferences]
+  );
+
+  // Changing the student's own currency is a deliberate act (Profile does
+  // it), so it is recorded as a local pick the same way the pickers are.
+  const setLedger = useCallback(
+    (code) => {
+      if (!code || code === ledgerCurrency) return;
+      setLedgerState(code);
+      setLedgerCurrency(code);
+      persist('cc.ledgerCurrency', code);
+      persist('cc.ledgerCurrency.picked', '1');
+      if (user) updatePreferences?.({ ledgerCurrency: code });
+    },
+    [ledgerCurrency, user, updatePreferences]
   );
 
   const setLanguage = useCallback(
@@ -163,8 +199,18 @@ export function LocaleProvider({ children }) {
   );
 
   const value = useMemo(
-    () => ({ language, setLanguage, currency, setCurrency, t, plural, dir }),
-    [language, setLanguage, currency, setCurrency, t, plural, dir]
+    () => ({
+      language,
+      setLanguage,
+      currency,
+      setCurrency,
+      ledgerCurrency,
+      setLedgerCurrency: setLedger,
+      t,
+      plural,
+      dir,
+    }),
+    [language, setLanguage, currency, setCurrency, ledgerCurrency, setLedger, t, plural, dir]
   );
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;

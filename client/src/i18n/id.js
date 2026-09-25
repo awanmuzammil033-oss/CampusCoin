@@ -45,6 +45,9 @@ export default {
 
   /* pemilih mata uang dan bahasa */
   'picker.currency': 'Mata uang',
+  'picker.fxSame': 'Jumlah Anda sudah ditampilkan dalam mata uang Anda.',
+  'picker.fxRate': '1 {from} = {rate} {to} · kurs referensi {date}',
+  'picker.fxNoRate': 'Tidak ada kurs referensi untuk {from}/{to} — jumlah ditampilkan apa adanya.',
   'picker.language': 'Bahasa',
   'picker.searchCurrency': 'Cari mata uang',
   'picker.searchLanguage': 'Cari bahasa',
@@ -66,6 +69,8 @@ export default {
   /* pendaftaran */
   'auth.createYourAccount': 'Buat akunmu',
   'auth.registerSubtitle': 'Gratis untuk pelajar — tanpa kartu, tanpa rekening bank.',
+  'auth.ownCurrency': 'Mata uang saya',
+  'auth.ownCurrencyHelp': 'Mata uang tempat jumlah Anda disimpan. Anda bisa menampilkannya dalam mata uang lain kapan saja.',
   'auth.fullName': 'Nama lengkap',
   'auth.emailHelp': 'Kamu akan masuk dengan alamat ini.',
   'auth.passwordHelp': 'Minimal 8 karakter — campur kata dan angka.',
@@ -625,6 +630,11 @@ export default {
   'prof.smaller': 'Teks lebih kecil',
   'prof.larger': 'Teks lebih besar',
   'prof.security': 'Keamanan',
+  'prof.currencySection': 'Mata uang',
+  'prof.ledgerCurrency': 'Mata uang saya (mata uang jumlah saya)',
+  'prof.ledgerHelp': 'Inilah mata uang sebenarnya dari jumlah Anda. Pemilih di atas hanya mengubah cara ditampilkan — jumlah yang tersimpan tidak pernah ditulis ulang.',
+  'prof.ledgerSame': 'Jumlah ditampilkan dalam {code}.',
+  'prof.ledgerConverted': 'Jumlah Anda dalam {code}; ditampilkan dalam {show} dengan kurs referensi {date}.',
   'prof.securityBody': 'Mengubah kata sandi mengirimkan tautan bermasa berlaku ke kotak masukmu — tautan yang sama dengan halaman “lupa kata sandi”.',
   'prof.changePassword': 'Ubah kata sandi',
   'prof.signingOut': 'Keluar…',

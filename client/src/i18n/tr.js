@@ -45,6 +45,9 @@ export default {
 
   /* para birimi ve dil seçicileri */
   'picker.currency': 'Para birimi',
+  'picker.fxSame': 'Tutarlarınız zaten kendi para biriminizde gösteriliyor.',
+  'picker.fxRate': '1 {from} = {rate} {to} · referans kurlar {date}',
+  'picker.fxNoRate': '{from}/{to} için referans kur yok — tutarlar girildiği gibi gösterilir.',
   'picker.language': 'Dil',
   'picker.searchCurrency': 'Para birimi ara',
   'picker.searchLanguage': 'Dil ara',
@@ -66,6 +69,8 @@ export default {
   /* kayıt */
   'auth.createYourAccount': 'Hesabınızı oluşturun',
   'auth.registerSubtitle': 'Öğrenciler için ücretsiz — kart yok, banka bağlantısı yok.',
+  'auth.ownCurrency': 'Para birimim',
+  'auth.ownCurrencyHelp': 'Tutarlarınızın saklandığı para birimi. İstediğiniz zaman başka bir para biriminde gösterebilirsiniz.',
   'auth.fullName': 'Ad soyad',
   'auth.emailHelp': 'Bu adresle giriş yapacaksınız.',
   'auth.passwordHelp': 'En az 8 karakter — kelime ve rakamları karıştırın.',
@@ -625,6 +630,11 @@ export default {
   'prof.smaller': 'Daha küçük yazı',
   'prof.larger': 'Daha büyük yazı',
   'prof.security': 'Güvenlik',
+  'prof.currencySection': 'Para birimi',
+  'prof.ledgerCurrency': 'Para birimim (tutar birimim)',
+  'prof.ledgerHelp': 'Tutarlarınız gerçekte bu para birimindedir. Üstteki seçici yalnızca gösterimi değiştirir — kayıtlı tutarlar yeniden yazılmaz.',
+  'prof.ledgerSame': 'Tutarlar {code} olarak gösteriliyor.',
+  'prof.ledgerConverted': 'Tutarlarınız {code} cinsinden; {date} tarihli referans kurlarla {show} olarak gösteriliyor.',
   'prof.securityBody': 'Parolanızı değiştirmek gelen kutunuza süreli bir bağlantı gönderir — “parolamı unuttum” sayfasının kullandığı aynı bağlantı.',
   'prof.changePassword': 'Parolayı değiştir',
   'prof.signingOut': 'Çıkış yapılıyor…',

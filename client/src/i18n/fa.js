@@ -45,6 +45,9 @@ export default {
 
   /* انتخابگرهای ارز و زبان */
   'picker.currency': 'ارز',
+  'picker.fxSame': 'مبالغ شما هم‌اکنون به پول خودتان نمایش داده می‌شود.',
+  'picker.fxRate': '۱ {from} = {rate} {to} · نرخ‌های مرجع {date}',
+  'picker.fxNoRate': 'برای {from}/{to} نرخ مرجعی وجود ندارد — مبالغ همان‌طور که وارد شده‌اند نمایش داده می‌شوند.',
   'picker.language': 'زبان',
   'picker.searchCurrency': 'جستجوی ارز',
   'picker.searchLanguage': 'جستجوی زبان',
@@ -66,6 +69,8 @@ export default {
   /* ثبت‌نام */
   'auth.createYourAccount': 'حساب خود را بسازید',
   'auth.registerSubtitle': 'رایگان برای دانشجویان — بدون کارت، بدون اتصال بانک.',
+  'auth.ownCurrency': 'ارز من',
+  'auth.ownCurrencyHelp': 'ارزی که مبالغ شما در آن نگهداری می‌شود. هر وقت خواستید می‌توانید آن‌ها را به ارز دیگری نمایش دهید.',
   'auth.fullName': 'نام کامل',
   'auth.emailHelp': 'شما با همین نشانی وارد می‌شوید.',
   'auth.passwordHelp': 'دست‌کم ۸ نویسه — کلمه و عدد را با هم بگذارید.',
@@ -626,6 +631,11 @@ export default {
   'prof.smaller': 'متن کوچک‌تر',
   'prof.larger': 'متن بزرگ‌تر',
   'prof.security': 'امنیت',
+  'prof.currencySection': 'ارز',
+  'prof.ledgerCurrency': 'ارز من (ارز مبالغ من)',
+  'prof.ledgerHelp': 'این ارز واقعی مبالغ شماست. انتخابگر نوار بالا فقط نحوه نمایش را تغییر می‌دهد — مبالغ ذخیره‌شده بازنویسی نمی‌شوند.',
+  'prof.ledgerSame': 'مبالغ به {code} نمایش داده می‌شوند.',
+  'prof.ledgerConverted': 'مبالغ شما به {code} است و با نرخ‌های مرجع {date} به {show} نمایش داده می‌شود.',
   'prof.securityBody': 'تغییر رمز عبور پیوندی زمان‌دار به صندوق ورودی شما می‌فرستد — همانی که صفحهٔ “فراموشی رمز عبور” استفاده می‌کند.',
   'prof.changePassword': 'تغییر رمز عبور',
   'prof.signingOut': 'در حال خروج…',
