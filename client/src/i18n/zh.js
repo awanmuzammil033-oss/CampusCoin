@@ -145,4 +145,18 @@ export default {
   'home.feature.reportText': '分类、半年和日视图，点击即可保存为 PDF 或通过邮件分享。',
   'home.feature.tipTitle': '来自你自己记录的建议',
   'home.feature.tipText': '建议按本月实际能省下的金额排序。',
+
+  /* public home — hero eyebrow, steps, facts, call to action, preview */
+  'home.eyebrow': '为学生钱包而造',
+  'home.howTitle': '使用方法',
+  'home.step1Title': '几秒记一笔',
+  'home.step1Text': '生活费进账，咖啡支出——两步搞定。',
+  'home.step2Title': '看清钱去了哪',
+  'home.step2Text': '彩色图表按类别拆解整个月的开销。',
+  'home.step3Title': '看着储蓄慢慢变多',
+  'home.step3Text': '预算在 80% 时提醒你，存钱目标条逐渐填满。',
+  'home.facts': '12 个现成类别 · 3 种报表视图 · 14 种语言 · 支持 PDF 与邮件导出',
+  'home.ctaTitle': '下个月可以不一样',
+  'home.ctaText': '不到一分钟设置第一个预算——学生免费使用。',
+  'home.previewAria': 'Campus Coin 仪表盘预览',
 };

@@ -5,7 +5,12 @@
    status also carries an icon or a sign in the markup — never colour alone.
    ========================================================================== */
 
-:root {
+/* The light palette is re-declared for any element that pins
+   data-theme="light" (the public landing wraps itself in one) so the
+   marketing pages stay warm and bright even when the device or the app
+   runs in dark mode. */
+:root,
+[data-theme='light'] {
   /* surfaces & text (light) */
   --cc-bg: #f6f8f7;
   --cc-surface: #ffffff;
@@ -157,6 +162,7 @@ a:hover { text-decoration: underline; }
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
+  white-space: nowrap; /* labels never wrap to two lines in a tight header */
   transition: background-color 150ms ease-out, border-color 150ms ease-out, transform 150ms ease-out;
   text-decoration: none !important;
 }
@@ -830,35 +836,359 @@ textarea.input {
 .auth-card.admin-mode { border-top: 4px solid var(--cc-accent); }
 .auth-brand { display: flex; justify-content: center; margin-bottom: 18px; }
 .auth-brand .brand-mark { width: 52px; height: 52px; font-size: 1.5rem; }
-
-/* -------------------------------- landing -------------------------------- */
-
-.landing-hero {
-  padding: 72px 24px 48px;
+/* staff door: a quiet dashed divider with the admin link under the form */
+.auth-alt {
+  border-top: 1px dashed var(--cc-border);
   text-align: center;
+}
+.auth-alt a { font-weight: 600; }
+
+/* -------------------------------- landing --------------------------------
+   The public face is pinned light and warm (Home.jsx wraps itself in
+   data-theme="light"): soft gold/teal shapes, rounded cards with a
+   hover lift and a playful mock of the product. The dark palette lives
+   inside the app — the shop window should read as a friendly student
+   money app, not a terminal. */
+
+.landing {
+  min-height: 100vh;
+  background: var(--cc-bg);
+  color: var(--cc-text);
+}
+
+.lp-hero {
+  position: relative;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 56px 24px 44px;
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 48px;
+  align-items: center;
+}
+.lp-hero::before {
+  content: '';
+  position: absolute;
+  inset: -80px 0 0;
+  z-index: -1;
+  pointer-events: none;
   background:
-    radial-gradient(900px 420px at 50% -10%, var(--cc-primary-soft), transparent),
-    var(--cc-bg);
+    radial-gradient(460px 300px at 12% 6%, var(--cc-accent-soft), transparent 70%),
+    radial-gradient(520px 340px at 88% 34%, var(--cc-primary-soft), transparent 70%);
 }
-.landing-hero h1 {
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 700;
+
+.lp-eyebrow {
+  display: inline-block;
+  padding: 5px 14px;
+  border-radius: var(--cc-radius-pill);
+  background: var(--cc-accent-soft);
+  border: 1px solid #f0d68a;
+  color: #8a5a00;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+}
+.lp-hero h1 {
+  font-size: clamp(2.2rem, 4.6vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1.08;
   letter-spacing: -0.02em;
-  margin-bottom: 12px;
+  margin: 0 0 14px;
 }
-.landing-hero .tagline {
+.lp-hero .tagline {
   font-size: 1.125rem;
   color: var(--cc-muted);
-  margin: 0 auto 28px;
+  margin: 0 0 26px;
+  max-width: 34rem;
+}
+.lp-hero-cta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.lp-hero-cta .btn {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.lp-hero-cta .btn:hover { transform: translateY(-2px); }
+.lp-hero-cta .btn-primary { box-shadow: 0 8px 20px rgba(15, 118, 110, 0.28); }
+
+/* A static mock of the dashboard — everything inside the card, no
+   floating boxes hovering over it. */
+.lp-preview {
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-border);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 24px 60px rgba(22, 33, 31, 0.14);
+  transform: rotate(-1.2deg);
+  display: grid;
+  gap: 15px;
+}
+.lp-p-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+}
+.lp-p-head .brand-mark { width: 28px; height: 28px; font-size: 0.8rem; }
+.lp-p-chip {
+  margin-left: auto;
+  background: var(--cc-primary-soft);
+  color: var(--cc-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--cc-radius-pill);
+}
+.lp-p-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.78rem;
+  color: var(--cc-muted);
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.lp-p-amount {
+  display: block;
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+.lp-p-split {
+  display: flex;
+  gap: 16px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.lp-up { color: var(--cc-income); }
+.lp-down { color: var(--cc-expense); }
+
+.lp-p-track {
+  height: 10px;
+  border-radius: var(--cc-radius-pill);
+  background: var(--cc-surface-2);
+  border: 1px solid var(--cc-border);
+  overflow: hidden;
+}
+.lp-p-track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--cc-accent);
+  box-shadow: inset 0 0 0 1px var(--cc-warning);
+}
+.lp-p-track.over > span {
+  background: var(--cc-danger);
+  box-shadow: none;
+}
+.lp-p-budget {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  margin-top: 8px;
+}
+.lp-p-budget > span:first-child { min-width: 128px; }
+.lp-p-budget .lp-p-track { flex: 1; }
+.lp-p-budget b {
+  min-width: 42px;
+  text-align: right;
+  font-size: 0.8rem;
+  color: var(--cc-muted);
+}
+.lp-over-text { color: var(--cc-danger); }
+.lp-p-chart {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-top: 1px dashed var(--cc-border);
+  padding-top: 14px;
+}
+.lp-p-donut {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: conic-gradient(#7c3aed 0 70%, #2563eb 70% 100%);
+}
+.lp-p-donut::after {
+  content: '';
+  position: absolute;
+  inset: 15px;
+  border-radius: 50%;
+  background: var(--cc-surface);
+}
+.lp-p-legend {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--cc-muted);
+}
+.dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-right: 7px;
+}
+.d1 { background: #7c3aed; }
+.d2 { background: #2563eb; }
+
+/* feature cards: icon chip + a friendly hover lift */
+.lp-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 12px 24px 8px;
+}
+.lp-feature {
+  padding: 22px 20px;
+  border-radius: 16px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.lp-feature:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 26px rgba(22, 33, 31, 0.09);
+}
+.lp-feature h3 {
+  font-size: 1.05rem;
+  margin: 0 0 6px;
+}
+.lp-feature p { font-size: 0.95rem; }
+.lp-f-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 1.35rem;
+  margin-bottom: 12px;
+}
+.i1 { background: var(--cc-primary-soft); }
+.i2 { background: var(--cc-accent-soft); }
+.i3 { background: var(--cc-expense-soft); }
+.i4 { background: var(--cc-income-soft); }
+
+/* how it works */
+.lp-how {
+  max-width: 1120px;
+  margin: 38px auto 0;
+  padding: 0 24px;
+  text-align: center;
+}
+.lp-how h2 {
+  font-size: 1.6rem;
+  margin-bottom: 20px;
+}
+.lp-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+.lp-step {
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-border);
+  border-radius: 16px;
+  padding: 22px 20px;
+}
+.lp-step-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 12px;
+}
+.n1 { background: var(--cc-primary); }
+.n2 { background: var(--cc-accent); color: #4a3200; }
+.n3 { background: #7c3aed; }
+.lp-step h3 {
+  font-size: 1.02rem;
+  margin: 0 0 6px;
+}
+.lp-step p {
+  margin: 0;
+  color: var(--cc-muted);
+  font-size: 0.95rem;
 }
 
-.feature-strip {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-  padding: 8px 24px 32px;
-  max-width: 1000px;
-  margin: 0 auto;
+/* honest facts band */
+.lp-facts {
+  max-width: 1120px;
+  margin: 26px auto 0;
+  padding: 0 24px;
+}
+.lp-facts p {
+  margin: 0;
+  text-align: center;
+  background: var(--cc-surface);
+  border: 1px dashed var(--cc-border);
+  border-radius: var(--cc-radius-pill);
+  padding: 12px 18px;
+  color: var(--cc-muted);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+/* call to action */
+.lp-cta {
+  position: relative;
+  overflow: hidden;
+  max-width: 1120px;
+  margin: 36px auto 0;
+  padding: 44px 28px;
+  border-radius: 24px;
+  text-align: center;
+  background: linear-gradient(135deg, #0f766e, #0d9488 55%, #14b8a6);
+  color: #fff;
+}
+.lp-cta::after {
+  content: '';
+  position: absolute;
+  right: -44px;
+  bottom: -66px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #ffe08a, #f5b400 68%, #d99a00);
+  box-shadow: 0 0 0 10px rgba(255, 255, 255, 0.14);
+  opacity: 0.32;
+  pointer-events: none;
+}
+.lp-cta h2 {
+  position: relative;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  margin: 0 0 8px;
+}
+.lp-cta p {
+  position: relative;
+  margin: 0 auto 22px;
+  max-width: 40rem;
+  opacity: 0.92;
+}
+.btn-cta {
+  position: relative;
+  background: #fff;
+  color: #0b5d57;
+  font-weight: 700;
+}
+.btn-cta:hover {
+  background: var(--cc-accent);
+  color: #3d2c00;
+}
+
+.landing .sitemap-block {
+  margin-top: 40px;
 }
 
 .sitemap-block {
@@ -952,6 +1282,29 @@ textarea.input {
 
   /* Phones: the language button keeps only the globe so the topbar fits. */
   .topbar .lang-native { display: none; }
+}
+
+/* Landing: the hero stacks (copy above, product preview below). */
+@media (max-width: 900px) {
+  .lp-hero {
+    grid-template-columns: 1fr;
+    padding-top: 36px;
+    gap: 32px;
+    text-align: center;
+  }
+  .lp-hero .tagline { margin-left: auto; margin-right: auto; }
+  .lp-hero-cta { justify-content: center; }
+  .lp-preview { transform: none; }
+}
+
+/* Phones: squeeze the topbar onto one line — coin mark instead of the
+   full wordmark, currency symbol instead of "$ USD". The pickers and
+   both auth buttons stay visible and tappable. */
+@media (max-width: 560px) {
+  .brand-name { display: none; }
+  .topbar .picker-code { display: none; }
+  .topbar { gap: 6px; padding: 0 12px; }
+  .topbar .btn-sm { padding: 4px 10px; }
 }
 
 /* --------------------------- reduced motion ------------------------------ */

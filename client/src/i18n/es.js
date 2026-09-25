@@ -146,4 +146,18 @@ export default {
   'home.feature.reportText': 'Vistas por categoría, seis meses y diarias, guardadas en PDF o compartidas por correo al hacer clic.',
   'home.feature.tipTitle': 'Consejos de tu propio historial',
   'home.feature.tipText': 'Sugerencias ordenadas por lo que realmente ahorrarías este mes.',
+
+  /* public home — hero eyebrow, steps, facts, call to action, preview */
+  'home.eyebrow': 'Hecho para carteras de estudiantes',
+  'home.howTitle': 'Cómo funciona',
+  'home.step1Title': 'Regístralo en segundos',
+  'home.step1Text': 'La mesada entra, el café sale — dos toques y listo.',
+  'home.step2Title': 'Ve a dónde va tu dinero',
+  'home.step2Text': 'Gráficos de colores desglosan el mes, categoría por categoría.',
+  'home.step3Title': 'Mira crecer tus ahorros',
+  'home.step3Text': 'Los presupuestos te avisan al 80% y la barra de meta se va llenando.',
+  'home.facts': '12 categorías listas · 3 vistas de informes · 14 idiomas · Exportación PDF y correo',
+  'home.ctaTitle': 'Tu próximo mes puede ser distinto',
+  'home.ctaText': 'Crea tu primer presupuesto en menos de un minuto — gratis para estudiantes.',
+  'home.previewAria': 'Vista previa del panel de Campus Coin',
 };

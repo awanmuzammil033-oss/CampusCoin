@@ -146,4 +146,18 @@ export default {
   'home.feature.reportText': 'Vues par catégorie, sur six mois et quotidiennes, enregistrées en PDF ou partagées par e-mail en un clic.',
   'home.feature.tipTitle': 'Des conseils tirés de votre propre historique',
   'home.feature.tipText': 'Suggestions classées selon ce que vous économiseriez réellement ce mois-ci.',
+
+  /* public home — hero eyebrow, steps, facts, call to action, preview */
+  'home.eyebrow': 'Pensé pour les portefeuilles étudiants',
+  'home.howTitle': 'Comment ça marche',
+  'home.step1Title': 'Saisie en quelques secondes',
+  'home.step1Text': 'L’argent de poche entre, le café sort — deux clics et c’est fait.',
+  'home.step2Title': 'Voyez où part votre argent',
+  'home.step2Text': 'Des graphiques en couleurs détaillent le mois, catégorie par catégorie.',
+  'home.step3Title': 'Vos économies grossissent',
+  'home.step3Text': 'Les budgets vous alertent à 80 % et la barre d’objectif se remplit.',
+  'home.facts': '12 catégories prêtes · 3 vues de rapports · 14 langues · Export PDF et e-mail',
+  'home.ctaTitle': 'Votre prochain mois peut être différent',
+  'home.ctaText': 'Créez votre premier budget en moins d’une minute — gratuit pour les étudiants.',
+  'home.previewAria': 'Aperçu du tableau de bord Campus Coin',
 };

@@ -148,4 +148,18 @@ export default {
   'home.feature.reportText': 'Category, six-month and daily views, saved as PDF or shared by email when you click.',
   'home.feature.tipTitle': 'Tips from your own history',
   'home.feature.tipText': 'Suggestions ranked by how much you would actually save this month.',
+
+  /* public home — hero eyebrow, steps, facts, call to action, preview */
+  'home.eyebrow': 'Made for student wallets',
+  'home.howTitle': 'How it works',
+  'home.step1Title': 'Log it in seconds',
+  'home.step1Text': 'Allowance in, coffee out — two taps and you are done.',
+  'home.step2Title': 'See where it goes',
+  'home.step2Text': 'Coloured charts break the month down, category by category.',
+  'home.step3Title': 'Watch your savings grow',
+  'home.step3Text': 'Budgets nudge you at 80%, and the savings goal bar fills up.',
+  'home.facts': '12 ready-made categories · 3 report views · 14 languages · PDF & email export',
+  'home.ctaTitle': 'Your next month can look different',
+  'home.ctaText': 'Set up your first budget in under a minute — free for students.',
+  'home.previewAria': 'Preview of the Campus Coin dashboard',
 };

@@ -146,4 +146,18 @@ export default {
   'home.feature.reportText': 'Tampilan kategori, enam bulan, dan harian, disimpan sebagai PDF atau dibagikan lewat email saat diklik.',
   'home.feature.tipTitle': 'Saran dari riwayat Anda sendiri',
   'home.feature.tipText': 'Saran diurutkan menurut berapa yang benar-benar bisa Anda hemat bulan ini.',
+
+  /* public home — hero eyebrow, steps, facts, call to action, preview */
+  'home.eyebrow': 'Dibuat untuk dompet mahasiswa',
+  'home.howTitle': 'Cara kerjanya',
+  'home.step1Title': 'Catat dalam hitungan detik',
+  'home.step1Text': 'Uang saku masuk, kopi keluar — dua ketuk selesai.',
+  'home.step2Title': 'Lihat uangmu ke mana',
+  'home.step2Text': 'Grafik berwarna merinci bulan ini, kategori per kategori.',
+  'home.step3Title': 'Lihat tabunganmu tumbuh',
+  'home.step3Text': 'Anggaran mengingatkan di 80%, dan bilah target terisi pelan-pelan.',
+  'home.facts': '12 kategori siap pakai · 3 tampilan laporan · 14 bahasa · Ekspor PDF & email',
+  'home.ctaTitle': 'Bulan depan bisa berbeda',
+  'home.ctaText': 'Buat anggaran pertamamu dalam hitungan menit — gratis untuk pelajar.',
+  'home.previewAria': 'Pratinjau dasbor Campus Coin',
 };

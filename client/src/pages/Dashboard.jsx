@@ -214,7 +214,7 @@ export default function Dashboard() {
           {nothingYet ? (
             <div className="card mt-3">
               <EmptyState
-                icon="🪙"
+                icon="💰"
                 title="No entries yet"
                 action={
                   <div className="d-flex gap-2 justify-content-center flex-wrap mt-2">

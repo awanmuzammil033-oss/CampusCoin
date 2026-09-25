@@ -146,4 +146,18 @@ export default {
   'home.feature.reportText': 'زمرہ، چھ ماہی اور روزانہ مناظر، کلک کرنے پر PDF میں محفوظ یا ای میل سے شیئر۔',
   'home.feature.tipTitle': 'اپنی ہی ہسٹری سے تجاویز',
   'home.feature.tipText': 'تجاویز اس مقدار کے لحاظ سے درجہ بندی ہیں جو آپ اس ماہ واقعی بچا سکتے ہیں۔',
+
+  /* public home — hero eyebrow, steps, facts, call to action, preview */
+  'home.eyebrow': 'طالبِ علم والٹ کے لیے بنایا گیا',
+  'home.howTitle': 'یہ کام کیسے کرتا ہے',
+  'home.step1Title': 'چند سیکنڈ میں درج کریں',
+  'home.step1Text': 'پوچھنا ملا، کافی کا خرچ — دو ٹیپ اور کام ٹھیک۔',
+  'home.step2Title': 'دیکھیں کہ پیسہ کہاں گیا',
+  'home.step2Text': 'رنگین چارٹ ہر ماہ کو زمروں کے حساب سے دکھاتے ہیں۔',
+  'home.step3Title': 'اپنی بچت بڑھتے دیکھیں',
+  'home.step3Text': 'بجٹ 80٪ پر اشارہ کرتے ہیں، اور بچت کا گول بھرتا جاتا ہے۔',
+  'home.facts': '12 تیار زمرے · 3 رپورٹ ویوز · 14 زبانیں · PDF اور ای میل ایکسپورٹ',
+  'home.ctaTitle': 'آپ کا اگلا مہینہ الگ ہو سکتا ہے',
+  'home.ctaText': 'ایک منٹ سے پہلے پہلا بجٹ بنائیں — طلباء کے لیے مفت۔',
+  'home.previewAria': 'Campus Coin ڈیش بورڈ کا پیش منظر',
 };

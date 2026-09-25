@@ -146,4 +146,18 @@ export default {
   'home.feature.reportText': 'عرض الفئة وستة أشهر ويومي، تُحفظ PDF أو تُشارك بالبريد عند النقر.',
   'home.feature.tipTitle': 'نصائح من سجلك أنت',
   'home.feature.tipText': 'نصائح مرتبة حسب ما قد توفّره فعليًا هذا الشهر.',
+
+  /* public home — hero eyebrow, steps, facts, call to action, preview */
+  'home.eyebrow': 'مصمَّم لمحافظ الطلاب',
+  'home.howTitle': 'كيف يعمل',
+  'home.step1Title': 'سجّلها في ثوانٍ',
+  'home.step1Text': 'المصروف اليومي، قهوة الصباح — نقرتان وانتهى الأمر.',
+  'home.step2Title': 'اعرف أين تذهب أموالك',
+  'home.step2Text': 'مخططات ملوّنة تشرح الشهر فئةً بفئة.',
+  'home.step3Title': 'شاهد مدخراتك تنمو',
+  'home.step3Text': 'تنبّهك الميزانيات عند 80٪، ويمتلئ هدف الادّخار.',
+  'home.facts': '12 فئة جاهزة · 3 عروض تقارير · 14 لغة · تصدير PDF والبريد',
+  'home.ctaTitle': 'قد يبدو شهرك القادم مختلفًا',
+  'home.ctaText': 'أنشئ أول ميزانية في أقل من دقيقة — مجانًا للطلاب.',
+  'home.previewAria': 'معاينة لوحة تحكم Campus Coin',
 };

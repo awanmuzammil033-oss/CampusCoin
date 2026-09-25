@@ -95,7 +95,7 @@ export default function LocalePickers({ onOpen }) {
       <div className="position-relative" ref={currencyRef}>
         <button type="button" className="icon-btn" aria-label={t('picker.currency')} aria-expanded={currencyOpen} onClick={openCurrency}>
           <span aria-hidden="true">{activeCurrency?.symbol || currency}</span>
-          <span>{currency}</span>
+          <span className="picker-code">{currency}</span>
         </button>
         {currencyOpen && (
           <div className="dropdown-menu" role="group" aria-label={t('picker.currency')}>

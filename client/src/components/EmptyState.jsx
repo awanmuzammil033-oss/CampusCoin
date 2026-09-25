@@ -1,5 +1,5 @@
 /** Friendly empty state: says what is missing and offers the next step. */
-export default function EmptyState({ icon = '🪙', title, children, action }) {
+export default function EmptyState({ icon = '💰', title, children, action }) {
   return (
     <div className="empty-state">
       <span className="empty-icon" aria-hidden="true">

@@ -146,4 +146,18 @@ export default {
   'home.feature.reportText': 'Kategorie-, Halbjahres- und Tagesansichten, per Klick als PDF gespeichert oder per E-Mail geteilt.',
   'home.feature.tipTitle': 'Tipps aus Ihrer eigenen Historie',
   'home.feature.tipText': 'Vorschläge, sortiert danach, was Sie in diesem Monat tatsächlich sparen würden.',
+
+  /* public home — hero eyebrow, steps, facts, call to action, preview */
+  'home.eyebrow': 'Für Studenten-Wallets gemacht',
+  'home.howTitle': 'So funktioniert es',
+  'home.step1Title': 'In Sekunden eintragen',
+  'home.step1Text': 'Taschengeld rein, Kaffee raus — zwei Fertig.',
+  'home.step2Title': 'Sieh, wohin das Geld geht',
+  'home.step2Text': 'Farbige Diagramme zerlegen den Monat, Kategorie für Kategorie.',
+  'home.step3Title': 'Sieh deinem Sparziel zu',
+  'home.step3Text': 'Budgets melden sich bei 80 %, und die Sparleiste füllt sich.',
+  'home.facts': '12 fertige Kategorien · 3 Berichtsansichten · 14 Sprachen · PDF- & E-Mail-Export',
+  'home.ctaTitle': 'Dein nächster Monat kann anders aussehen',
+  'home.ctaText': 'Richte dein erstes Budget in unter einer Minute ein — kostenlos für Studierende.',
+  'home.previewAria': 'Vorschau des Campus-Coin-Dashboards',
 };

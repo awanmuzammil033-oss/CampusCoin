@@ -11,12 +11,12 @@
       // Apply theme and text size before the first paint so the page never
       // flashes light-then-dark. localStorage mirrors the account setting
       // (the server stays the source of truth once you are signed in).
+      // Friendly by default: start on light unless this device already
+      // picked a theme — a student money app should not open like a
+      // terminal on a system with dark mode enabled.
       (function () {
         try {
-          var theme = localStorage.getItem('cc.theme');
-          if (!theme) {
-            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-          }
+          var theme = localStorage.getItem('cc.theme') || 'light';
           document.documentElement.setAttribute('data-theme', theme);
 
           var scale = localStorage.getItem('cc.fontScale') || '2';

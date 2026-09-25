@@ -312,7 +312,7 @@ export default function Transactions() {
             </EmptyState>
           ) : (
             <EmptyState
-              icon="🪙"
+              icon="💰"
               title="No entries yet"
               action={
                 <Link className="btn btn-primary mt-2" to="/transactions/new?type=expense">

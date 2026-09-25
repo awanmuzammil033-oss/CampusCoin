@@ -106,6 +106,12 @@ export default function Login() {
             {t('auth.newHere')} <Link to="/register">{t('auth.createAccount')}</Link>
           </span>
         </div>
+
+        {/* Staff door, right here — nobody needs to go back home to find it. */}
+        <div className="auth-alt mt-4 pt-3 smallish">
+          <span aria-hidden="true">🛡️ </span>
+          <Link to="/control/login">{t('home.link.adminSignIn')}</Link>
+        </div>
       </div>
     </div>
   );

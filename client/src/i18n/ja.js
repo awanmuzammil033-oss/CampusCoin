@@ -146,4 +146,18 @@ export default {
   'home.feature.reportText': 'カテゴリ・半年・日別の表示を、クリックで PDF 保存やメール共有ができます。',
   'home.feature.tipTitle': '自分の履歴からのヒント',
   'home.feature.tipText': '今月実際に節約できる額に基づいて並んだ提案です。',
+
+  /* public home — hero eyebrow, steps, facts, call to action, preview */
+  'home.eyebrow': '学生の財布のために',
+  'home.howTitle': '使い方はかんたん',
+  'home.step1Title': '数秒で記録',
+  'home.step1Text': 'お小遣い入り、コーヒー出費——タップ2回で完了。',
+  'home.step2Title': 'お金の行先が見える',
+  'home.step2Text': '色分けグラフが月をカテゴリごとに見せてくれます。',
+  'home.step3Title': '貯金が育つのを見る',
+  'home.step3Text': '予算は80%で知らせて、貯金目標バーが満ちていきます。',
+  'home.facts': '12のカテゴリ · 3つのレポート表示 · 14言語 · PDF・メール書き出し',
+  'home.ctaTitle': '来月はもっと違うかも',
+  'home.ctaText': '1分もかからず最初の予算を作成——学生には無料。',
+  'home.previewAria': 'Campus Coin ダッシュボードのプレビュー',
 };

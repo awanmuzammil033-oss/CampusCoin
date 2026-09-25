@@ -146,4 +146,18 @@ export default {
   'home.feature.reportText': 'Kategori, altı aylık ve günlük görünümler; tıklayınca PDF olarak kaydedilir veya e-postayla paylaşılır.',
   'home.feature.tipTitle': 'Kendi geçmişinizden öneriler',
   'home.feature.tipText': 'Bu ay gerçekten ne kadar biriktirebileceğinize göre sıralanmış öneriler.',
+
+  /* public home — hero eyebrow, steps, facts, call to action, preview */
+  'home.eyebrow': 'Öğrenci cüzdanları için tasarlandı',
+  'home.howTitle': 'Nasıl çalışır',
+  'home.step1Title': 'Saniyeler içinde kaydet',
+  'home.step1Text': 'Harçlık girer, kahve çıkar — iki dokunuş biter.',
+  'home.step2Title': 'Paranın nereye gittiğini gör',
+  'home.step2Text': 'Renkli grafikler ayı kategori kategori gösterir.',
+  'home.step3Title': 'Birikimini büyüürken izle',
+  'home.step3Text': 'Bütçeler %80’de uyarır, hedef çubuğu dolmaya başlar.',
+  'home.facts': '12 hazır kategori · 3 rapor görünümü · 14 dil · PDF ve e-posta dışa aktarımı',
+  'home.ctaTitle': 'Gelecek ayın farklı olabilir',
+  'home.ctaText': 'İlk bütçeni bir dakikadan kısa sürede kur — öğrenciler için ücretsiz.',
+  'home.previewAria': 'Campus Coin panelinin önizlemesi',
 };

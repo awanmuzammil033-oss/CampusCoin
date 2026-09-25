@@ -146,4 +146,18 @@ export default {
   'home.feature.reportText': 'श्रेणी, छह-माही और दैनिक व्यू, क्लिक पर PDF में सेव या ईमेल से शेयर।',
   'home.feature.tipTitle': 'अपने ही रिकॉर्ड से सुझाव',
   'home.feature.tipText': 'सुझाव इस आधार पर क्रमबद्ध कि इस महीने आप कितना वास्तव में बचा सकते हैं।',
+
+  /* public home — hero eyebrow, steps, facts, call to action, preview */
+  'home.eyebrow': 'छात्र वॉलेट के लिए बनाया गया',
+  'home.howTitle': 'यह कैसे काम करता है',
+  'home.step1Title': 'कुछ सेकंड में लॉग करें',
+  'home.step1Text': 'पॉकेट मनी अंदर, कॉफ़ी बाहर — दो टैप और हो गया।',
+  'home.step2Title': 'देखें पैसा कहाँ गया',
+  'home.step2Text': 'रंगीन चार्ट पूरे महीने को श्रेणी के हिसाब से दिखाते हैं।',
+  'home.step3Title': 'अपनी बचत बढ़ते देखें',
+  'home.step3Text': 'बजट 80% पर चेतावनी देते हैं, और सेविंग गोल भरती जाती है।',
+  'home.facts': '12 तैयार श्रेणियाँ · 3 रिपोर्ट व्यू · 14 भाषाएँ · PDF व ईमेल एक्सपोर्ट',
+  'home.ctaTitle': 'आपका अगला महीना अलग हो सकता है',
+  'home.ctaText': 'एक मिनट से पहले पहला बजट बनाएँ — छात्रों के लिए मुफ़्त।',
+  'home.previewAria': 'Campus Coin डैशबोर्ड की झलक',
 };
