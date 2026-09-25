@@ -9,6 +9,8 @@ import { categoryColor } from '../chartColors.js';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
+import { useLocale } from '../locale.jsx';
+import { uiLang } from '../dates.js';
 
 function monthKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -16,7 +18,7 @@ function monthKey(date) {
 
 function monthLabel(key) {
   const [y, m] = key.split('-').map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  return new Date(y, m - 1, 1).toLocaleDateString(uiLang(), { month: 'long', year: 'numeric' });
 }
 
 function shiftMonth(key, delta) {
@@ -25,14 +27,14 @@ function shiftMonth(key, delta) {
 }
 
 const TABS = [
-  { id: 'category', label: 'Category-wise' },
-  { id: 'trend', label: 'Income vs expense (6 months)' },
-  { id: 'daily', label: 'Daily & weekly' },
+  { id: 'category', label: 'rep.tabCategory' },
+  { id: 'trend', label: 'rep.tabTrend' },
+  { id: 'daily', label: 'rep.tabDaily' },
 ];
 
 /* The report payload differs slightly per tab — read it the forgiving way. */
 
-function readCategoryRows(data) {
+function readCategoryRows(data, t) {
   const source = data?.rows || data?.categories || data?.category || [];
   if (!Array.isArray(source)) return [];
 
@@ -62,7 +64,7 @@ function readCategoryRows(data) {
         const n = ((row.amount - prev) / prev) * 100;
         changeText = n >= 0 ? `↑ +${Math.round(n)}%` : `↓ ${Math.round(n)}%`;
       } else if (row.amount > 0) {
-        changeText = '↑ new';
+        changeText = t('rep.newChange');
       }
     }
 
@@ -93,11 +95,11 @@ function readDailyRows(data) {
     }));
 }
 
-function readWeekRows(data) {
+function readWeekRows(data, t) {
   const source = data?.weeks || data?.weekly || [];
   if (!Array.isArray(source)) return [];
   return source.map((r) => ({
-    label: r.label || r.week || `Week ${r.weekNumber ?? ''}`,
+    label: r.label || r.week || t('rep.weekN', { n: r.weekNumber ?? '' }),
     amount: Number(r.amount ?? r.total ?? r.value ?? r.expense ?? 0),
   }));
 }
@@ -107,6 +109,7 @@ function readWeekRows(data) {
  * that only ever run when someone presses the button.
  */
 export default function Reports() {
+  const { t } = useLocale();
   const { push } = useToast();
   const [month, setMonth] = useState(() => monthKey(new Date()));
   const [tab, setTab] = useState('category');
@@ -147,7 +150,7 @@ export default function Reports() {
       const canvas = await html2canvas(node, { backgroundColor: getComputedStyle(document.body).backgroundColor });
       canvas.toBlob((blob) => {
         if (!blob) {
-          push('The image could not be created — try again.', 'error');
+          push(t('rep.imgFail'), 'error');
           setCapturing(false);
           return;
         }
@@ -163,7 +166,7 @@ export default function Reports() {
       }, 'image/png');
     } catch (err) {
       setCapturing(false);
-      push(err.message || 'The image could not be created.', 'error');
+      push(err.message || t('rep.imgFail2'), 'error');
     }
   }
 
@@ -173,7 +176,7 @@ export default function Reports() {
     try {
       await api.post('/api/reports/share', { month, email: share.email, message: share.message });
       setShareOpen(false);
-      push(`Report for ${monthLabel(month)} is on its way to ${share.email}.`);
+      push(t('rep.emailed', { month: monthLabel(month), email: share.email }));
       setShare({ email: '', message: '' });
     } catch (err) {
       push(err.message, 'error');
@@ -184,81 +187,81 @@ export default function Reports() {
 
   /* ------------------------------- per-tab views ------------------------------ */
 
-  const categoryRows = tab === 'category' ? readCategoryRows(data) : [];
+  const categoryRows = tab === 'category' ? readCategoryRows(data, t) : [];
   const trendRows = tab === 'trend' ? readTrendRows(data) : [];
   const dailyRows = tab === 'daily' ? readDailyRows(data) : [];
-  const weekRows = tab === 'daily' ? readWeekRows(data) : [];
+  const weekRows = tab === 'daily' ? readWeekRows(data, t) : [];
 
   const views = {
     category: {
       chart: (
         <ChartCard
-          title="Spending by category"
+          title={t('dash.chartSpending')}
           type="bar"
           data={{
             labels: categoryRows.map((r) => r.name),
             datasets: [{
-              label: 'Amount',
+              label: t('ui.amount'),
               data: categoryRows.map((r) => r.amount),
               // each bar wears its category's colour, same as the doughnut
               backgroundColor: categoryRows.map((r) => categoryColor(r.name)),
             }],
           }}
           loading={!data}
-          emptyText="No expenses in this month."
+          emptyText={t('rep.emptyNoExpenses')}
           table={{
-            columns: ['Category', 'Amount', '% of total', 'vs last month'],
+            columns: [t('ui.category'), t('ui.amount'), t('ui.pctOfTotal'), t('ui.vsLastMonth')],
             rows: categoryRows.map((r) => [r.name, money(r.amount), `${r.pct}%`, r.changeText]),
           }}
         />
       ),
       table: {
-        columns: ['Category', 'Amount', '% of total', 'vs last month'],
+        columns: [t('ui.category'), t('ui.amount'), t('ui.pctOfTotal'), t('ui.vsLastMonth')],
         rows: categoryRows.map((r) => [r.name, money(r.amount), `${r.pct}%`, r.changeText]),
       },
       empty: !data ? null : categoryRows.length === 0,
-      emptyText: 'Nothing was logged in this month.',
+      emptyText: t('rep.emptyNothingLogged'),
     },
     trend: {
       chart: (
         <ChartCard
-          title="Income vs expense (6 months)"
+          title={t('rep.tabTrend')}
           type="bar"
           data={{
             labels: trendRows.map((r) => r.label),
             datasets: [
-              { label: 'Income', data: trendRows.map((r) => r.income), backgroundColor: 'var(--cc-income)' },
-              { label: 'Expense', data: trendRows.map((r) => r.expense), backgroundColor: 'var(--cc-expense)' },
+              { label: t('ui.income'), data: trendRows.map((r) => r.income), backgroundColor: 'var(--cc-income)' },
+              { label: t('ui.expense'), data: trendRows.map((r) => r.expense), backgroundColor: 'var(--cc-expense)' },
             ],
           }}
           loading={!data}
-          emptyText="Six months of history will show up here."
+          emptyText={t('rep.emptySixMonths')}
           table={{
-            columns: ['Month', 'Income', 'Expense'],
+            columns: [t('ui.month'), t('ui.income'), t('ui.expense')],
             rows: trendRows.map((r) => [r.label, money(r.income), money(r.expense)]),
           }}
         />
       ),
       table: {
-        columns: ['Month', 'Income', 'Expense'],
+        columns: [t('ui.month'), t('ui.income'), t('ui.expense')],
         rows: trendRows.map((r) => [r.label, money(r.income), money(r.expense)]),
       },
       empty: !data ? null : trendRows.length === 0,
-      emptyText: 'No months to compare yet.',
+      emptyText: t('rep.emptyNoMonths'),
     },
     daily: {
       chart: (
         <ChartCard
-          title={`Daily spending · ${monthLabel(month)}`}
+          title={t('rep.chartDaily', { month: monthLabel(month) })}
           type="line"
           data={{
             labels: dailyRows.map((r) => String(r.day).padStart(2, '0')),
-            datasets: [{ label: 'Spent', data: dailyRows.map((r) => r.amount), tension: 0.3, fill: true }],
+            datasets: [{ label: t('ui.spent'), data: dailyRows.map((r) => r.amount), tension: 0.3, fill: true }],
           }}
           loading={!data}
-          emptyText="No daily totals for this month."
+          emptyText={t('rep.emptyNoDaily')}
           table={{
-            columns: weekRows.length ? ['Week', 'Amount'] : ['Day', 'Amount'],
+            columns: weekRows.length ? [t('ui.week'), t('ui.amount')] : [t('ui.day'), t('ui.amount')],
             rows: weekRows.length
               ? weekRows.map((w) => [w.label, money(w.amount)])
               : dailyRows.map((d) => [String(d.day).padStart(2, '0'), money(d.amount)]),
@@ -266,10 +269,10 @@ export default function Reports() {
         />
       ),
       table: weekRows.length
-        ? { columns: ['Week', 'Amount'], rows: weekRows.map((w) => [w.label, money(w.amount)]) }
-        : { columns: ['Day', 'Amount'], rows: dailyRows.map((d) => [String(d.day).padStart(2, '0'), money(d.amount)]) },
+        ? { columns: [t('ui.week'), t('ui.amount')], rows: weekRows.map((w) => [w.label, money(w.amount)]) }
+        : { columns: [t('ui.day'), t('ui.amount')], rows: dailyRows.map((d) => [String(d.day).padStart(2, '0'), money(d.amount)]) },
       empty: !data ? null : dailyRows.length === 0 && weekRows.length === 0,
-      emptyText: 'Nothing spent in this month.',
+      emptyText: t('rep.emptyNothingSpent'),
     },
   };
 
@@ -278,23 +281,23 @@ export default function Reports() {
   return (
     <Page
       trail={[
-        { label: 'Reports' },
+        { label: t('nav.reports') },
         { label: monthLabel(month) },
       ]}
-      title="Reports"
-      subtitle="Three ways to read one month."
+      title={t('nav.reports')}
+      subtitle={t('rep.subtitle')}
     >
       <div className="d-flex gap-2 flex-wrap align-items-center justify-content-between mb-3">
-        <div className="d-flex gap-1 flex-wrap align-items-center" role="group" aria-label="Report view">
-          {TABS.map((t) => (
+        <div className="d-flex gap-1 flex-wrap align-items-center" role="group" aria-label={t('rep.viewAria')}>
+          {TABS.map((tabDef) => (
             <button
-              key={t.id}
+              key={tabDef.id}
               type="button"
-              className={`btn ${tab === t.id ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-              aria-pressed={tab === t.id}
-              onClick={() => setTab(t.id)}
+              className={`btn ${tab === tabDef.id ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+              aria-pressed={tab === tabDef.id}
+              onClick={() => setTab(tabDef.id)}
             >
-              {t.label}
+              {t(tabDef.label)}
             </button>
           ))}
         </div>
@@ -304,8 +307,8 @@ export default function Reports() {
             type="button"
             className="icon-btn"
             onClick={() => setMonth((m) => shiftMonth(m, -1))}
-            aria-label="Previous month"
-            title="Previous month"
+            aria-label={t('ui.prevMonth')}
+            title={t('ui.prevMonth')}
           >
             ‹
           </button>
@@ -316,8 +319,8 @@ export default function Reports() {
             type="button"
             className="icon-btn"
             onClick={() => setMonth((m) => shiftMonth(m, 1))}
-            aria-label="Next month"
-            title="Next month"
+            aria-label={t('ui.nextMonth')}
+            title={t('ui.nextMonth')}
           >
             ›
           </button>
@@ -326,14 +329,14 @@ export default function Reports() {
 
       <div className="d-flex gap-2 flex-wrap justify-content-end mb-3">
         <a className="btn btn-secondary btn-sm" href={`/api/reports/export/pdf?month=${month}`}>
-          ⬇ Export PDF
+          {t('rep.exportPdf')}
         </a>
         <button type="button" className="btn btn-secondary btn-sm" onClick={exportImage} disabled={capturing}>
           {capturing && <span className="spinner" aria-hidden="true" />}
-          {capturing ? 'Preparing…' : '⬇ Export image'}
+          {capturing ? t('rep.preparing') : t('rep.exportImage')}
         </button>
         <button type="button" className="btn btn-secondary btn-sm" onClick={() => setShareOpen(true)}>
-          ✉ Email
+          {t('rep.emailBtn')}
         </button>
       </div>
 
@@ -346,7 +349,7 @@ export default function Reports() {
 
       <div ref={reportRef}>
         <div className="d-flex align-items-center justify-content-between mb-2">
-          <h2 className="mb-0">{TABS.find((t) => t.id === tab)?.label}</h2>
+          <h2 className="mb-0">{t(TABS.find((x) => x.id === tab)?.label)}</h2>
           <span className="smallish muted num">{monthLabel(month)}</span>
         </div>
 
@@ -354,7 +357,7 @@ export default function Reports() {
           <div className="card" role="status">
             <div className="d-flex align-items-center gap-2 muted">
               <span className="spinner" aria-hidden="true" />
-              Building your report…
+              {t('rep.building')}
             </div>
             <div className="skeleton mt-3" style={{ height: 220 }} />
           </div>
@@ -371,11 +374,11 @@ export default function Reports() {
             {view.chart}
             <div className="card mt-3">
               <div className="card-title">
-                <span>Same numbers, as a table</span>
+                <span>{t('rep.sameNumbers')}</span>
               </div>
               <div className="table-scroll">
                 <table className="table">
-                  <caption className="visually-hidden">Report table for {monthLabel(month)}</caption>
+                  <caption className="visually-hidden">{t('rep.caption', { month: monthLabel(month) })}</caption>
                   <thead>
                     <tr>
                       {view.table.columns.map((c) => (
@@ -405,22 +408,22 @@ export default function Reports() {
 
       {shareOpen && (
         <Modal
-          title="Email this report"
+          title={t('rep.shareTitle')}
           onClose={() => setShareOpen(false)}
           footer={
             <>
               <button type="button" className="btn btn-ghost" onClick={() => setShareOpen(false)}>
-                Cancel
+                {t('ui.cancel')}
               </button>
               <button type="submit" form="report-share-form" className="btn btn-primary" disabled={sharing}>
                 {sharing && <span className="spinner" aria-hidden="true" />}
-                {sharing ? 'Sending…' : 'Send'}
+                {sharing ? t('rep.sending') : t('ui.send')}
               </button>
             </>
           }
         >
           <form id="report-share-form" onSubmit={sendByEmail} noValidate>
-            <FormField label="Send to" htmlFor="share-email" help={`The ${monthLabel(month)} report as an attachment.`}>
+            <FormField label={t('ui.sendTo')} htmlFor="share-email" help={t('rep.attachHelp', { month: monthLabel(month) })}>
               {(a) => (
                 <input
                   id="share-email"
@@ -434,7 +437,7 @@ export default function Reports() {
                 />
               )}
             </FormField>
-            <FormField label="Message (optional)" htmlFor="share-message">
+            <FormField label={t('rep.messageOptional')} htmlFor="share-message">
               {(a) => (
                 <textarea
                   id="share-message"

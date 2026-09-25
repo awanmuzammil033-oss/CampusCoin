@@ -6,6 +6,7 @@ import FormField from '../components/FormField.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
+import { useLocale } from '../locale.jsx';
 
 const ICONS = {
   wallet: '👛', cup: '☕', bus: '🚌', book: '📚', gift: '🎁', film: '🎞️',
@@ -23,6 +24,7 @@ const ICON_CHOICES = ['wallet', 'cup', 'bus', 'book', 'gift', 'film', 'play', 'h
  * asks where those entries should move instead of orphaning them.
  */
 export default function Categories() {
+  const { t } = useLocale();
   const { push } = useToast();
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
@@ -50,8 +52,8 @@ export default function Categories() {
   }, []);
 
   const groups = [
-    { type: 'income', label: 'Income categories' },
-    { type: 'expense', label: 'Expense categories' },
+    { type: 'income', label: 'cat.groupIncome' },
+    { type: 'expense', label: 'cat.groupExpense' },
   ];
   const byType = (type) => (data?.[type] || []).filter((c) => c.isActive !== false);
 
@@ -69,7 +71,7 @@ export default function Categories() {
     event.preventDefault();
     setDraftError('');
     if (!draft.name.trim()) {
-      setDraftError('Please enter a category name.');
+      setDraftError(t('cat.nameError'));
       return;
     }
 
@@ -77,10 +79,10 @@ export default function Categories() {
     try {
       if (draft.mode === 'new') {
         await api.post('/api/categories', { name: draft.name.trim(), type: draft.type, icon: draft.icon });
-        push('Category added.');
+        push(t('cat.added'));
       } else {
         await api.patch(`/api/categories/${draft.id}`, { name: draft.name.trim(), type: draft.type, icon: draft.icon });
-        push('Category updated.');
+        push(t('cat.updated'));
       }
       setDraft(null);
       load();
@@ -96,7 +98,7 @@ export default function Categories() {
     setSaving(true);
     try {
       await api.del(`/api/categories/${target.id}`);
-      push('Category removed.');
+      push(t('cat.removed'));
       setRemoving(null);
       load();
     } catch (err) {
@@ -108,7 +110,12 @@ export default function Categories() {
         if (others.length) {
           setReassign({ category: target, message: '', targetId: others[0].id });
         } else {
-          push(`This category has entries and there is nowhere to move them yet — add another ${target.type} category first.`, 'error');
+          push(
+          t('cat.needsTarget', {
+            type: t(target.type === 'income' ? 'cat.kindIncome' : 'cat.kindSpending'),
+          }),
+          'error'
+        );
         }
       } else {
         push(err.message, 'error');
@@ -122,7 +129,7 @@ export default function Categories() {
     setSaving(true);
     try {
       await api.del(`/api/categories/${reassign.category.id}`, { reassignTo: reassign.targetId });
-      push('Category removed and its entries moved across.');
+      push(t('cat.removedMoved'));
       setReassign(null);
       load();
     } catch (err) {
@@ -134,9 +141,9 @@ export default function Categories() {
 
   return (
     <Page
-      trail={[{ label: 'Categories' }]}
-      title="Your categories"
-      subtitle="The defaults come with the app — everything else is yours to shape."
+      trail={[{ label: t('nav.categories') }]}
+      title={t('cat.title')}
+      subtitle={t('cat.subtitle')}
     >
       {error && (
         <div className="field-error mb-3" role="alert">
@@ -150,7 +157,7 @@ export default function Categories() {
           <div className="skeleton" style={{ height: 44, marginBottom: 10 }} />
           <div className="skeleton" style={{ height: 44, marginBottom: 10 }} />
           <div className="skeleton" style={{ height: 44 }} />
-          <p className="smallish muted mb-0 mt-3">Loading your categories…</p>
+          <p className="smallish muted mb-0 mt-3">{t('cat.loading')}</p>
         </div>
       )}
 
@@ -160,15 +167,17 @@ export default function Categories() {
           return (
             <section className="card mb-3" key={group.type}>
               <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-                <h2 className="mb-0">{group.label}</h2>
+                <h2 className="mb-0">{t(group.label)}</h2>
                 <button type="button" className="btn btn-secondary btn-sm" onClick={() => openNew(group.type)}>
-                  + Add category
+                  {t('cat.addBtn')}
                 </button>
               </div>
 
               {items.length === 0 ? (
-                <EmptyState icon="🏷️" title="Nothing here yet">
-                  Add {group.type === 'income' ? 'income' : 'spending'} categories to organise your entries.
+                <EmptyState icon="🏷️" title={t('cat.emptyTitle')}>
+                  {t('cat.emptyBody', {
+                    kind: t(group.type === 'income' ? 'cat.kindIncome' : 'cat.kindSpending'),
+                  })}
                 </EmptyState>
               ) : (
                 <div className="card" style={{ padding: 0 }}>
@@ -182,8 +191,8 @@ export default function Categories() {
                           <span className="txn-desc">{category.name}</span>
                         </span>
                         {category.isDefault && (
-                          <span className="pill" title="Managed by administrators">
-                            Default
+                          <span className="pill" title={t('cat.defaultPillTitle')}>
+                            {t('cat.defaultPill')}
                           </span>
                         )}
                         {!category.isDefault && (
@@ -192,8 +201,8 @@ export default function Categories() {
                               type="button"
                               className="icon-btn"
                               onClick={() => openEdit(category)}
-                              aria-label={`Edit ${category.name}`}
-                              title="Edit"
+                              aria-label={t('tx.editAria', { name: category.name })}
+                              title={t('ui.edit')}
                             >
                               ✏️
                             </button>
@@ -201,8 +210,8 @@ export default function Categories() {
                               type="button"
                               className="icon-btn"
                               onClick={() => setRemoving(category)}
-                              aria-label={`Delete ${category.name}`}
-                              title="Delete"
+                              aria-label={t('tx.deleteAria', { name: category.name })}
+                              title={t('ui.delete')}
                             >
                               🗑
                             </button>
@@ -216,7 +225,7 @@ export default function Categories() {
 
               {items.some((c) => c.isDefault) && (
                 <p className="smallish muted mb-0 mt-2">
-                  Categories marked <span className="pill">Default</span> are managed by administrators.
+                  {t('cat.managedF1')} <span className="pill">{t('cat.defaultPill')}</span> {t('cat.managedF2')}
                 </p>
               )}
             </section>
@@ -225,7 +234,11 @@ export default function Categories() {
 
       {draft && (
         <Modal
-          title={draft.mode === 'new' ? `New ${draft.type} category` : 'Edit category'}
+          title={
+          draft.mode === 'new'
+            ? t('cat.newByType', { type: draft.type === 'income' ? t('ui.income') : t('ui.expense') })
+            : t('cat.editTitle')
+        }
           onClose={() => setDraft(null)}
           footer={
             <>
@@ -234,7 +247,7 @@ export default function Categories() {
               </button>
               <button type="submit" form="category-draft-form" className="btn btn-primary" disabled={saving}>
                 {saving && <span className="spinner" aria-hidden="true" />}
-                {saving ? 'Saving…' : 'Save'}
+                {saving ? t('ui.saving') : t('ui.save')}
               </button>
             </>
           }
@@ -247,7 +260,7 @@ export default function Categories() {
               </div>
             )}
 
-            <FormField label="Name" htmlFor="category-name" help="Unique per type — duplicates are refused.">
+            <FormField label={t('ui.name')} htmlFor="category-name" help={t('cat.nameHelp')}>
               {(a) => (
                 <input
                   id="category-name"
@@ -261,12 +274,12 @@ export default function Categories() {
               )}
             </FormField>
 
-            <FormField label="Type" htmlFor="category-type" help="Fixed once entries exist under it.">
+            <FormField label={t('ui.type')} htmlFor="category-type" help={t('cat.typeHelp')}>
               {(a) => (
                 <input
                   id="category-type"
                   className="input"
-                  value={draft.type === 'income' ? 'Income' : 'Expense'}
+                  value={draft.type === 'income' ? t('ui.income') : t('ui.expense')}
                   readOnly
                   disabled={draft.mode === 'edit'}
                   {...a}
@@ -274,7 +287,7 @@ export default function Categories() {
               )}
             </FormField>
 
-            <FormField label="Icon" htmlFor="category-icon">
+            <FormField label={t('ui.icon')} htmlFor="category-icon">
               {(a) => (
                 <select
                   id="category-icon"
@@ -285,7 +298,7 @@ export default function Categories() {
                 >
                   {ICON_CHOICES.map((name) => (
                     <option key={name} value={name}>
-                      {glyph(name)} {name}
+                      {glyph(name)} {t(`cat.icon.${name}`)}
                     </option>
                   ))}
                 </select>
@@ -297,7 +310,7 @@ export default function Categories() {
 
       {removing && (
         <Modal
-          title="Delete this category?"
+          title={t('cat.delTitle')}
           onClose={() => setRemoving(null)}
           footer={
             <>
@@ -306,21 +319,20 @@ export default function Categories() {
               </button>
               <button type="button" className="btn btn-danger-outline" onClick={confirmRemove} disabled={saving}>
                 {saving && <span className="spinner" aria-hidden="true" />}
-                {saving ? 'Working…' : 'Delete category'}
+                {saving ? t('cat.working') : t('cat.delBtn')}
               </button>
             </>
           }
         >
           <p className="mb-0">
-            “{removing.name}” disappears from the pickers. If entries already use it, we will ask where to move
-            them first.
+            {t('cat.delBody', { name: removing.name })}
           </p>
         </Modal>
       )}
 
       {reassign && (
         <Modal
-          title="Where should the entries go?"
+          title={t('cat.reassignTitle')}
           onClose={() => setReassign(null)}
           footer={
             <>
@@ -329,16 +341,15 @@ export default function Categories() {
               </button>
               <button type="button" className="btn btn-primary" onClick={confirmReassign} disabled={saving}>
                 {saving && <span className="spinner" aria-hidden="true" />}
-                Move &amp; delete
+                {t('cat.moveBtn')}
               </button>
             </>
           }
         >
           <p>
-            “{reassign.category.name}” still has entries. Pick the category they should live under instead — the
-            numbers themselves never change.
+            {t('cat.reassignBody', { name: reassign.category.name })}
           </p>
-          <FormField label="Move entries to" htmlFor="reassign-target">
+          <FormField label={t('cat.moveTo')} htmlFor="reassign-target">
             {(a) => (
               <select
                 id="reassign-target"

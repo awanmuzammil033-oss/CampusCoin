@@ -10,10 +10,7 @@ import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
-
-function monthLabel() {
-  return new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-}
+import { useLocale } from '../locale.jsx';
 
 /** Category icons are stored as names, so a tiny glyph map keeps rows visual. */
 const ICONS = {
@@ -24,18 +21,20 @@ function glyph(name) {
   return ICONS[name] || '🏷️';
 }
 
-function dayLabel(value) {
-  const [y, m, d] = String(value || '').slice(0, 10).split('-').map(Number);
-  if (!y || !m || !d) return '';
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
 /**
  * The home screen once signed in: this month's money at a glance, the two
  * widgets from the brief, the charts, and a way back into logging an entry.
  */
 export default function Dashboard() {
+  const { t, language, plural } = useLocale();
   const { user } = useAuth();
+  // Month/day names follow the active language (en → 'September 2026', tr → 'Eylül 2026').
+  const monthLabel = () => new Date().toLocaleDateString(language || 'en', { month: 'long', year: 'numeric' });
+  const dayLabel = (value) => {
+    const [y, m, d] = String(value || '').slice(0, 10).split('-').map(Number);
+    if (!y || !m || !d) return '';
+    return new Date(y, m - 1, d).toLocaleDateString(language || 'en', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
   const { push } = useToast();
   const [summary, setSummary] = useState(null);
   const [charts, setCharts] = useState(null);
@@ -78,23 +77,23 @@ export default function Dashboard() {
   const trendData = {
     labels: trendRows.map((r) => r.label),
     datasets: [
-      { label: 'Income', data: trendRows.map((r) => Number(r.income)), backgroundColor: 'var(--cc-income)' },
-      { label: 'Expense', data: trendRows.map((r) => Number(r.expense)), backgroundColor: 'var(--cc-expense)' },
+      { label: t('ui.income'), data: trendRows.map((r) => Number(r.income)), backgroundColor: 'var(--cc-income)' },
+      { label: t('ui.expense'), data: trendRows.map((r) => Number(r.expense)), backgroundColor: 'var(--cc-expense)' },
     ],
   };
 
   return (
     <Page
-      trail={[{ label: 'Dashboard' }]}
-      title={`Hi, ${firstName} 👋`}
+      trail={[{ label: t('nav.dashboard') }]}
+      title={t('dash.hi', { name: firstName })}
       subtitle={monthLabel()}
       actions={
         <>
           <Link className="btn btn-secondary" to="/transactions/new?type=income">
-            + Add Income
+            {t('dash.addIncome')}
           </Link>
           <Link className="btn btn-primary" to="/transactions/new?type=expense">
-            − Add Expense
+            {t('dash.addExpense')}
           </Link>
         </>
       }
@@ -102,7 +101,7 @@ export default function Dashboard() {
       {error && (
         <div className="field-error mb-3" role="alert">
           <span aria-hidden="true">⚠</span>
-          <span>{error} Your entries are safe — try loading the page again.</span>
+          <span>{t('dash.errorSafe', { msg: error })}</span>
         </div>
       )}
 
@@ -127,17 +126,17 @@ export default function Dashboard() {
           <div className="d-grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
             <div className="card">
               <div className="card-title">
-                <span>Balance · {monthLabel()}</span>
+                <span>{t('dash.balanceMonth', { month: monthLabel() })}</span>
               </div>
               <div className="balance-display">{money(summary.balance)}</div>
               <div className="d-flex gap-4 mt-2 flex-wrap">
                 <div>
                   <div className="amount-income num">+ ↑ {money(summary.income)}</div>
-                  <div className="smallish muted">Income · {summary.counts?.income ?? 0} entries</div>
+                  <div className="smallish muted">{plural('dash.incomeCount', summary.counts?.income ?? 0, { n: summary.counts?.income ?? 0 })}</div>
                 </div>
                 <div>
                   <div className="amount-expense num">− ↓ {money(summary.expense)}</div>
-                  <div className="smallish muted">Expenses · {summary.counts?.expense ?? 0} entries</div>
+                  <div className="smallish muted">{plural('dash.expenseCount', summary.counts?.expense ?? 0, { n: summary.counts?.expense ?? 0 })}</div>
                 </div>
               </div>
             </div>
@@ -145,20 +144,20 @@ export default function Dashboard() {
             {summary.savingsGoal && (
               <div className="card">
                 <div className="card-title">
-                  <span>Savings goal</span>
+                  <span>{t('dash.savingsGoal')}</span>
                   <Link className="btn btn-ghost btn-sm" to="/profile">
-                    Adjust
+                    {t('dash.adjust')}
                   </Link>
                 </div>
                 <Progress
                   variant="goal"
                   pct={summary.savingsGoal.pct}
-                  label={`${money(summary.savingsGoal.saved)} saved of ${money(summary.savingsGoal.goal)}`}
+                  label={t('dash.savedOf', { saved: money(summary.savingsGoal.saved), goal: money(summary.savingsGoal.goal) })}
                 />
                 <p className="smallish muted mb-0 mt-3">
                   {summary.savingsGoal.saved >= summary.savingsGoal.goal
-                    ? `Goal reached — ${money(summary.savingsGoal.saved - summary.savingsGoal.goal)} beyond target, still under budget.`
-                    : `${money(summary.savingsGoal.goal - summary.savingsGoal.saved)} to go — adjust the goal in your profile.`}
+                    ? t('dash.goalReached', { amount: money(summary.savingsGoal.saved - summary.savingsGoal.goal) })
+                    : t('dash.toGo', { amount: money(summary.savingsGoal.goal - summary.savingsGoal.saved) })}
                 </p>
               </div>
             )}
@@ -168,7 +167,7 @@ export default function Dashboard() {
           <div className="d-grid gap-3 mt-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
             <div className="card">
               <div className="card-title">
-                <span>This Month's Top Category</span>
+                <span>{t('dash.topCategory')}</span>
               </div>
               {summary.topCategory ? (
                 <div className="d-flex align-items-center gap-3">
@@ -179,18 +178,18 @@ export default function Dashboard() {
                     <div style={{ fontWeight: 600 }}>{summary.topCategory.name}</div>
                     <div className="num">{money(summary.topCategory.amount)}</div>
                   </div>
-                  <span className="pill pill-expense num">{summary.topCategory.share}% of spending</span>
+                  <span className="pill pill-expense num">{t('dash.pctOfSpending', { pct: summary.topCategory.share })}</span>
                 </div>
               ) : (
-                <p className="muted mb-0">No expenses logged this month yet.</p>
+                <p className="muted mb-0">{t('dash.noExpensesYet')}</p>
               )}
             </div>
 
             <div className="card">
               <div className="card-title">
-                <span>Budget vs Actual</span>
+                <span>{t('dash.budgetVsActual')}</span>
                 <Link className="btn btn-ghost btn-sm" to="/budgets">
-                  Manage budgets
+                  {t('dash.manageBudgets')}
                 </Link>
               </div>
               {summary.budgets?.length ? (
@@ -199,14 +198,12 @@ export default function Dashboard() {
                     <Progress
                       key={b.id}
                       pct={b.pct}
-                      label={`${b.category.name} · ${money(b.spent)} of ${money(b.limit)}`}
+                      label={t('dash.budgetRow', { category: b.category.name, spent: money(b.spent), limit: money(b.limit) })}
                     />
                   ))}
                 </div>
               ) : (
-                <p className="muted mb-0">
-                  No limits for {monthLabel()} yet — set one and you get a nudge at 80%.
-                </p>
+                <p className="muted mb-0">{t('dash.noLimits', { month: monthLabel() })}</p>
               )}
             </div>
           </div>
@@ -215,19 +212,19 @@ export default function Dashboard() {
             <div className="card mt-3">
               <EmptyState
                 icon="💰"
-                title="No entries yet"
+                title={t('dash.emptyTitle')}
                 action={
                   <div className="d-flex gap-2 justify-content-center flex-wrap mt-2">
                     <Link className="btn btn-primary" to="/transactions/new?type=expense">
-                      Log your first expense
+                      {t('dash.emptyLogExpense')}
                     </Link>
                     <Link className="btn btn-secondary" to="/transactions/new?type=income">
-                      Add income
+                      {t('dash.emptyAddIncome')}
                     </Link>
                   </div>
                 }
               >
-                Log your first one — it takes 10 seconds.
+                {t('dash.emptyBody')}
               </EmptyState>
             </div>
           ) : (
@@ -235,24 +232,24 @@ export default function Dashboard() {
               {/* charts sit side by side and stack on small screens */}
               <div className="d-grid gap-3 mt-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))' }}>
                 <ChartCard
-                  title="Spending by category"
+                  title={t('dash.chartSpending')}
                   type="doughnut"
                   data={charts ? doughnutData : { labels: [], datasets: [] }}
                   loading={!charts}
-                  emptyText="No expenses to chart for this month."
+                  emptyText={t('dash.chartSpendingEmpty')}
                   table={{
-                    columns: ['Category', 'Amount'],
+                    columns: [t('ui.category'), t('ui.amount')],
                     rows: doughnutRows.map((r) => [r.category, money(r.total)]),
                   }}
                 />
                 <ChartCard
-                  title="Income vs Expense (6 mo)"
+                  title={t('dash.chartTrend')}
                   type="bar"
                   data={charts ? trendData : { labels: [], datasets: [] }}
                   loading={!charts}
-                  emptyText="Once there are a few months of entries the trend appears here."
+                  emptyText={t('dash.chartTrendEmpty')}
                   table={{
-                    columns: ['Month', 'Income', 'Expense'],
+                    columns: [t('ui.month'), t('ui.income'), t('ui.expense')],
                     rows: trendRows.map((r) => [r.label, money(r.income), money(r.expense)]),
                   }}
                 />
@@ -260,9 +257,9 @@ export default function Dashboard() {
 
               <section className="mt-4">
                 <div className="d-flex align-items-center justify-content-between mb-2">
-                  <h2 className="mb-0">💡 Top saving tips</h2>
+                  <h2 className="mb-0">💡 {t('dash.tipsTitle')}</h2>
                   <Link className="btn btn-ghost btn-sm" to="/tips">
-                    See all tips
+                    {t('dash.seeAllTips')}
                   </Link>
                 </div>
                 {summary.tips?.length ? (
@@ -272,22 +269,20 @@ export default function Dashboard() {
                         <div className="d-flex align-items-start gap-3">
                           <p className="flex-grow-1 mb-0">{tip.text}</p>
                           {tip.potentialSavings > 0 && (
-                            <span className="tip-saving">Save ~{money(tip.potentialSavings)}</span>
+                            <span className="tip-saving">{t('ui.saveApprox', { amount: money(tip.potentialSavings) })}</span>
                           )}
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="muted mb-0">
-                    Tips appear once there is a month of entries to learn from.
-                  </p>
+                  <p className="muted mb-0">{t('dash.tipsEmpty')}</p>
                 )}
               </section>
 
               {summary.recent?.length > 0 && (
                 <section className="mt-4">
-                  <h2 className="mb-2">Recently edited</h2>
+                  <h2 className="mb-2">{t('dash.recentlyEdited')}</h2>
                   <div className="card" style={{ padding: 0 }}>
                     <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                       {summary.recent.map((row, i) => (
@@ -301,9 +296,9 @@ export default function Dashboard() {
                               🧾
                             </span>
                             <span className="txn-main">
-                              <span className="txn-desc">{row.description || 'Untitled entry'}</span>
+                              <span className="txn-desc">{row.description || t('dash.untitled')}</span>
                               <span className="txn-meta">
-                                {row.category || 'Uncategorised'} · {dayLabel(row.date)}
+                                {row.category || t('dash.uncategorised')} · {dayLabel(row.date)}
                               </span>
                             </span>
                             <span

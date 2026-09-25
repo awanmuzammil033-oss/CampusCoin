@@ -7,12 +7,14 @@ import Pagination from '../../components/Pagination.jsx';
 import { api, qs } from '../../api.js';
 import { useAuth } from '../../auth.jsx';
 import { useToast } from '../../components/Toast.jsx';
+import { useLocale } from '../../locale.jsx';
+import { uiLang } from '../../dates.js';
 
 function dayLabel(value) {
   if (!value) return '—';
   const [y, m, d] = String(value).slice(0, 10).split('-').map(Number);
   if (!y || !m || !d) return '—';
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+  return new Date(y, m - 1, d).toLocaleDateString(uiLang(), { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function readRows(payload) {
@@ -27,6 +29,7 @@ function readRows(payload) {
 export default function ControlUsers() {
   const { user } = useAuth();
   const { push } = useToast();
+  const { t } = useLocale();
   const [search, setSearch] = useState('');
   const [query, setQuery] = useState({ q: '', page: 1 });
   const [data, setData] = useState(null);
@@ -72,7 +75,7 @@ export default function ControlUsers() {
     setBusyId(row.id);
     try {
       await api.post(`/api/control/users/${row.id}/${enabling ? 'enable' : 'disable'}`);
-      push(enabling ? `${row.email} can sign in again.` : `${row.email} has been disabled.`);
+      push(enabling ? t('ctl.canSignIn', { email: row.email }) : t('ctl.hasBeenDisabled', { email: row.email }));
       setReloadKey((k) => k + 1);
     } catch (err) {
       push(err.message, 'error');
@@ -85,7 +88,7 @@ export default function ControlUsers() {
     setSendingTo(row.id);
     try {
       await api.post(`/api/control/users/${row.id}/reset`);
-      push(`Reset link sent to ${row.email}.`);
+      push(t('ctl.resetSent', { email: row.email }));
     } catch (err) {
       push(err.message, 'error');
     } finally {
@@ -99,19 +102,19 @@ export default function ControlUsers() {
 
   return (
     <Page
-      trail={[{ label: 'Control', to: '/control' }, { label: 'Users' }]}
-      title="Users"
-      subtitle="Accounts only — never the entries behind them."
+      trail={[{ label: t('ctl.trail'), to: '/control' }, { label: t('ctl.navUsers') }]}
+      title={t('ctl.navUsers')}
+      subtitle={t('ctl.usersSubtitle')}
     >
       <div className="card mb-3">
         <div style={{ maxWidth: 380 }}>
-          <FormField label="Search by name or email" htmlFor="control-user-search">
+          <FormField label={t('ctl.userSearch')} htmlFor="control-user-search">
             {(a) => (
               <input
                 id="control-user-search"
                 type="search"
                 className="input"
-                placeholder="e.g. aisha or @campus.edu"
+                placeholder={t('ctl.userSearchPh')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 {...a}
@@ -133,7 +136,7 @@ export default function ControlUsers() {
           <div className="skeleton" style={{ height: 44, marginBottom: 10 }} />
           <div className="skeleton" style={{ height: 44, marginBottom: 10 }} />
           <div className="skeleton" style={{ height: 44 }} />
-          <p className="smallish muted mb-0 mt-3">Loading accounts…</p>
+          <p className="smallish muted mb-0 mt-3">{t('ctl.loadingAccounts')}</p>
         </div>
       )}
 
@@ -141,16 +144,16 @@ export default function ControlUsers() {
         <div className="card">
           <EmptyState
             icon="👥"
-            title={searched ? 'No accounts match that search' : 'No accounts yet'}
+            title={searched ? t('ctl.noMatch') : t('ctl.noAccounts')}
             action={
               searched ? (
                 <button type="button" className="btn btn-secondary mt-2" onClick={() => setSearch('')}>
-                  Clear search
+                  {t('ctl.clearSearch')}
                 </button>
               ) : undefined
             }
           >
-            {searched ? 'Try part of a name or the domain part of an address.' : 'Registered students appear here.'}
+            {searched ? t('ctl.tryPart') : t('ctl.registeredHere')}
           </EmptyState>
         </div>
       )}
@@ -159,14 +162,14 @@ export default function ControlUsers() {
         <div className="card" style={{ padding: 0 }}>
           <div className="table-scroll">
             <table className="table">
-              <caption className="visually-hidden">Student accounts</caption>
+              <caption className="visually-hidden">{t('ctl.accountsCaption')}</caption>
               <thead>
                 <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">Email</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Joined</th>
-                  <th scope="col">Actions</th>
+                  <th scope="col">{t('ui.name')}</th>
+                  <th scope="col">{t('ui.email')}</th>
+                  <th scope="col">{t('ui.status')}</th>
+                  <th scope="col">{t('ctl.joined')}</th>
+                  <th scope="col">{t('ui.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -177,10 +180,10 @@ export default function ControlUsers() {
                     <tr key={row.id}>
                       <td>
                         <strong>{row.name}</strong>
-                        {isMe && <span className="pill" style={{ marginLeft: 8 }}>You</span>}
+                        {isMe && <span className="pill" style={{ marginLeft: 8 }}>{t('ctl.you')}</span>}
                       </td>
                       <td>{row.email}</td>
-                      <td>{active ? <span className="pill pill-income">Active</span> : <span className="pill">Disabled</span>}</td>
+                      <td>{active ? <span className="pill pill-income">{t('ctl.active')}</span> : <span className="pill">{t('ctl.disabled')}</span>}</td>
                       <td className="num">{dayLabel(row.createdAt || row.joinedAt)}</td>
                       <td>
                         <div className="d-flex gap-2 flex-wrap">
@@ -188,21 +191,21 @@ export default function ControlUsers() {
                             type="button"
                             className={`btn btn-sm ${active ? 'btn-danger-outline' : 'btn-secondary'}`}
                             disabled={busyId === row.id || isMe}
-                            title={isMe ? 'You cannot disable your own account' : undefined}
+                            title={isMe ? t('ctl.noDisableSelf') : undefined}
                             onClick={() => toggleDisabled(row)}
                           >
                             {busyId === row.id && <span className="spinner" aria-hidden="true" />}
-                            {active ? 'Disable' : 'Enable'}
+                            {active ? t('ctl.disable') : t('ctl.enable')}
                           </button>
                           <button
                             type="button"
                             className="btn btn-ghost btn-sm"
                             disabled={sendingTo === row.id || !active}
                             onClick={() => sendReset(row)}
-                            aria-label={`Send a password reset link to ${row.email}`}
+                            aria-label={t('ctl.sendResetAria', { email: row.email })}
                           >
                             {sendingTo === row.id && <span className="spinner" aria-hidden="true" />}
-                            {sendingTo === row.id ? 'Sending…' : 'Send reset link'}
+                            {sendingTo === row.id ? t('ui.sending') : t('auth.sendResetLink')}
                           </button>
                         </div>
                       </td>
@@ -224,8 +227,7 @@ export default function ControlUsers() {
       )}
 
       <p className="smallish muted mt-3 mb-0">
-        <span aria-hidden="true"> ℹ️</span> No transaction details are shown here — student entries stay private
-        to each account.
+        <span aria-hidden="true"> ℹ️</span> {t('ctl.usersPrivacy')}
       </p>
     </Page>
   );

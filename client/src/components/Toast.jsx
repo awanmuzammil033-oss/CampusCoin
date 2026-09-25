@@ -1,10 +1,12 @@
 import { createContext, useContext, useState, useCallback, useRef } from 'react';
+import { useLocale } from '../locale.jsx';
 
 const ToastContext = createContext(null);
 
 /** Small transient messages: success disappears on its own, errors stay
  *  until dismissed, and the region is polite for screen readers. */
 export function ToastProvider({ children }) {
+  const { t } = useLocale();
   const [toasts, setToasts] = useState([]);
   const idRef = useRef(0);
 
@@ -26,16 +28,16 @@ export function ToastProvider({ children }) {
     <ToastContext.Provider value={{ push }}>
       {children}
       <div className="toast-region" role="status" aria-live="polite">
-        {toasts.map((t) => (
-          <div key={t.id} className={`toast ${t.kind === 'error' ? 'toast-error' : ''}`}>
+        {toasts.map((toast) => (
+          <div key={toast.id} className={`toast ${toast.kind === 'error' ? 'toast-error' : ''}`}>
             <div className="d-flex align-items-start gap-2">
-              <span aria-hidden="true">{t.kind === 'error' ? '⚠' : '✓'}</span>
-              <span>{t.message}</span>
+              <span aria-hidden="true">{toast.kind === 'error' ? '⚠' : '✓'}</span>
+              <span>{toast.message}</span>
               <button
                 type="button"
                 className="btn btn-ghost btn-sm ms-auto"
-                onClick={() => dismiss(t.id)}
-                aria-label="Dismiss message"
+                onClick={() => dismiss(toast.id)}
+                aria-label={t('ui.dismiss')}
               >
                 ✕
               </button>

@@ -5,6 +5,7 @@ import Modal from '../../components/Modal.jsx';
 import FormField from '../../components/FormField.jsx';
 import { api } from '../../api.js';
 import { useToast } from '../../components/Toast.jsx';
+import { useLocale } from '../../locale.jsx';
 
 const ICONS = {
   wallet: '👛', cup: '☕', bus: '🚌', book: '📚', gift: '🎁', film: '🎞️',
@@ -26,6 +27,7 @@ function readRows(payload) {
 /** ADM-1: the default categories every student starts with. */
 export default function ControlCategories() {
   const { push } = useToast();
+  const { t } = useLocale();
   const [rows, setRows] = useState(null);
   const [error, setError] = useState('');
   const [draft, setDraft] = useState(null); // { mode, id?, name, type, icon }
@@ -65,17 +67,17 @@ export default function ControlCategories() {
     event.preventDefault();
     setDraftError('');
     if (!draft.name.trim()) {
-      setDraftError('Please enter a name.');
+      setDraftError(t('ctl.needName'));
       return;
     }
     setSaving(true);
     try {
       if (draft.mode === 'new') {
         await api.post('/api/control/categories', { name: draft.name.trim(), type: draft.type, icon: draft.icon });
-        push('Category added for every student.');
+        push(t('ctl.catAdded'));
       } else {
         await api.patch(`/api/control/categories/${draft.id}`, { name: draft.name.trim(), type: draft.type, icon: draft.icon });
-        push('Category updated.');
+        push(t('ctl.catUpdated'));
       }
       setDraft(null);
       load();
@@ -91,7 +93,7 @@ export default function ControlCategories() {
     try {
       await api.del(`/api/control/categories/${removing.id}`);
       setRemoving(null);
-      push('Category retired — students keep the entries already filed under it.');
+      push(t('ctl.catRetired'));
       load();
     } catch (err) {
       push(err.message, 'error');
@@ -101,18 +103,18 @@ export default function ControlCategories() {
   }
 
   const groups = [
-    { type: 'income', label: 'Income categories' },
-    { type: 'expense', label: 'Expense categories' },
+    { type: 'income', label: 'ctl.incomeCats' },
+    { type: 'expense', label: 'ctl.expenseCats' },
   ];
 
   return (
     <Page
-      trail={[{ label: 'Control', to: '/control' }, { label: 'Categories' }]}
-      title="Default categories"
-      subtitle="The starting set every student sees in their pickers."
+      trail={[{ label: t('ctl.trail'), to: '/control' }, { label: t('ctl.navCategories') }]}
+      title={t('ctl.catTitle')}
+      subtitle={t('ctl.catSubtitle')}
       actions={
         <button type="button" className="btn btn-primary" onClick={openNew}>
-          + Add default category
+          {t('ctl.addDefault')}
         </button>
       }
     >
@@ -128,7 +130,7 @@ export default function ControlCategories() {
           <div className="skeleton" style={{ height: 44, marginBottom: 10 }} />
           <div className="skeleton" style={{ height: 44, marginBottom: 10 }} />
           <div className="skeleton" style={{ height: 44 }} />
-          <p className="smallish muted mb-0 mt-3">Loading categories…</p>
+          <p className="smallish muted mb-0 mt-3">{t('ctl.loadingCats')}</p>
         </div>
       )}
 
@@ -139,18 +141,18 @@ export default function ControlCategories() {
           return (
             <section className="card mb-3" key={group.type}>
               <div className="card-title">
-                <span>{group.label}</span>
+                <span>{t(group.label)}</span>
                 <span className="pill num">{items.length}</span>
               </div>
               <div className="table-scroll">
                 <table className="table">
-                  <caption className="visually-hidden">{group.label}</caption>
+                  <caption className="visually-hidden">{t(group.label)}</caption>
                   <thead>
                     <tr>
-                      <th scope="col">Name</th>
-                      <th scope="col">Type</th>
-                      <th scope="col">Status</th>
-                      <th scope="col">Actions</th>
+                      <th scope="col">{t('ui.name')}</th>
+                      <th scope="col">{t('ui.type')}</th>
+                      <th scope="col">{t('ui.status')}</th>
+                      <th scope="col">{t('ui.actions')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -162,18 +164,18 @@ export default function ControlCategories() {
                             <strong>{row.name}</strong>
                           </span>
                         </td>
-                        <td>{row.type === 'income' ? 'Income' : 'Expense'}</td>
+                        <td>{row.type === 'income' ? t('ui.income') : t('ui.expense')}</td>
                         <td>
                           {row.isActive === false ? (
-                            <span className="pill">⏸ Retired</span>
+                            <span className="pill">{t('ctl.retired')}</span>
                           ) : (
-                            <span className="pill pill-income">▶ Active</span>
+                            <span className="pill pill-income">{t('ctl.activePill')}</span>
                           )}
                         </td>
                         <td>
                           <div className="d-flex gap-2">
                             <button type="button" className="btn btn-secondary btn-sm" onClick={() => openEdit(row)}>
-                              Edit
+                              {t('ui.edit')}
                             </button>
                             <button
                               type="button"
@@ -181,7 +183,7 @@ export default function ControlCategories() {
                               onClick={() => setRemoving(row)}
                               disabled={row.isActive === false}
                             >
-                              Remove
+                              {t('ui.remove')}
                             </button>
                           </div>
                         </td>
@@ -196,16 +198,16 @@ export default function ControlCategories() {
 
       {draft && (
         <Modal
-          title={draft.mode === 'new' ? 'Add default category' : 'Edit category'}
+          title={draft.mode === 'new' ? t('ctl.addDefault') : t('ctl.editCategory')}
           onClose={() => setDraft(null)}
           footer={
             <>
               <button type="button" className="btn btn-ghost" onClick={() => setDraft(null)}>
-                Cancel
+                {t('ui.cancel')}
               </button>
               <button type="submit" form="control-category-form" className="btn btn-primary" disabled={saving}>
                 {saving && <span className="spinner" aria-hidden="true" />}
-                {saving ? 'Saving…' : 'Save'}
+                {saving ? t('ui.saving') : t('ui.save')}
               </button>
             </>
           }
@@ -218,7 +220,7 @@ export default function ControlCategories() {
               </div>
             )}
 
-            <FormField label="Name" htmlFor="control-category-name">
+            <FormField label={t('ui.name')} htmlFor="control-category-name">
               {(a) => (
                 <input
                   id="control-category-name"
@@ -234,7 +236,7 @@ export default function ControlCategories() {
 
             <div className="field">
               <span id="control-type-label" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: 6 }}>
-                Type
+                {t('ui.type')}
               </span>
               <div className="chip-grid" role="group" aria-labelledby="control-type-label">
                 <button
@@ -243,7 +245,7 @@ export default function ControlCategories() {
                   aria-pressed={draft.type === 'income'}
                   onClick={() => setDraft((d) => ({ ...d, type: 'income' }))}
                 >
-                  + Income
+                  {t('txf.incomeChip')}
                 </button>
                 <button
                   type="button"
@@ -251,12 +253,12 @@ export default function ControlCategories() {
                   aria-pressed={draft.type === 'expense'}
                   onClick={() => setDraft((d) => ({ ...d, type: 'expense' }))}
                 >
-                  − Expense
+                  {t('txf.expenseChip')}
                 </button>
               </div>
             </div>
 
-            <FormField label="Icon" htmlFor="control-category-icon">
+            <FormField label={t('ui.icon')} htmlFor="control-category-icon">
               {(a) => (
                 <select
                   id="control-category-icon"
@@ -267,7 +269,7 @@ export default function ControlCategories() {
                 >
                   {ICON_CHOICES.map((name) => (
                     <option key={name} value={name}>
-                      {glyph(name)} {name}
+                      {glyph(name)} {t(`cat.icon.${name}`)}
                     </option>
                   ))}
                 </select>
@@ -279,23 +281,22 @@ export default function ControlCategories() {
 
       {removing && (
         <Modal
-          title="Retire this category?"
+          title={t('ctl.retireTitle')}
           onClose={() => setRemoving(null)}
           footer={
             <>
               <button type="button" className="btn btn-ghost" onClick={() => setRemoving(null)}>
-                Cancel
+                {t('ui.cancel')}
               </button>
               <button type="button" className="btn btn-danger-outline" onClick={removeRow} disabled={saving}>
                 {saving && <span className="spinner" aria-hidden="true" />}
-                {saving ? 'Working…' : 'Remove'}
+                {saving ? t('ui.working') : t('ui.remove')}
               </button>
             </>
           }
         >
           <p className="mb-0">
-            “{removing.name}” stops appearing in new entries. Existing entries keep their history and remain
-            readable in reports.
+            {t('ctl.retireBody', { name: removing.name })}
           </p>
         </Modal>
       )}

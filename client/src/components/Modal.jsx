@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useLocale } from '../locale.jsx';
 
 /**
  * Modal (design.md §5): focus moves in on open, Tab stays inside,
@@ -6,6 +7,7 @@ import { useEffect, useRef } from 'react';
  * delete confirmations and the quick-add sheet.
  */
 export default function Modal({ title, onClose, children, footer, labelledBy }) {
+  const { t } = useLocale();
   const panelRef = useRef(null);
   const previousFocus = useRef(null);
 
@@ -55,7 +57,7 @@ export default function Modal({ title, onClose, children, footer, labelledBy }) 
       >
         <div className="d-flex align-items-center justify-content-between mb-3">
           <h2 id="modal-title" className="mb-0">{title}</h2>
-          <button type="button" className="icon-btn" onClick={onClose} aria-label="Close dialog">✕</button>
+          <button type="button" className="icon-btn" onClick={onClose} aria-label={t('ui.closeDialog')}>✕</button>
         </div>
         {children}
         {footer && <div className="d-flex gap-2 justify-content-end mt-4">{footer}</div>}

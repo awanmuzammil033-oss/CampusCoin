@@ -123,19 +123,48 @@ export function LocaleProvider({ children }) {
 
   // Per-key fallback: active language → English → the key string itself, so
   // an untranslated (or misspelled) key still shows something readable.
+  // `vars` fills {placeholders}: t('dash.hi', { name: 'Aisha' }).
+  const format = (s, vars) =>
+    vars ? s.replace(/\{(\w+)\}/g, (m, name) => (vars[name] !== undefined ? String(vars[name]) : m)) : s;
+
   const t = useCallback(
-    (key) => {
+    (key, vars) => {
       const dict = dictionaries[language] || dictionaries[language.split('-')[0]];
-      if (dict && dict[key] !== undefined) return dict[key];
-      if (dictionaries.en[key] !== undefined) return dictionaries.en[key];
-      return key;
+      let s;
+      if (dict && dict[key] !== undefined) s = dict[key];
+      else if (dictionaries.en[key] !== undefined) s = dictionaries.en[key];
+      else s = key;
+      return format(s, vars);
+    },
+    [language]
+  );
+
+  // Countable phrases: `plural('dash.incomeCount', n, { n })` picks the key
+  // suffix Intl.PluralRules wants for this language (one/few/many/other) and
+  // falls back to .other, then the bare base key. English ships .one/.other.
+  const plural = useCallback(
+    (base, n, vars) => {
+      const count = Number(n);
+      let cat = 'other';
+      try {
+        cat = new Intl.PluralRules(language).select(count);
+      } catch {}
+      const dict = dictionaries[language] || dictionaries[language.split('-')[0]];
+      let s;
+      if (dict && dict[`${base}.${cat}`] !== undefined) s = dict[`${base}.${cat}`];
+      else if (dictionaries.en[`${base}.${cat}`] !== undefined) s = dictionaries.en[`${base}.${cat}`];
+      else if (dict && dict[`${base}.other`] !== undefined) s = dict[`${base}.other`];
+      else if (dictionaries.en[`${base}.other`] !== undefined) s = dictionaries.en[`${base}.other`];
+      else if (dict && dict[base] !== undefined) s = dict[base];
+      else s = base;
+      return format(s, vars);
     },
     [language]
   );
 
   const value = useMemo(
-    () => ({ language, setLanguage, currency, setCurrency, t, dir }),
-    [language, setLanguage, currency, setCurrency, t, dir]
+    () => ({ language, setLanguage, currency, setCurrency, t, plural, dir }),
+    [language, setLanguage, currency, setCurrency, t, plural, dir]
   );
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;

@@ -1,3 +1,5 @@
+import { useLocale } from '../locale.jsx';
+
 /**
  * Progress bar (BUD-2) with two readings:
  *
@@ -13,6 +15,7 @@
  * seeing colour (design.md §3).
  */
 export default function Progress({ pct, label, variant = 'budget' }) {
+  const { t } = useLocale();
   const parsed = Number(pct);
   const value = Number.isFinite(parsed) ? Math.max(0, Math.round(parsed)) : 0;
   const width = Math.min(100, value);
@@ -25,11 +28,11 @@ export default function Progress({ pct, label, variant = 'budget' }) {
   const icon = goal ? (reached ? '✔' : '⏳') : over ? '⛔' : '✔';
   const toneText = goal
     ? reached
-      ? 'under budget'
-      : 'under goal'
+      ? t('st.underBudget')
+      : t('st.underGoal')
     : over
-      ? 'over budget'
-      : 'under budget';
+      ? t('st.overBudget')
+      : t('st.underBudget');
 
   return (
     <div>

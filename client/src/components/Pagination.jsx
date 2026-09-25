@@ -1,9 +1,12 @@
+import { useLocale } from '../locale.jsx';
+
 /** Pager for list views (TXN-5). Buttons stay 44px for touch. */
 export default function Pagination({ page, pages, onPage }) {
+  const { t } = useLocale();
   if (pages <= 1) return null;
 
   return (
-    <nav className="pagination" aria-label="Pagination">
+    <nav className="pagination" aria-label={t('ui.pagination')}>
       <button type="button" className="page-btn" disabled={page <= 1} onClick={() => onPage(page - 1)}>
         ‹
       </button>

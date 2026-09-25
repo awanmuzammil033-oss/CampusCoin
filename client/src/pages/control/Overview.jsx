@@ -4,9 +4,11 @@ import Page from '../../components/Page.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
 import { api } from '../../api.js';
 import { useToast } from '../../components/Toast.jsx';
+import { useLocale } from '../../locale.jsx';
+import { uiLang } from '../../dates.js';
 
 /** Read the stats whichever of the two plausible key names the server uses. */
-function readStats(payload) {
+function readStats(payload, t) {
   const stats = payload?.stats || payload || {};
   const top = stats.mostUsedCategories || stats.topCategories || stats.categories || [];
   return {
@@ -15,7 +17,7 @@ function readStats(payload) {
     top: (Array.isArray(top) ? top : []).map((row) =>
       typeof row === 'string'
         ? { name: row, count: 0 }
-        : { name: row.name || row.category?.name || 'Category', count: Number(row.count ?? row.total ?? 0) }
+        : { name: row.name || row.category?.name || t('ui.category'), count: Number(row.count ?? row.total ?? 0) }
     ),
   };
 }
@@ -23,6 +25,7 @@ function readStats(payload) {
 /** Control › Overview (ADM-4): totals only — never anyone's individual rows. */
 export default function Overview() {
   const { push } = useToast();
+  const { t } = useLocale();
   const [stats, setStats] = useState(null);
   const [error, setError] = useState('');
 
@@ -32,7 +35,7 @@ export default function Overview() {
       .get('/api/control/stats')
       .then((payload) => {
         if (!alive) return;
-        setStats(readStats(payload));
+        setStats(readStats(payload, t));
         setError('');
       })
       .catch((err) => {
@@ -49,9 +52,9 @@ export default function Overview() {
 
   return (
     <Page
-      trail={[{ label: 'Control', to: '/control' }, { label: 'Overview' }]}
-      title="Overview"
-      subtitle="How the platform is being used this term."
+      trail={[{ label: t('ctl.trail'), to: '/control' }, { label: t('ctl.navOverview') }]}
+      title={t('ctl.navOverview')}
+      subtitle={t('ctl.ovSubtitle')}
     >
       {error && (
         <div className="field-error mb-3" role="alert">
@@ -78,25 +81,25 @@ export default function Overview() {
           <div className="d-grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
             <div className="card">
               <div className="card-title">
-                <span>Active students</span>
+                <span>{t('ctl.activeStudents')}</span>
               </div>
-              <div className="balance-display num">{stats.active.toLocaleString('en-US')}</div>
+              <div className="balance-display num">{stats.active.toLocaleString(uiLang())}</div>
             </div>
             <div className="card">
               <div className="card-title">
-                <span>Total transactions logged</span>
+                <span>{t('ctl.totalTx')}</span>
               </div>
-              <div className="balance-display num">{stats.transactions.toLocaleString('en-US')}</div>
+              <div className="balance-display num">{stats.transactions.toLocaleString(uiLang())}</div>
             </div>
           </div>
 
           <section className="card mt-3">
             <div className="card-title">
-              <span>Top categories</span>
+              <span>{t('ctl.topCategories')}</span>
             </div>
             {stats.top.length === 0 ? (
-              <EmptyState icon="🏷️" title="No categories in use yet">
-                Once students start logging, the ranking appears here.
+              <EmptyState icon="🏷️" title={t('ctl.noCategoriesTitle')}>
+                {t('ctl.noCategoriesBody')}
               </EmptyState>
             ) : (
               <ul style={{ listStyle: 'none', margin: 0, padding: 0 }} className="d-grid gap-3">
@@ -106,7 +109,7 @@ export default function Overview() {
                       <span>
                         <strong>{i + 1}.</strong> {row.name}
                       </span>
-                      <span className="num">{row.count.toLocaleString('en-US')}</span>
+                      <span className="num">{row.count.toLocaleString(uiLang())}</span>
                     </div>
                     <div className="progress-track">
                       <div
@@ -121,7 +124,7 @@ export default function Overview() {
           </section>
 
           <p className="smallish muted mt-3 mb-0">
-            <span aria-hidden="true"> ℹ️</span> Totals only — individual entries are private to each student.
+            <span aria-hidden="true"> ℹ️</span> {t('ctl.privacyNote')}
           </p>
         </>
       )}

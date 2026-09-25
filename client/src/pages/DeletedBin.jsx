@@ -6,15 +6,12 @@ import EmptyState from '../components/EmptyState.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
-
-function dayLabel(value) {
-  const [y, m, d] = String(value || '').slice(0, 10).split('-').map(Number);
-  if (!y || !m || !d) return '';
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
-}
+import { useLocale } from '../locale.jsx';
+import { dayLabel } from '../dates.js';
 
 /** The bin: soft-deleted entries stay here until someone brings them back. */
 export default function DeletedBin() {
+  const { t } = useLocale();
   const { push } = useToast();
   const [rows, setRows] = useState(null);
   const [error, setError] = useState('');
@@ -40,7 +37,7 @@ export default function DeletedBin() {
     try {
       await api.post(`/api/transactions/${row.id}/restore`);
       setRows((list) => (list || []).filter((r) => r.id !== row.id));
-      push('Entry restored — it is back in your list.');
+      push(t('tx.restoredBack'));
     } catch (err) {
       push(err.message, 'error');
     } finally {
@@ -51,14 +48,14 @@ export default function DeletedBin() {
   return (
     <Page
       trail={[
-        { label: 'Transactions', to: '/transactions' },
-        { label: 'Deleted' },
+        { label: t('nav.transactions'), to: '/transactions' },
+        { label: t('tx.deleted') },
       ]}
-      title="Deleted entries"
-      subtitle="Nothing is ever wiped — restorations are one click away."
+      title={t('tx.deletedTitle')}
+      subtitle={t('tx.binSubtitle')}
       actions={
         <Link className="btn btn-ghost" to="/transactions">
-          ← Back to transactions
+          ← {t('tx.backPlain')}
         </Link>
       }
     >
@@ -74,18 +71,18 @@ export default function DeletedBin() {
           <div className="skeleton" style={{ height: 56, marginBottom: 10 }} />
           <div className="skeleton" style={{ height: 56, marginBottom: 10 }} />
           <div className="skeleton" style={{ height: 56 }} />
-          <p className="smallish muted mb-0 mt-3">Checking the bin…</p>
+          <p className="smallish muted mb-0 mt-3">{t('tx.checkingBin')}</p>
         </div>
       )}
 
       {rows && rows.length === 0 && (
         <div className="card">
-          <EmptyState icon="🗂️" title="Nothing in the bin." action={
+          <EmptyState icon="🗂️" title={t('tx.binEmptyTitle')} action={
             <Link className="btn btn-secondary mt-2" to="/transactions">
-              Back to transactions
+              {t('tx.backPlain')}
             </Link>
           }>
-            Deleted entries land here first, so a slip of the finger never costs you data.
+            {t('tx.binEmptyBody')}
           </EmptyState>
         </div>
       )}
@@ -99,9 +96,9 @@ export default function DeletedBin() {
                   🧾
                 </span>
                 <span className="txn-main">
-                  <span className="txn-desc">{row.description || 'Untitled entry'}</span>
+                  <span className="txn-desc">{row.description || t('dash.untitled')}</span>
                   <span className="txn-meta">
-                    {row.category?.name || 'Uncategorised'} · {dayLabel(row.date)}
+                    {row.category?.name || t('dash.uncategorised')} · {dayLabel(row.date)}
                   </span>
                 </span>
                 <span className={`txn-amount ${row.type === 'income' ? 'amount-income' : 'amount-expense'}`}>
@@ -112,10 +109,10 @@ export default function DeletedBin() {
                   className="btn btn-secondary btn-sm"
                   disabled={busyId === row.id}
                   onClick={() => restore(row)}
-                  aria-label={`Restore ${row.description || 'this entry'}`}
+                  aria-label={t('tx.restoreAria', { name: row.description || t('tx.thisEntry') })}
                 >
                   {busyId === row.id && <span className="spinner" aria-hidden="true" />}
-                  {busyId === row.id ? 'Restoring…' : 'Restore'}
+                  {busyId === row.id ? t('tx.restoring') : t('tx.restore')}
                 </button>
               </li>
             ))}

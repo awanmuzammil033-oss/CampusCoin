@@ -5,6 +5,8 @@ import Page from '../components/Page.jsx';
 import FormField from '../components/FormField.jsx';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
+import { useLocale } from '../locale.jsx';
+import { currencySymbol } from '../money.js';
 
 const ICONS = {
   wallet: '👛', cup: '☕', bus: '🚌', book: '📚', gift: '🎁', film: '🎞️',
@@ -30,6 +32,7 @@ export default function TransactionForm() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { push } = useToast();
+  const { t } = useLocale();
   const creating = !id;
 
   const [form, setForm] = useState({
@@ -57,7 +60,7 @@ export default function TransactionForm() {
       .then((d) => {
         if (alive) setCategories([...(d.income || []), ...(d.expense || [])]);
       })
-      .catch(() => setFormError('Categories could not be loaded — refresh the page to pick one.'));
+      .catch(() => setFormError(t('txf.loadError')));
 
     if (!creating) {
       api
@@ -111,7 +114,7 @@ export default function TransactionForm() {
           }
           const next = {
             id: categoryId,
-            name: pick.name || 'this category',
+            name: pick.name || t('txf.thisCategory'),
             type: pick.type || null,
             source: data.source || pick.source || 'history',
           };
@@ -175,11 +178,11 @@ export default function TransactionForm() {
     setFormError('');
 
     if (!form.amount || Number(form.amount) <= 0 || Number.isNaN(Number(form.amount))) {
-      setAmountError('Amount must be more than 0.');
+      setAmountError(t('txf.amountMore'));
       return;
     }
     if (!form.categoryId) {
-      setFormError('Please choose a category.');
+      setFormError(t('txf.chooseCategory'));
       return;
     }
 
@@ -209,15 +212,15 @@ export default function TransactionForm() {
             description: form.description,
             startDate: form.date,
           });
-          push(`Will repeat ${form.frequency}ly.`);
+          push(form.frequency === 'weekly' ? t('txf.willRepeatWeekly') : t('txf.willRepeatMonthly'));
         }
 
-        push('Entry saved.');
+        push(t('txf.saved'));
         if (addAnother) resetForAnother();
         else navigate('/transactions');
       } else {
         await api.patch(`/api/transactions/${id}`, payload);
-        push('Changes saved.');
+        push(t('txf.changesSaved'));
         navigate('/transactions');
       }
     } catch (err) {
@@ -231,13 +234,13 @@ export default function TransactionForm() {
 
   if (loading) {
     return (
-      <Page trail={[{ label: 'Transactions', to: '/transactions' }, { label: 'Loading…' }]} title="Entry">
+      <Page trail={[{ label: t('nav.transactions'), to: '/transactions' }, { label: t('ui.loading') }]} title={t('txf.entryTitle')}>
         <div className="card" role="status">
           <div className="skeleton" style={{ height: 18, width: '30%', marginBottom: 12 }} />
           <div className="skeleton" style={{ height: 44, marginBottom: 18 }} />
           <div className="skeleton" style={{ height: 44, marginBottom: 18 }} />
           <div className="skeleton" style={{ height: 44 }} />
-          <p className="smallish muted mb-0 mt-3">Loading the entry…</p>
+          <p className="smallish muted mb-0 mt-3">{t('txf.loading')}</p>
         </div>
       </Page>
     );
@@ -246,11 +249,11 @@ export default function TransactionForm() {
   return (
     <Page
       trail={[
-        { label: 'Transactions', to: '/transactions' },
-        { label: creating ? 'New entry' : 'Edit entry' },
+        { label: t('nav.transactions'), to: '/transactions' },
+        { label: creating ? t('txf.newEntry') : t('txf.editEntry') },
       ]}
-      title={creating ? (form.type === 'income' ? 'Add income' : 'Add expense') : 'Edit entry'}
-      subtitle={creating ? 'Five fields, ten seconds — the rest is optional.' : 'Changes are kept in the entry history.'}
+      title={creating ? (form.type === 'income' ? t('txf.addIncome') : t('txf.addExpense')) : t('txf.editEntry')}
+      subtitle={creating ? t('txf.subtitleNew') : t('txf.subtitleEdit')}
     >
       <div className="card" style={{ maxWidth: 640 }}>
         <form onSubmit={(e) => save(e, false)} noValidate>
@@ -261,9 +264,9 @@ export default function TransactionForm() {
             </div>
           )}
 
-          <FormField label="Amount" htmlFor="amount" error={amountError}>
+          <FormField label={t('ui.amount')} htmlFor="amount" error={amountError}>
             <div className="amount-wrap">
-              <span className="amount-prefix" aria-hidden="true">$</span>
+              <span className="amount-prefix" aria-hidden="true">{currencySymbol()}</span>
               <input
                 id="amount"
                 className={`input ${amountError ? 'input-error' : ''}`}
@@ -279,7 +282,7 @@ export default function TransactionForm() {
             </div>
           </FormField>
 
-          <FormField label="Description" htmlFor="description" help="What was it for? A few words are plenty.">
+          <FormField label={t('ui.description')} htmlFor="description" help={t('txf.descHelp')}>
             {(a) => (
               <input
                 id="description"
@@ -287,7 +290,7 @@ export default function TransactionForm() {
                 type="text"
                 maxLength={255}
                 autoComplete="off"
-                placeholder="e.g. campus cafe lunch"
+                placeholder={t('txf.descPlaceholder')}
                 value={form.description}
                 onChange={(e) => setField('description', e.target.value)}
                 {...a}
@@ -297,14 +300,14 @@ export default function TransactionForm() {
 
           {suggestion && (
             <div className="d-flex align-items-center gap-2 flex-wrap" style={{ marginTop: -8, marginBottom: 14 }} role="status">
-              <span className="pill pill-suggest">✨ Suggested: {suggestion.name}</span>
+              <span className="pill pill-suggest">✨ {t('txf.suggested', { name: suggestion.name })}</span>
               <button
                 type="button"
                 className="btn btn-ghost btn-sm"
                 onClick={changeSuggestion}
-                aria-label={`Change the suggested category ${suggestion.name}`}
+                aria-label={t('txf.suggestedAria', { name: suggestion.name })}
               >
-                (change)
+                {t('txf.change')}
               </button>
             </div>
           )}
@@ -314,7 +317,7 @@ export default function TransactionForm() {
               id="type-label"
               style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: 6 }}
             >
-              Type
+              {t('ui.type')}
             </span>
             <div className="chip-grid" role="group" aria-labelledby="type-label">
               <button
@@ -323,7 +326,7 @@ export default function TransactionForm() {
                 aria-pressed={form.type === 'income'}
                 onClick={() => switchType('income')}
               >
-                + Income
+                {t('txf.incomeChip')}
               </button>
               <button
                 type="button"
@@ -331,7 +334,7 @@ export default function TransactionForm() {
                 aria-pressed={form.type === 'expense'}
                 onClick={() => switchType('expense')}
               >
-                − Expense
+                {t('txf.expenseChip')}
               </button>
             </div>
           </div>
@@ -341,7 +344,7 @@ export default function TransactionForm() {
               id="category-label"
               style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: 6 }}
             >
-              Category
+              {t('ui.category')}
             </span>
             <div className="chip-grid" role="group" aria-labelledby="category-label">
               {options.map((c) => (
@@ -356,11 +359,11 @@ export default function TransactionForm() {
                   {c.name}
                 </button>
               ))}
-              {options.length === 0 && <span className="muted smallish">No categories for this type yet.</span>}
+              {options.length === 0 && <span className="muted smallish">{t('txf.noCats')}</span>}
             </div>
           </div>
 
-          <FormField label="…or pick from list" htmlFor="category-select">
+          <FormField label={t('txf.orPick')} htmlFor="category-select">
             {(a) => (
               <select
                 id="category-select"
@@ -369,7 +372,7 @@ export default function TransactionForm() {
                 onChange={(e) => pickCategory(e.target.value)}
                 {...a}
               >
-                <option value="">Choose a category</option>
+                <option value="">{t('txf.chooseFromList')}</option>
                 {options.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -379,7 +382,7 @@ export default function TransactionForm() {
             )}
           </FormField>
 
-          <FormField label="Date" htmlFor="date">
+          <FormField label={t('ui.date')} htmlFor="date">
             {(a) => (
               <input
                 id="date"
@@ -394,7 +397,7 @@ export default function TransactionForm() {
 
           {creating && (
             <>
-              <FormField label="Repeat this entry" htmlFor="repeat">
+              <FormField label={t('txf.repeat')} htmlFor="repeat">
                 {(a) => (
                   <input
                     id="repeat"
@@ -408,9 +411,9 @@ export default function TransactionForm() {
 
               {form.repeat && (
                 <FormField
-                  label="How often"
+                  label={t('txf.howOften')}
                   htmlFor="frequency"
-                  help="Starting from the date above — the next occurrence fills itself in."
+                  help={t('txf.repeatHelp')}
                 >
                   {(a) => (
                     <select
@@ -420,8 +423,8 @@ export default function TransactionForm() {
                       onChange={(e) => setField('frequency', e.target.value)}
                       {...a}
                     >
-                      <option value="weekly">Every week</option>
-                      <option value="monthly">Every month</option>
+                      <option value="weekly">{t('txf.everyWeek')}</option>
+                      <option value="monthly">{t('txf.everyMonth')}</option>
                     </select>
                   )}
                 </FormField>
@@ -432,15 +435,15 @@ export default function TransactionForm() {
           <div className="d-flex gap-2 flex-wrap mt-3">
             <button type="submit" className="btn btn-primary" disabled={busy}>
               {busy && <span className="spinner" aria-hidden="true" />}
-              {busy ? 'Saving…' : 'Save'}
+              {busy ? t('ui.saving') : t('ui.save')}
             </button>
             {creating && (
               <button type="button" className="btn btn-secondary" disabled={busy} onClick={(e) => save(e, true)}>
-                Save &amp; add another
+                {t('ui.saveAndAnother')}
               </button>
             )}
             <button type="button" className="btn btn-ghost" disabled={busy} onClick={() => navigate(-1)}>
-              Cancel
+              {t('ui.cancel')}
             </button>
           </div>
         </form>

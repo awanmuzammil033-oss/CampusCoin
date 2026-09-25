@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { Chart as ChartJS, ArcElement, BarElement, LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Filler } from 'chart.js';
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
 
-import { money } from '../money.js';
+import { money, currencySymbol } from '../money.js';
+import { useLocale } from '../locale.jsx';
 import { cssColor, withAlpha } from '../chartColors.js';
 
 // Registering only what we draw keeps the bundle lean.
@@ -23,6 +24,7 @@ const PALETTE = [
  * at draw time and re-read whenever the theme flips.
  */
 export default function ChartCard({ title, type = 'doughnut', data, options, loading, emptyText, table }) {
+  const { t } = useLocale();
   const [showTable, setShowTable] = useState(false);
   const [themeTick, setThemeTick] = useState(0);
 
@@ -92,7 +94,7 @@ export default function ChartCard({ title, type = 'doughnut', data, options, loa
         : {
             x: { ticks: { color: cssColor('var(--cc-muted)') } },
             y: {
-              ticks: { callback: (v) => `$${v}`, color: cssColor('var(--cc-muted)') },
+              ticks: { callback: (v) => { const s = currencySymbol(); return s.length <= 1 ? `${s}${v}` : `${s} ${v}`; }, color: cssColor('var(--cc-muted)') },
               grid: { color: 'rgba(128,128,128,0.15)' },
             },
           },
@@ -110,7 +112,7 @@ export default function ChartCard({ title, type = 'doughnut', data, options, loa
         <span>{title}</span>
         {hasData && table && (
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => setShowTable((v) => !v)}>
-            {showTable ? 'View as chart' : 'View as table'}
+            {showTable ? t('ui.viewAsChart') : t('ui.viewAsTable')}
           </button>
         )}
       </div>
@@ -123,10 +125,10 @@ export default function ChartCard({ title, type = 'doughnut', data, options, loa
           </div>
         )}
 
-        {!loading && !hasData && <p className="muted">{emptyText || 'Nothing to chart yet.'}</p>}
+        {!loading && !hasData && <p className="muted">{emptyText || t('ui.nothingToChart')}</p>}
 
         {!loading && hasData && !showTable && (
-          <div role="img" aria-label={`${title} chart. A table with the same numbers is available.`}>
+          <div role="img" aria-label={t('ui.chartAria', { title })}>
             <Chart data={coloured} options={merged} height={260} />
           </div>
         )}

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api, setCsrfToken } from '../api.js';
-import { applyPreferences } from '../auth.jsx';
+import { useAuth } from '../auth.jsx';
 import { useLocale } from '../locale.jsx';
 import FormField from '../components/FormField.jsx';
 
@@ -13,6 +12,7 @@ import FormField from '../components/FormField.jsx';
 export default function AdminLogin() {
   const navigate = useNavigate();
   const { t } = useLocale();
+  const { controlLogin, logout } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -23,15 +23,15 @@ export default function AdminLogin() {
     setError('');
     setBusy(true);
     try {
-      await api.post('/api/auth/control-login', { email, password });
-      const me = await api.get('/api/auth/me');
-      setCsrfToken(me.csrfToken);
-      if (me.user?.role !== 'admin') {
+      // controlLogin posts to the staff endpoint AND writes the user into
+      // the auth context — without that, RequireAdmin still sees an
+      // anonymous visitor and bounces straight back to this page.
+      const user = await controlLogin(email, password);
+      if (user.role !== 'admin') {
         setError(t('auth.adminOnly'));
-        await api.post('/api/auth/logout').catch(() => {});
+        await logout();
         return;
       }
-      applyPreferences(me.user.theme, me.user.fontScale);
       navigate('/control', { replace: true });
     } catch (err) {
       setError(err.message);
@@ -43,6 +43,11 @@ export default function AdminLogin() {
   return (
     <div className="auth-wrap">
       <div className="card auth-card admin-mode">
+        <div className="auth-top">
+          <Link to="/" className="btn btn-ghost btn-sm auth-back">
+            <span aria-hidden="true">←</span> {t('auth.backToSite')}
+          </Link>
+        </div>
         <div className="auth-brand">
           <span className="brand-mark" aria-hidden="true">C</span>
         </div>

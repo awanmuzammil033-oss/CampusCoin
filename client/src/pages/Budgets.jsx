@@ -9,6 +9,9 @@ import Progress from '../components/Progress.jsx';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
+import { useLocale } from '../locale.jsx';
+import { currencySymbol } from '../money.js';
+import { uiLang } from '../dates.js';
 
 function monthKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -16,7 +19,7 @@ function monthKey(date) {
 
 function monthLabel(key) {
   const [y, m] = key.split('-').map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  return new Date(y, m - 1, 1).toLocaleDateString(uiLang(), { month: 'long', year: 'numeric' });
 }
 
 function shiftMonth(key, delta) {
@@ -38,6 +41,7 @@ function glyph(name) {
  * has to guess what 80% and 100% mean.
  */
 export default function Budgets() {
+  const { t, plural } = useLocale();
   const { push } = useToast();
   const [month, setMonth] = useState(() => monthKey(new Date()));
   const [rows, setRows] = useState(null);
@@ -88,13 +92,13 @@ export default function Budgets() {
   async function saveRow(row) {
     const limit = String(limits[row.id] ?? '').trim();
     if (!limit || Number(limit) <= 0) {
-      push('A limit needs to be more than 0.', 'error');
+      push(t('bud.zeroError'), 'error');
       return;
     }
     setRowBusy(row.id);
     try {
       await api.post('/api/budgets', { categoryId: row.category.id, month, limitAmount: limit });
-      push(`Limit saved for ${row.category.name}.`);
+      push(t('bud.limitSaved', { name: row.category.name }));
       load(month);
     } catch (err) {
       push(err.message, 'error');
@@ -109,7 +113,7 @@ export default function Budgets() {
     try {
       await api.del(`/api/budgets/${target.id}`);
       setRemoving(null);
-      push(`Limit removed for ${target.category?.name || 'that category'}.`);
+      push(t('bud.limitRemoved', { name: target.category?.name || t('bud.thatCategory') }));
       load(month);
     } catch (err) {
       push(err.message, 'error');
@@ -122,11 +126,11 @@ export default function Budgets() {
     event.preventDefault();
     setAddError('');
     if (!newCat) {
-      setAddError('Choose a category first.');
+      setAddError(t('bud.catFirst'));
       return;
     }
     if (!newLimit || Number(newLimit) <= 0) {
-      setAddError('Enter a limit more than 0.');
+      setAddError(t('bud.limitZero'));
       return;
     }
     setAdding(true);
@@ -134,7 +138,7 @@ export default function Budgets() {
       await api.post('/api/budgets', { categoryId: newCat, month, limitAmount: newLimit.trim() });
       setNewCat('');
       setNewLimit('');
-      push('Budget added.');
+      push(t('bud.added'));
       load(month);
     } catch (err) {
       setAddError(err.message);
@@ -146,7 +150,7 @@ export default function Budgets() {
   async function copyPrevious() {
     try {
       const data = await api.post('/api/budgets/copy-previous', { month });
-      push(`Copied ${data.copied ?? 0} limits.`);
+      push(plural('bud.copied', data.copied ?? 0, { n: data.copied ?? 0 }));
       load(month);
     } catch (err) {
       push(err.message, 'error');
@@ -155,9 +159,9 @@ export default function Budgets() {
 
   return (
     <Page
-      trail={[{ label: 'Budgets' }]}
-      title="Budgets"
-      subtitle={`Monthly limits for ${monthLabel(month)}.`}
+      trail={[{ label: t('nav.budgets') }]}
+      title={t('nav.budgets')}
+      subtitle={t('bud.subtitle', { month: monthLabel(month) })}
       actions={
         <>
           <span className="d-inline-flex align-items-center gap-1">
@@ -165,8 +169,8 @@ export default function Budgets() {
               type="button"
               className="icon-btn"
               onClick={() => setMonth((m) => shiftMonth(m, -1))}
-              aria-label="Previous month"
-              title="Previous month"
+              aria-label={t('ui.prevMonth')}
+              title={t('ui.prevMonth')}
             >
               ‹
             </button>
@@ -177,20 +181,20 @@ export default function Budgets() {
               type="button"
               className="icon-btn"
               onClick={() => setMonth((m) => shiftMonth(m, 1))}
-              aria-label="Next month"
-              title="Next month"
+              aria-label={t('ui.nextMonth')}
+              title={t('ui.nextMonth')}
             >
               ›
             </button>
           </span>
           <button type="button" className="btn btn-secondary" onClick={copyPrevious}>
-            Copy last month
+            {t('bud.copy')}
           </button>
         </>
       }
     >
       <p className="smallish muted">
-        <span aria-hidden="true"> ℹ️</span> You'll get a nudge at 80% and again at 100% — once per month each.
+        <span aria-hidden="true"> ℹ️</span> {t('bud.nudgeNote')}
       </p>
 
       {error && (
@@ -205,7 +209,7 @@ export default function Budgets() {
           <div className="skeleton" style={{ height: 52, marginBottom: 10 }} />
           <div className="skeleton" style={{ height: 52, marginBottom: 10 }} />
           <div className="skeleton" style={{ height: 52 }} />
-          <p className="smallish muted mb-0 mt-3">Loading this month's limits…</p>
+          <p className="smallish muted mb-0 mt-3">{t('bud.loading')}</p>
         </div>
       )}
 
@@ -213,15 +217,15 @@ export default function Budgets() {
         <div className="card" style={{ padding: 0 }}>
           <div className="table-scroll">
             <table className="table">
-              <caption className="visually-hidden">Budget limits for {monthLabel(month)}</caption>
+              <caption className="visually-hidden">{t('bud.caption', { month: monthLabel(month) })}</caption>
               <thead>
                 <tr>
-                  <th scope="col">Category</th>
-                  <th scope="col">Limit</th>
-                  <th scope="col">Spent</th>
-                  <th scope="col">Progress</th>
+                  <th scope="col">{t('ui.category')}</th>
+                  <th scope="col">{t('ui.limit')}</th>
+                  <th scope="col">{t('ui.spent')}</th>
+                  <th scope="col">{t('ui.progress')}</th>
                   <th scope="col">
-                    <span className="visually-hidden">Actions</span>
+                    <span className="visually-hidden">{t('ui.actions')}</span>
                   </th>
                 </tr>
               </thead>
@@ -233,19 +237,17 @@ export default function Budgets() {
                         <span className="txn-ico" aria-hidden="true" style={{ width: 32, height: 32 }}>
                           {glyph(row.category?.icon)}
                         </span>
-                        <strong>{row.category?.name || 'Category'}</strong>
+                        <strong>{row.category?.name || t('ui.category')}</strong>
                       </span>
                     </td>
                     <td>
                       <span className="amount-wrap" style={{ display: 'inline-block', width: 120 }}>
-                        <span className="amount-prefix" aria-hidden="true">
-                          $
-                        </span>
+<span className="amount-prefix" aria-hidden="true">{currencySymbol()}</span>
                         <input
                           className="input"
                           type="text"
                           inputMode="decimal"
-                          aria-label={`Limit for ${row.category?.name}`}
+                          aria-label={t('bud.limitAria', { name: row.category?.name })}
                           value={limits[row.id] ?? ''}
                           onChange={(e) => setLimits((l) => ({ ...l, [row.id]: e.target.value }))}
                         />
@@ -253,7 +255,7 @@ export default function Budgets() {
                     </td>
                     <td className="num">{money(row.spent)}</td>
                     <td style={{ minWidth: 220 }}>
-                      <Progress pct={row.pct} label={`${money(row.spent)} of ${money(row.limit)}`} />
+                      <Progress pct={row.pct} label={t('bud.spentOf', { spent: money(row.spent), limit: money(row.limit) })} />
                     </td>
                     <td>
                       <div className="d-flex gap-1 justify-content-end">
@@ -264,14 +266,14 @@ export default function Budgets() {
                           onClick={() => saveRow(row)}
                         >
                           {rowBusy === row.id && <span className="spinner" aria-hidden="true" />}
-                          Save
+                          {t('ui.save')}
                         </button>
                         <button
                           type="button"
                           className="icon-btn"
                           onClick={() => setRemoving(row)}
-                          aria-label={`Remove budget for ${row.category?.name}`}
-                          title="Remove"
+                          aria-label={t('bud.removeAria', { name: row.category?.name })}
+                          title={t('ui.remove')}
                         >
                           🗑
                         </button>
@@ -287,15 +289,15 @@ export default function Budgets() {
 
       {rows && rows.length === 0 && (
         <div className="card">
-          <EmptyState icon="🎯" title={`No budgets for ${monthLabel(month)} yet`}>
-            Start with the category that always surprises you — Food is a popular first pick.
+          <EmptyState icon="🎯" title={t('bud.emptyTitle', { month: monthLabel(month) })}>
+            {t('bud.emptyBody')}
           </EmptyState>
         </div>
       )}
 
       <form className="card mt-3" onSubmit={addBudget} noValidate>
         <div className="card-title">
-          <span>Add a budget</span>
+          <span>{t('bud.addTitle')}</span>
         </div>
         {addError && (
           <div className="field-error mb-3" role="alert">
@@ -305,7 +307,7 @@ export default function Budgets() {
         )}
         <div className="d-flex gap-2 flex-wrap align-items-end">
           <div style={{ flex: '2 1 220px' }}>
-            <FormField label="Category" htmlFor="budget-category">
+            <FormField label={t('ui.category')} htmlFor="budget-category">
               {(a) => (
                 <select
                   id="budget-category"
@@ -314,7 +316,7 @@ export default function Budgets() {
                   onChange={(e) => setNewCat(e.target.value)}
                   {...a}
                 >
-                  <option value="">Choose a category</option>
+                  <option value="">{t('txf.chooseFromList')}</option>
                   {available.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
@@ -325,11 +327,9 @@ export default function Budgets() {
             </FormField>
           </div>
           <div style={{ flex: '1 1 150px' }}>
-            <FormField label="Monthly limit" htmlFor="budget-limit">
+            <FormField label={t('ui.monthlyLimit')} htmlFor="budget-limit">
               <div className="amount-wrap">
-                <span className="amount-prefix" aria-hidden="true">
-                  $
-                </span>
+<span className="amount-prefix" aria-hidden="true">{currencySymbol()}</span>
                 <input
                   id="budget-limit"
                   className="input"
@@ -345,21 +345,20 @@ export default function Budgets() {
           <div style={{ paddingBottom: 16 }}>
             <button type="submit" className="btn btn-primary" disabled={adding || available.length === 0}>
               {adding && <span className="spinner" aria-hidden="true" />}
-              Add
+              {t('ui.add')}
             </button>
           </div>
         </div>
         {available.length === 0 && (
           <p className="smallish muted mb-0">
-            Every expense category already has a limit for this month.{' '}
-            <Link to="/categories">Add another category</Link> to go further.
+            {t('bud.allHaveLimit')} <Link to="/categories">{t('bud.addAnotherCat')}</Link> {t('bud.goFurther')}
           </p>
         )}
       </form>
 
       {removing && (
         <Modal
-          title="Remove this limit?"
+          title={t('bud.removeTitle')}
           onClose={() => setRemoving(null)}
           footer={
             <>
@@ -367,14 +366,13 @@ export default function Budgets() {
                 Cancel
               </button>
               <button type="button" className="btn btn-danger-outline" onClick={removeRow}>
-                Remove limit
+                {t('bud.removeBtn')}
               </button>
             </>
           }
         >
           <p className="mb-0">
-            “{removing.category?.name}” stops having a cap for {monthLabel(month)}. Your entries stay exactly as
-            they are.
+            {t('bud.removeBody', { name: removing.category?.name, month: monthLabel(month) })}
           </p>
         </Modal>
       )}

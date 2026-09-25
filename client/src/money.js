@@ -5,10 +5,28 @@
  */
 
 let currency = 'USD';
+let symbolCache = null;
 
 /** Points money() at a different display currency. Stores it and nothing else. */
 export function setDisplayCurrency(code) {
   currency = code;
+  symbolCache = null;
+}
+
+/**
+ * Just the symbol/prefix of the display currency ("$", "ARS", "€") for
+ * input-box prefixes and chart ticks — money() stays the way amounts are
+ * really written; this is only the little label in front of the number.
+ */
+export function currencySymbol() {
+  if (symbolCache) return symbolCache;
+  try {
+    const parts = new Intl.NumberFormat(undefined, { style: 'currency', currency }).formatToParts(0);
+    symbolCache = parts.find((p) => p.type === 'currency')?.value || currency;
+  } catch {
+    symbolCache = currency;
+  }
+  return symbolCache;
 }
 
 export function getDisplayCurrency() {

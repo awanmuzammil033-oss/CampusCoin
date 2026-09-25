@@ -8,12 +8,14 @@ import EmptyState from '../components/EmptyState.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
+import { useLocale } from '../locale.jsx';
+import { uiLang } from '../dates.js';
 
 function monthTitle(value) {
   if (!value) return '';
   const [y, m] = String(value).slice(0, 7).split('-').map(Number);
   if (!y || !m) return String(value);
-  return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  return new Date(y, m - 1, 1).toLocaleDateString(uiLang(), { month: 'long', year: 'numeric' });
 }
 
 const CLAMP = {
@@ -25,6 +27,7 @@ const CLAMP = {
 
 /** Bookmarks & notes (BKM-1): everything the student deliberately kept. */
 export default function Bookmarks() {
+  const { t } = useLocale();
   const { push } = useToast();
   const [tips, setTips] = useState(null);
   const [insights, setInsights] = useState(null);
@@ -60,7 +63,7 @@ export default function Bookmarks() {
       await api.patch(`/api/bookmarks/${editing.kind}/${editing.id}/note`, { note: editing.note });
       applyLocal(editing.kind, editing.id, { note: editing.note });
       setEditing(null);
-      push('Note saved.');
+      push(t('bkm.noteSaved'));
     } catch (err) {
       push(err.message, 'error');
     } finally {
@@ -74,7 +77,7 @@ export default function Bookmarks() {
       await api.del(`/api/bookmarks/${kind}/${id}`);
       if (kind === 'tip') setTips((list) => (list || []).filter((t) => t.id !== id));
       else setInsights((list) => (list || []).filter((i) => i.id !== id));
-      push('Removed from bookmarks.');
+      push(t('bkm.removed'));
     } catch (err) {
       push(err.message, 'error');
     } finally {
@@ -91,12 +94,12 @@ export default function Bookmarks() {
   const nothingAtAll = (tips?.length || 0) === 0 && (insights?.length || 0) === 0;
 
   const sections = [
-    { kind: 'tip', title: 'Bookmarked tips', icon: '💡', rows: tips, empty: 'No bookmarked tips yet — pin the ones worth keeping.' },
-    { kind: 'insight', title: 'Saved insights', icon: '🌤️', rows: insights, empty: 'No saved insights yet — bookmark a monthly summary and it lands here.' },
+    { kind: 'tip', title: 'bkm.titleTips', icon: '💡', rows: tips, empty: 'bkm.emptyTips' },
+    { kind: 'insight', title: 'bkm.titleInsights', icon: '🌤️', rows: insights, empty: 'bkm.emptyInsights' },
   ];
 
   return (
-    <Page trail={[{ label: 'Bookmarks' }]} title="Bookmarks & notes" subtitle="Tips and insights you decided to keep.">
+    <Page trail={[{ label: t('nav.bookmarks') }]} title={t('bkm.pageTitle')} subtitle={t('bkm.pageSubtitle')}>
       {error && (
         <div className="field-error mb-3" role="alert">
           <span aria-hidden="true">⚠</span>
@@ -108,7 +111,7 @@ export default function Bookmarks() {
         <div className="card" role="status">
           <div className="skeleton" style={{ height: 70, marginBottom: 12 }} />
           <div className="skeleton" style={{ height: 70 }} />
-          <p className="smallish muted mb-0 mt-3">Loading your bookmarks…</p>
+          <p className="smallish muted mb-0 mt-3">{t('bkm.loading')}</p>
         </div>
       )}
 
@@ -116,19 +119,19 @@ export default function Bookmarks() {
         <div className="card">
           <EmptyState
             icon="🔖"
-            title="Nothing bookmarked yet"
+            title={t('bkm.emptyTitle')}
             action={
               <div className="d-flex gap-2 justify-content-center flex-wrap mt-2">
                 <Link className="btn btn-secondary" to="/tips">
-                  Browse tips
+                  {t('bkm.browseTips')}
                 </Link>
                 <Link className="btn btn-ghost" to="/insights">
-                  Open insights
+                  {t('bkm.openInsights')}
                 </Link>
               </div>
             }
           >
-            Nothing bookmarked yet — pin a tip or save an insight and it lands here.
+            {t('bkm.emptyBody')}
           </EmptyState>
         </div>
       )}
@@ -138,7 +141,7 @@ export default function Bookmarks() {
           <section className="card mb-3" key={section.kind}>
             <div className="card-title">
               <span>
-                {section.icon} {section.title}
+                {section.icon} {t(section.title)}
               </span>
               <span className="pill num">{section.rows.length}</span>
             </div>
@@ -148,7 +151,7 @@ export default function Bookmarks() {
                   <div className="d-flex align-items-start justify-content-between gap-2 flex-wrap">
                     <p className="smallish muted mb-1">{monthTitle(item.month)}</p>
                     <span className="smallish muted num">
-                      {item.potentialSavings > 0 ? `Save ~${money(item.potentialSavings)}` : ''}
+                      {item.potentialSavings > 0 ? t('ui.saveApprox', { amount: money(item.potentialSavings) }) : ''}
                     </span>
                   </div>
                   <p style={CLAMP} className="mb-2">
@@ -167,18 +170,18 @@ export default function Bookmarks() {
                       type="button"
                       className="btn btn-secondary btn-sm"
                       onClick={() => setEditing({ kind: section.kind, id: item.id, note: item.note || '' })}
-                      aria-label={`Edit note for this ${section.kind}`}
+                      aria-label={t('bkm.editNoteAria', { kind: t(section.kind === 'tip' ? 'bkm.kindTip' : 'bkm.kindInsight') })}
                     >
-                      📝 {item.note ? 'Edit note' : 'Note'}
+                      {item.note ? t('bkm.editNote') : t('bkm.note')}
                     </button>
                     <button
                       type="button"
                       className="btn btn-ghost btn-sm"
                       disabled={busyKey === `${section.kind}-${item.id}`}
                       onClick={() => remove(section.kind, item.id)}
-                      aria-label={`Remove this ${section.kind} from bookmarks`}
+                      aria-label={t('bkm.removeAria', { kind: t(section.kind === 'tip' ? 'bkm.kindTip' : 'bkm.kindInsight') })}
                     >
-                      ✕ Remove
+                      {t('bkm.removeBtn')}
                     </button>
                   </div>
                 </li>
@@ -193,32 +196,32 @@ export default function Bookmarks() {
           <section className="card mb-3" key={`${section.kind}-empty`}>
             <div className="card-title">
               <span>
-                {section.icon} {section.title}
+                {section.icon} {t(section.title)}
               </span>
             </div>
-            <p className="muted smallish mb-0">{section.empty}</p>
+            <p className="muted smallish mb-0">{t(section.empty)}</p>
           </section>
         ) : null
       )}
 
       {editing && (
         <Modal
-          title="Your note"
+          title={t('bkm.noteTitle')}
           onClose={() => setEditing(null)}
           footer={
             <>
               <button type="button" className="btn btn-ghost" onClick={() => setEditing(null)}>
-                Cancel
+                {t('ui.cancel')}
               </button>
               <button type="submit" form="bookmark-note-form" className="btn btn-primary" disabled={saving}>
                 {saving && <span className="spinner" aria-hidden="true" />}
-                Save note
+                {t('ui.saveNote')}
               </button>
             </>
           }
         >
           <form id="bookmark-note-form" onSubmit={saveNote}>
-            <FormField label="Note" htmlFor="bookmark-note" help="Optional, up to 500 characters.">
+            <FormField label={t('ui.note')} htmlFor="bookmark-note" help={t('bkm.noteHelp')}>
               {(a) => (
                 <textarea
                   id="bookmark-note"

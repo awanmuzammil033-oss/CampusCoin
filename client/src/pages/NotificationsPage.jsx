@@ -4,9 +4,12 @@ import Page from '../components/Page.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
+import { useLocale } from '../locale.jsx';
+import { uiLang } from '../dates.js';
 
 /** Every alert and campus notice in one readable list (BUD-3 feed). */
 export default function NotificationsPage() {
+  const { t } = useLocale();
   const [rows, setRows] = useState(null);
   const [error, setError] = useState('');
   const toast = useToast();
@@ -22,7 +25,7 @@ export default function NotificationsPage() {
     try {
       await api.post('/api/notifications/read-all');
       setRows((list) => (list || []).map((r) => ({ ...r, isRead: true })));
-      toast.push('All notifications marked as read.');
+      toast.push(t('noti.markedAll'));
     } catch (err) {
       toast.push(err.message, 'error');
     }
@@ -39,12 +42,12 @@ export default function NotificationsPage() {
 
   return (
     <Page
-      trail={[{ label: 'Notifications' }]}
-      title="Notifications"
-      subtitle="Budget nudges and campus notices."
+      trail={[{ label: t('noti.title') }]}
+      title={t('noti.title')}
+      subtitle={t('noti.subtitle')}
       actions={
         <button type="button" className="btn btn-secondary" onClick={markAll}>
-          Mark all read
+          {t('noti.markAll')}
         </button>
       }
     >
@@ -57,9 +60,8 @@ export default function NotificationsPage() {
 
       {rows && rows.length === 0 && (
         <div className="card">
-          <EmptyState icon="🔕" title="Nothing yet">
-            Budget warnings and announcements will appear here. You can check your{' '}
-            <Link to="/budgets">budgets</Link> in the meantime.
+          <EmptyState icon="🔕" title={t('noti.emptyTitle')}>
+            {t('noti.emptyF1')} <Link to="/budgets">{t('noti.budgetsLink')}</Link> {t('noti.emptyF2')}
           </EmptyState>
         </div>
       )}
@@ -80,10 +82,10 @@ export default function NotificationsPage() {
                   </span>
                   <span className="txn-main">
                     <span className="txn-desc">{row.message}</span>
-                    <span className="txn-meta">{new Date(row.createdAt).toLocaleString()}</span>
+                    <span className="txn-meta">{new Date(row.createdAt).toLocaleString(uiLang())}</span>
                   </span>
                   {!row.isRead && !String(row.id).startsWith('ann-') && (
-                    <span className="pill pill-suggest">New</span>
+                    <span className="pill pill-suggest">{t('noti.new')}</span>
                   )}
                 </button>
               </li>

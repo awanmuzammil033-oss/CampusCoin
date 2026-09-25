@@ -6,6 +6,7 @@ import FormField from '../../components/FormField.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
 import { api, qs } from '../../api.js';
 import { useToast } from '../../components/Toast.jsx';
+import { useLocale } from '../../locale.jsx';
 
 const CLAMP = {
   display: '-webkit-box',
@@ -24,6 +25,7 @@ function readRows(payload) {
 /** ADM-2: the wording behind every tip and campus announcement. */
 export default function Templates() {
   const { push } = useToast();
+  const { t } = useLocale();
   const [rows, setRows] = useState(null);
   const [error, setError] = useState('');
   const [draft, setDraft] = useState(null); // { mode, id?, ...fields }
@@ -71,11 +73,11 @@ export default function Templates() {
     event.preventDefault();
     setDraftError('');
     if (!draft.title.trim() || !draft.bodyTemplate.trim()) {
-      setDraftError('A template needs both a title and a body.');
+      setDraftError(t('ctl.tplNeedBoth'));
       return;
     }
     if (draft.mode === 'new' && !draft.code.trim()) {
-      setDraftError('Please give the template a short code.');
+      setDraftError(t('ctl.tplNeedCode'));
       return;
     }
 
@@ -84,10 +86,10 @@ export default function Templates() {
       const payload = { kind: draft.kind, title: draft.title.trim(), bodyTemplate: draft.bodyTemplate };
       if (draft.mode === 'new') {
         await api.post('/api/control/templates', { code: draft.code.trim(), ...payload });
-        push('Template created.');
+        push(t('ctl.tplCreated'));
       } else {
         await api.patch(`/api/control/templates/${draft.id}`, payload);
-        push('Template updated.');
+        push(t('ctl.tplUpdated'));
       }
       setDraft(null);
       load();
@@ -102,7 +104,7 @@ export default function Templates() {
     setBusyId(row.id);
     try {
       await api.patch(`/api/control/templates/${row.id}`, { isActive: !row.isActive });
-      push(row.isActive ? 'Template switched off.' : 'Template switched on.');
+      push(row.isActive ? t('ctl.tplOff') : t('ctl.tplOn'));
       load();
     } catch (err) {
       push(err.message, 'error');
@@ -116,7 +118,7 @@ export default function Templates() {
     try {
       await api.del(`/api/control/templates/${removing.id}`);
       setRemoving(null);
-      push('Template deleted.');
+      push(t('ctl.tplDeleted'));
       load();
     } catch (err) {
       push(err.message, 'error');
@@ -127,12 +129,12 @@ export default function Templates() {
 
   return (
     <Page
-      trail={[{ label: 'Control', to: '/control' }, { label: 'Templates' }]}
-      title="Templates"
-      subtitle="The wording behind saving tips and campus announcements."
+      trail={[{ label: t('ctl.trail'), to: '/control' }, { label: t('ctl.navTemplates') }]}
+      title={t('ctl.navTemplates')}
+      subtitle={t('ctl.tplSubtitle')}
       actions={
         <button type="button" className="btn btn-primary" onClick={openNew}>
-          + New template
+          {t('ctl.newTemplate')}
         </button>
       }
     >
@@ -162,14 +164,14 @@ export default function Templates() {
         <div className="card">
           <EmptyState
             icon="📝"
-            title="No templates yet"
+            title={t('ctl.tplEmptyTitle')}
             action={
               <button type="button" className="btn btn-primary mt-2" onClick={openNew}>
-                Create the first one
+                {t('ctl.tplCreateFirst')}
               </button>
             }
           >
-            Templates decide the wording students see — write one here.
+            {t('ctl.tplEmptyBody')}
           </EmptyState>
         </div>
       )}
@@ -181,12 +183,12 @@ export default function Templates() {
               <div className="d-flex align-items-center justify-content-between gap-2 mb-2">
                 <span className="smallish muted num">{row.code || '—'}</span>
                 <span className={row.kind === 'announcement' ? 'pill pill-suggest' : 'pill pill-income'}>
-                  {row.kind === 'announcement' ? 'Announcement' : 'Tip'}
+                  {row.kind === 'announcement' ? t('ctl.announcement') : t('ctl.tip')}
                 </span>
               </div>
-              <h2 className="h3">{row.title || 'Untitled'}</h2>
+              <h2 className="h3">{row.title || t('ctl.untitled')}</h2>
               <p style={CLAMP} className="smallish muted">
-                {row.bodyTemplate || row.body || 'No body text yet.'}
+                {row.bodyTemplate || row.body || t('ctl.noBody')}
               </p>
 
               <div className="d-flex gap-2 flex-wrap align-items-center mt-2">
@@ -197,18 +199,18 @@ export default function Templates() {
                   disabled={busyId === row.id}
                   onClick={() => toggleActive(row)}
                 >
-                  {row.isActive ? 'Active' : 'Paused'}
+                  {row.isActive ? t('ctl.active') : t('ctl.paused')}
                 </button>
                 <button type="button" className="btn btn-secondary btn-sm" onClick={() => openEdit(row)}>
-                  Edit
+                  {t('ui.edit')}
                 </button>
                 <button
                   type="button"
                   className="btn btn-ghost btn-sm"
                   onClick={() => setRemoving(row)}
-                  aria-label={`Delete template ${row.code || row.title}`}
+                  aria-label={t('ctl.deleteTplAria', { code: row.code || row.title })}
                 >
-                  🗑 Delete
+                  {t('ctl.deleteTplBtn')}
                 </button>
               </div>
             </article>
@@ -218,16 +220,16 @@ export default function Templates() {
 
       {draft && (
         <Modal
-          title={draft.mode === 'new' ? 'New template' : 'Edit template'}
+          title={draft.mode === 'new' ? t('ctl.newTemplate') : t('ctl.editTemplate')}
           onClose={() => setDraft(null)}
           footer={
             <>
               <button type="button" className="btn btn-ghost" onClick={() => setDraft(null)}>
-                Cancel
+                {t('ui.cancel')}
               </button>
               <button type="submit" form="template-form" className="btn btn-primary" disabled={saving}>
                 {saving && <span className="spinner" aria-hidden="true" />}
-                {saving ? 'Saving…' : 'Save'}
+                {saving ? t('ui.saving') : t('ui.save')}
               </button>
             </>
           }
@@ -241,7 +243,7 @@ export default function Templates() {
             )}
 
             {draft.mode === 'new' && (
-              <FormField label="Code" htmlFor="template-code" help="Short and stable, e.g. budget_pace.">
+              <FormField label={t('ctl.code')} htmlFor="template-code" help={t('ctl.codeHelp')}>
                 {(a) => (
                   <input
                     id="template-code"
@@ -256,7 +258,7 @@ export default function Templates() {
               </FormField>
             )}
 
-            <FormField label="Kind" htmlFor="template-kind">
+            <FormField label={t('ctl.kind')} htmlFor="template-kind">
               {(a) => (
                 <select
                   id="template-kind"
@@ -265,13 +267,13 @@ export default function Templates() {
                   onChange={(e) => setDraft((d) => ({ ...d, kind: e.target.value }))}
                   {...a}
                 >
-                  <option value="tip">Tip</option>
-                  <option value="announcement">Announcement</option>
+                  <option value="tip">{t('ctl.tip')}</option>
+                  <option value="announcement">{t('ctl.announcement')}</option>
                 </select>
               )}
             </FormField>
 
-            <FormField label="Title" htmlFor="template-title">
+            <FormField label={t('ctl.title')} htmlFor="template-title">
               {(a) => (
                 <input
                   id="template-title"
@@ -286,9 +288,9 @@ export default function Templates() {
             </FormField>
 
             <FormField
-              label="Body"
+              label={t('ctl.body')}
               htmlFor="template-body"
-              help="Use {{amount}}, {{category}}, {{pct}} placeholders — they fill in per student."
+              help={t('ctl.bodyHelp')}
             >
               {(a) => (
                 <textarea
@@ -308,22 +310,21 @@ export default function Templates() {
 
       {removing && (
         <Modal
-          title="Delete this template?"
+          title={t('ctl.deleteTplTitle')}
           onClose={() => setRemoving(null)}
           footer={
             <>
               <button type="button" className="btn btn-ghost" onClick={() => setRemoving(null)}>
-                Cancel
+                {t('ui.cancel')}
               </button>
               <button type="button" className="btn btn-danger-outline" onClick={removeRow}>
-                Delete template
+                {t('ctl.deleteTplConfirm')}
               </button>
             </>
           }
         >
           <p className="mb-0">
-            “{removing.title || removing.code}” disappears from future tips. Tips already written for this month
-            stay until they are refreshed.
+            {t('ctl.deleteTplBody', { name: removing.title || removing.code })}
           </p>
         </Modal>
       )}

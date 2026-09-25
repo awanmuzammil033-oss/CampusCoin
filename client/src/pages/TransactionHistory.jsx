@@ -6,32 +6,31 @@ import EmptyState from '../components/EmptyState.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
-
-function dayLabel(value) {
-  const [y, m, d] = String(value || '').slice(0, 10).split('-').map(Number);
-  if (!y || !m || !d) return '';
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
-}
+import { useLocale } from '../locale.jsx';
+import { dayLabel, uiLang } from '../dates.js';
 
 const ACTIONS = {
-  create: { icon: '➕', label: 'Created' },
-  update: { icon: '✏️', label: 'Edited' },
-  delete: { icon: '🗑', label: 'Deleted' },
-  restore: { icon: '♻️', label: 'Restored' },
+  create: { icon: '➕', label: 'hist.created' },
+  update: { icon: '✏️', label: 'hist.edited' },
+  delete: { icon: '🗑', label: 'hist.deleted' },
+  restore: { icon: '♻️', label: 'hist.restored' },
 };
+
+// Field labels come from the shared table vocabulary.
+const FIELD_KEYS = { amount: 'ui.amount', category: 'ui.category', description: 'ui.description', date: 'ui.date', type: 'ui.type' };
 
 // Only these fields can change — everything else about an entry is fixed.
 const FIELDS = ['amount', 'category', 'description', 'date', 'type'];
 
 /** Read one field out of a before/after snapshot, the way a person would. */
-function showValue(field, snapshot, names) {
+function showValue(field, snapshot, names, t) {
   const value = snapshot?.[field];
   if (value === undefined || value === null || value === '') return '—';
   if (field === 'amount') return money(value);
   if (field === 'date') return dayLabel(value);
-  if (field === 'type') return value === 'income' ? 'Income' : 'Expense';
+  if (field === 'type') return value === 'income' ? t('ui.income') : t('ui.expense');
   if (field === 'category') {
-    return snapshot.categoryName || names[String(value)] || `Category …${String(value).slice(-4)}`;
+    return snapshot.categoryName || names[String(value)] || t('hist.categoryShort', { id: String(value).slice(-4) });
   }
   return String(value);
 }
@@ -41,6 +40,7 @@ function showValue(field, snapshot, names) {
  * that actually changed, with the old value struck through.
  */
 export default function TransactionHistory() {
+  const { t } = useLocale();
   const { id } = useParams();
   const { push } = useToast();
   const [rows, setRows] = useState(null);
@@ -80,14 +80,14 @@ export default function TransactionHistory() {
   return (
     <Page
       trail={[
-        { label: 'Transactions', to: '/transactions' },
-        { label: 'Entry history' },
+        { label: t('nav.transactions'), to: '/transactions' },
+        { label: t('hist.entryHistory') },
       ]}
-      title="Entry history"
-      subtitle="Every change to this entry, newest first."
+      title={t('hist.entryHistory')}
+      subtitle={t('hist.subtitle')}
       actions={
         <Link className="btn btn-ghost" to="/transactions">
-          ← Back to transactions
+          ← {t('tx.backPlain')}
         </Link>
       }
     >
@@ -103,18 +103,18 @@ export default function TransactionHistory() {
           <div className="skeleton" style={{ height: 70, marginBottom: 12 }} />
           <div className="skeleton" style={{ height: 70, marginBottom: 12 }} />
           <div className="skeleton" style={{ height: 70 }} />
-          <p className="smallish muted mb-0 mt-3">Loading the trail…</p>
+          <p className="smallish muted mb-0 mt-3">{t('hist.loading')}</p>
         </div>
       )}
 
       {rows && rows.length === 0 && (
         <div className="card">
-          <EmptyState icon="📜" title="Nothing recorded yet" action={
+          <EmptyState icon="📜" title={t('hist.emptyTitle')} action={
             <Link className="btn btn-secondary mt-2" to="/transactions">
-              Back to transactions
+              {t('tx.backPlain')}
             </Link>
           }>
-            Edits, deletions and restorations show up here the moment they happen.
+            {t('hist.emptyBody')}
           </EmptyState>
         </div>
       )}
@@ -134,9 +134,9 @@ export default function TransactionHistory() {
                     {action.icon}
                   </span>
                   <div>
-                    <strong>{action.label}</strong>{' '}
+                    <strong>{t(action.label)}</strong>{' '}
                     <span className="smallish muted">
-                      {new Date(row.changedAt).toLocaleString('en-US', {
+                      {new Date(row.changedAt).toLocaleString(uiLang(), {
                         day: '2-digit',
                         month: 'short',
                         year: 'numeric',
@@ -148,17 +148,17 @@ export default function TransactionHistory() {
                 </div>
 
                 {changed.length === 0 ? (
-                  <p className="smallish muted mb-0 mt-2">No field values changed.</p>
+                  <p className="smallish muted mb-0 mt-2">{t('hist.nothingChanged')}</p>
                 ) : (
                   <div className="d-grid gap-1 mt-3">
                     {changed.map((field) => (
                       <div key={field} className="d-flex gap-2 align-items-baseline flex-wrap smallish">
                         <span className="muted" style={{ minWidth: 96 }}>
-                          {field.charAt(0).toUpperCase() + field.slice(1)}
+                          {t(FIELD_KEYS[field])}
                         </span>
-                        <s className="muted">{showValue(field, before, names)}</s>
+                        <s className="muted">{showValue(field, before, names, t)}</s>
                         <span aria-hidden="true">→</span>
-                        <strong>{showValue(field, after, names)}</strong>
+                        <strong>{showValue(field, after, names, t)}</strong>
                       </div>
                     ))}
                   </div>

@@ -1,13 +1,15 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../auth.jsx';
+import { useLocale } from '../../locale.jsx';
+import ThemeToggle from '../../components/ThemeToggle.jsx';
 
 const NAV = [
-  { to: '/control', label: 'Overview', icon: '📊', end: true },
-  { to: '/control/categories', label: 'Categories', icon: '🏷️' },
-  { to: '/control/templates', label: 'Templates', icon: '📝' },
-  { to: '/control/announcements', label: 'Announcements', icon: '📢' },
-  { to: '/control/users', label: 'Users', icon: '👥' },
+  { to: '/control', label: 'ctl.navOverview', icon: '📊', end: true },
+  { to: '/control/categories', label: 'ctl.navCategories', icon: '🏷️' },
+  { to: '/control/templates', label: 'ctl.navTemplates', icon: '📝' },
+  { to: '/control/announcements', label: 'ctl.navAnnouncements', icon: '📢' },
+  { to: '/control/users', label: 'ctl.navUsers', icon: '👥' },
 ];
 
 /**
@@ -16,16 +18,8 @@ const NAV = [
  */
 export default function ControlLayout() {
   const { updatePreferences, logout } = useAuth();
+  const { t } = useLocale();
   const navigate = useNavigate();
-
-  async function cycleTheme() {
-    const current = document.documentElement.getAttribute('data-theme');
-    try {
-      await updatePreferences({ theme: current === 'dark' ? 'light' : 'dark' });
-    } catch {
-      /* the toggle is a convenience — never block on it */
-    }
-  }
 
   async function handleLogout() {
     try {
@@ -37,34 +31,26 @@ export default function ControlLayout() {
 
   return (
     <div className="app-shell admin-mode">
-      <a className="skip-link" href="#main-content">Skip to content</a>
+      <a className="skip-link" href="#main-content">{t('ctl.skip')}</a>
 
       <header className="topbar admin-mode" style={{ borderTop: '4px solid var(--cc-accent)' }}>
         <Link to="/control" className="brand">
           <span className="brand-mark" aria-hidden="true">C</span>
-          <span>Campus Coin · Control</span>
+          <span>{t('ctl.brand')}</span>
         </Link>
         <div className="topbar-spacer" />
         <Link className="btn btn-ghost btn-sm" to="/">
-          View student site
+          {t('ctl.viewStudent')}
         </Link>
-        <button
-          type="button"
-          className="icon-btn"
-          onClick={cycleTheme}
-          aria-label="Switch colour theme"
-          title="Light / dark"
-        >
-          {document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙'}
-        </button>
+        <ThemeToggle labels={{ aria: t('ctl.switchTheme'), title: t('ctl.themeTitle') }} />
         <button type="button" className="btn btn-secondary btn-sm" onClick={handleLogout}>
-          Sign out
+          {t('account.signOut')}
         </button>
       </header>
 
       <div className="layout">
-        <nav className="sidebar" aria-label="Control">
-          <div className="nav-section">Administrator</div>
+        <nav className="sidebar" aria-label={t('ctl.navAria')}>
+          <div className="nav-section">{t('ctl.administrator')}</div>
           {NAV.map((item) => (
             <NavLink
               key={item.to}
@@ -73,7 +59,7 @@ export default function ControlLayout() {
               className={({ isActive }) => `nav-link-cc ${isActive ? 'active' : ''}`}
             >
               <span className="nav-ico" aria-hidden="true">{item.icon}</span>
-              <span className="nav-label">{item.label}</span>
+              <span className="nav-label">{t(item.label)}</span>
             </NavLink>
           ))}
         </nav>

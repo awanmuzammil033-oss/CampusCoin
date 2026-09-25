@@ -6,12 +6,14 @@ import FormField from '../../components/FormField.jsx';
 import EmptyState from '../../components/EmptyState.jsx';
 import { api } from '../../api.js';
 import { useToast } from '../../components/Toast.jsx';
+import { useLocale } from '../../locale.jsx';
+import { uiLang } from '../../dates.js';
 
 function dayLabel(value) {
   if (!value) return '';
   const [y, m, d] = String(value).slice(0, 10).split('-').map(Number);
   if (!y || !m || !d) return '';
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+  return new Date(y, m - 1, d).toLocaleDateString(uiLang(), { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function todayISO() {
@@ -31,6 +33,7 @@ function blankDraft() {
 /** ADM-2: campus-wide notices, shown in the bell feed while they run. */
 export default function Announcements() {
   const { push } = useToast();
+  const { t } = useLocale();
   const [rows, setRows] = useState(null);
   const [error, setError] = useState('');
   const [draft, setDraft] = useState(null); // { mode, id?, ...fields }
@@ -78,11 +81,11 @@ export default function Announcements() {
     event.preventDefault();
     setDraftError('');
     if (!draft.title.trim()) {
-      setDraftError('An announcement needs a title.');
+      setDraftError(t('ctl.annNeedTitle'));
       return;
     }
     if (!draft.body.trim()) {
-      setDraftError('Please write the message students will read.');
+      setDraftError(t('ctl.annNeedBody'));
       return;
     }
 
@@ -97,10 +100,10 @@ export default function Announcements() {
       };
       if (draft.mode === 'new') {
         await api.post('/api/control/announcements', payload);
-        push('Announcement published.');
+        push(t('ctl.annPublished'));
       } else {
         await api.patch(`/api/control/announcements/${draft.id}`, payload);
-        push('Announcement updated.');
+        push(t('ctl.annUpdated'));
       }
       setDraft(null);
       load();
@@ -116,7 +119,7 @@ export default function Announcements() {
     try {
       await api.del(`/api/control/announcements/${removing.id}`);
       setRemoving(null);
-      push('Announcement removed.');
+      push(t('ctl.annRemoved'));
       load();
     } catch (err) {
       push(err.message, 'error');
@@ -127,12 +130,12 @@ export default function Announcements() {
 
   return (
     <Page
-      trail={[{ label: 'Control', to: '/control' }, { label: 'Announcements' }]}
-      title="Announcements"
-      subtitle="Short campus notices that appear in every student's bell."
+      trail={[{ label: t('ctl.trail'), to: '/control' }, { label: t('ctl.navAnnouncements') }]}
+      title={t('ctl.navAnnouncements')}
+      subtitle={t('ctl.annSubtitle')}
       actions={
         <button type="button" className="btn btn-primary" onClick={openNew}>
-          + New announcement
+          {t('ctl.newAnn')}
         </button>
       }
     >
@@ -147,7 +150,7 @@ export default function Announcements() {
         <div className="card" role="status">
           <div className="skeleton" style={{ height: 60, marginBottom: 10 }} />
           <div className="skeleton" style={{ height: 60 }} />
-          <p className="smallish muted mb-0 mt-3">Loading announcements…</p>
+          <p className="smallish muted mb-0 mt-3">{t('ctl.loadingAnns')}</p>
         </div>
       )}
 
@@ -155,14 +158,14 @@ export default function Announcements() {
         <div className="card">
           <EmptyState
             icon="📢"
-            title="No announcements yet"
+            title={t('ctl.annEmptyTitle')}
             action={
               <button type="button" className="btn btn-primary mt-2" onClick={openNew}>
-                Write the first one
+                {t('ctl.annWriteFirst')}
               </button>
             }
           >
-            Deadline reminders, workshop dates, anything worth a line in the bell feed.
+            {t('ctl.annEmptyBody')}
           </EmptyState>
         </div>
       )}
@@ -174,23 +177,23 @@ export default function Announcements() {
               <div className="d-flex align-items-start justify-content-between gap-2 flex-wrap">
                 <h2 className="h3 mb-1">{row.title}</h2>
                 {row.isActive === false ? (
-                  <span className="pill">⏸ Inactive</span>
+                  <span className="pill">{t('ctl.inactive')}</span>
                 ) : (
-                  <span className="pill pill-income">▶ Active</span>
+                  <span className="pill pill-income">{t('ctl.activePill')}</span>
                 )}
               </div>
               <p className="mb-2">{row.body}</p>
               <p className="smallish muted mb-3">
-                {dayLabel(row.startsAt || row.startDate) || 'Starts today'}
+                {dayLabel(row.startsAt || row.startDate) || t('ctl.startsToday')}
                 {' → '}
-                {row.endsAt || row.endDate ? dayLabel(row.endsAt || row.endDate) : 'no end date set'}
+                {row.endsAt || row.endDate ? dayLabel(row.endsAt || row.endDate) : t('ctl.noEndDate')}
               </p>
               <div className="d-flex gap-2 flex-wrap">
                 <button type="button" className="btn btn-secondary btn-sm" onClick={() => openEdit(row)}>
-                  Edit
+                  {t('ui.edit')}
                 </button>
                 <button type="button" className="btn btn-ghost btn-sm" onClick={() => setRemoving(row)}>
-                  🗑 Remove
+                  {t('ctl.removeBtn')}
                 </button>
               </div>
             </article>
@@ -200,16 +203,16 @@ export default function Announcements() {
 
       {draft && (
         <Modal
-          title={draft.mode === 'new' ? 'New announcement' : 'Edit announcement'}
+          title={draft.mode === 'new' ? t('ctl.newAnn') : t('ctl.editAnn')}
           onClose={() => setDraft(null)}
           footer={
             <>
               <button type="button" className="btn btn-ghost" onClick={() => setDraft(null)}>
-                Cancel
+                {t('ui.cancel')}
               </button>
               <button type="submit" form="announcement-form" className="btn btn-primary" disabled={saving}>
                 {saving && <span className="spinner" aria-hidden="true" />}
-                {saving ? 'Saving…' : 'Save'}
+                {saving ? t('ui.saving') : t('ui.save')}
               </button>
             </>
           }
@@ -222,7 +225,7 @@ export default function Announcements() {
               </div>
             )}
 
-            <FormField label="Title" htmlFor="announcement-title">
+            <FormField label={t('ctl.title')} htmlFor="announcement-title">
               {(a) => (
                 <input
                   id="announcement-title"
@@ -236,7 +239,7 @@ export default function Announcements() {
               )}
             </FormField>
 
-            <FormField label="Body" htmlFor="announcement-body">
+            <FormField label={t('ctl.body')} htmlFor="announcement-body">
               {(a) => (
                 <textarea
                   id="announcement-body"
@@ -250,7 +253,7 @@ export default function Announcements() {
               )}
             </FormField>
 
-            <FormField label="Starts" htmlFor="announcement-starts">
+            <FormField label={t('ctl.starts')} htmlFor="announcement-starts">
               {(a) => (
                 <input
                   id="announcement-starts"
@@ -263,7 +266,7 @@ export default function Announcements() {
               )}
             </FormField>
 
-            <FormField label="Ends (optional)" htmlFor="announcement-ends" help="Leave blank to keep it running.">
+            <FormField label={t('ctl.ends')} htmlFor="announcement-ends" help={t('ctl.endsHelp')}>
               {(a) => (
                 <input
                   id="announcement-ends"
@@ -276,7 +279,7 @@ export default function Announcements() {
               )}
             </FormField>
 
-            <FormField label="Show to students" htmlFor="announcement-active">
+            <FormField label={t('ctl.showToStudents')} htmlFor="announcement-active">
               {(a) => (
                 <input
                   id="announcement-active"
@@ -293,20 +296,20 @@ export default function Announcements() {
 
       {removing && (
         <Modal
-          title="Remove this announcement?"
+          title={t('ctl.removeAnnTitle')}
           onClose={() => setRemoving(null)}
           footer={
             <>
               <button type="button" className="btn btn-ghost" onClick={() => setRemoving(null)}>
-                Cancel
+                {t('ui.cancel')}
               </button>
               <button type="button" className="btn btn-danger-outline" onClick={removeRow}>
-                Remove
+                {t('ui.remove')}
               </button>
             </>
           }
         >
-          <p className="mb-0">“{removing.title}” disappears from every bell feed straight away.</p>
+          <p className="mb-0">{t('ctl.removeAnnBody', { name: removing.title })}</p>
         </Modal>
       )}
     </Page>

@@ -165,7 +165,7 @@ export default function LocalePickers({ onOpen }) {
                 <span
                   className={`row-ui-tag${hasUi(l.code) ? ' row-ui-full' : ''}`}
                   aria-hidden="true"
-                  title={hasUi(l.code) ? 'Interface translated' : 'Interface stays in English for now'}
+                  title={hasUi(l.code) ? t('lp.langTranslated') : t('lp.langEnglishOnly')}
                 >
                   {hasUi(l.code) ? '✓ UI' : 'EN'}
                 </span>

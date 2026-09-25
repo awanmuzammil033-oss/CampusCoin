@@ -6,14 +6,10 @@ import EmptyState from '../components/EmptyState.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
+import { useLocale } from '../locale.jsx';
+import { dayLabel } from '../dates.js';
 
 const MAX_BYTES = 1024 * 1024;
-
-function dayLabel(value) {
-  const [y, m, d] = String(value || '').slice(0, 10).split('-').map(Number);
-  if (!y || !m || !d) return '';
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
-}
 
 /**
  * CSV import (TXN-8) in three honest steps: pick a file, read the preview
@@ -23,6 +19,7 @@ function dayLabel(value) {
 export default function ImportCsv() {
   const navigate = useNavigate();
   const { push } = useToast();
+  const { t, plural } = useLocale();
   const [preview, setPreview] = useState(null);
   const [fileName, setFileName] = useState('');
   const [busy, setBusy] = useState(false);
@@ -37,12 +34,12 @@ export default function ImportCsv() {
 
     // Friendly guards before anything leaves the browser (≤1 MB, .csv only).
     if (!/\.csv$/i.test(file.name)) {
-      setError('Only .csv files can be imported — export your sheet as CSV first.');
+      setError(t('imp.csvOnly'));
       event.target.value = '';
       return;
     }
     if (file.size > MAX_BYTES) {
-      setError('That file is larger than 1 MB — please split it into smaller batches.');
+      setError(t('imp.tooBig'));
       event.target.value = '';
       return;
     }
@@ -67,7 +64,7 @@ export default function ImportCsv() {
     setBusy(true);
     try {
       const data = await api.post('/api/transactions/import/confirm', { rows: preview.rows });
-      push(`${data.imported} entries imported.`);
+      push(plural('imp.imported', data.imported, { n: data.imported }));
       navigate('/transactions');
     } catch (err) {
       setError(err.message);
@@ -90,24 +87,23 @@ export default function ImportCsv() {
   return (
     <Page
       trail={[
-        { label: 'Transactions', to: '/transactions' },
-        { label: 'Import from CSV' },
+        { label: t('nav.transactions'), to: '/transactions' },
+        { label: t('home.link.importCsv') },
       ]}
-      title="Import from CSV"
-      subtitle="Bring in a semester of history without typing it all again."
+      title={t('home.link.importCsv')}
+      subtitle={t('imp.subtitle')}
       actions={
         <a className="btn btn-secondary" href="/api/transactions/import/template">
-          Download template
+          {t('imp.downloadTemplate')}
         </a>
       }
     >
       {!preview && (
         <div className="card" style={{ maxWidth: 640 }}>
-          <h2>Step 1 · Choose your file</h2>
+          <h2>{t('imp.step1')}</h2>
           <p className="muted">
-            The file needs five columns: <code>date, type, category, amount, description</code>, with dates
-            written as <code>2026-09-01</code>. Download the template to see the exact shape — one bad line
-            never throws away the good ones; problems are listed line by line before anything is saved.
+            {t('imp.helpF1')} <code>date, type, category, amount, description</code> {t('imp.helpF2')}{' '}
+            <code>2026-09-01</code> {t('imp.helpF3')}
           </p>
 
           <div className="field" style={{ position: 'relative' }}>
@@ -116,7 +112,7 @@ export default function ImportCsv() {
               htmlFor="csv-file"
               style={focusRing ? { outline: '3px solid var(--cc-focus)', outlineOffset: 2 } : undefined}
             >
-              Choose a CSV file
+              {t('imp.chooseFile')}
             </label>
             <input
               id="csv-file"
@@ -128,19 +124,19 @@ export default function ImportCsv() {
               onFocus={() => setFocusRing(true)}
               onBlur={() => setFocusRing(false)}
             />
-            <div className="field-help">.csv only · up to 1 MB · UTF-8 text.</div>
+            <div className="field-help">{t('imp.fileHelp')}</div>
           </div>
 
           {fileName && !busy && (
             <p className="smallish muted mb-0">
-              Selected: <strong>{fileName}</strong>
+              {t('imp.selected')} <strong>{fileName}</strong>
             </p>
           )}
 
           {busy && (
             <div className="d-flex align-items-center gap-2 muted mt-3" role="status" aria-live="polite">
               <span className="spinner" aria-hidden="true" />
-              Reading your file…
+              {t('imp.reading')}
             </div>
           )}
 
@@ -156,53 +152,53 @@ export default function ImportCsv() {
       {preview && (
         <div className="card">
           <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
-            <h2 className="mb-0">Step 2 · Check the preview</h2>
-            <span className="smallish muted">From {fileName}</span>
+            <h2 className="mb-0">{t('imp.step2')}</h2>
+            <span className="smallish muted">{t('imp.from', { file: fileName })}</span>
           </div>
 
           <div className="d-flex gap-2 flex-wrap mb-3">
-            <span className="pill pill-income num">✔ {ready} ready</span>
+            <span className="pill pill-income num">✔ {t('imp.ready', { n: ready })}</span>
             <span className={problems ? 'pill pill-expense num' : 'pill num'}>
-              {problems ? '⚠' : '·'} {problems} {problems === 1 ? 'problem' : 'problems'}
+              {problems ? '⚠' : '·'} {plural('imp.problems', problems, { n: problems })}
             </span>
-            <span className="pill num">{preview.total ?? ready + problems} rows in file</span>
+            <span className="pill num">{plural('imp.rows', preview.total ?? ready + problems, { n: preview.total ?? ready + problems })}</span>
           </div>
 
           {preview.errors?.length > 0 && (
             <div className="mb-3">
-              <h3>Lines that need a fix</h3>
+              <h3>{t('imp.fixTitle')}</h3>
               <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                 {preview.errors.map((err, i) => (
                   <li key={`${err.line}-${i}`} className="field-error">
                     <span aria-hidden="true">⚠</span>
                     <span>
-                      Line {err.line || '—'}: {err.message}
+                      {t('imp.lineMsg', { line: err.line || '—', message: err.message })}
                     </span>
                   </li>
                 ))}
               </ul>
               <p className="smallish muted mb-0 mt-2">
-                Fix those lines in your file and upload again — the rows below can still be imported now.
+                {t('imp.fixNote')}
               </p>
             </div>
           )}
 
           {preview.rows?.length === 0 ? (
-            <EmptyState icon="📄" title="Nothing ready to import">
-              Every line needs a fix first. Correct them in the spreadsheet and start over.
+            <EmptyState icon="📄" title={t('imp.emptyTitle')}>
+              {t('imp.emptyBody')}
             </EmptyState>
           ) : (
             <div className="table-scroll">
               <table className="table">
-                <caption className="visually-hidden">Rows that will be imported</caption>
+                <caption className="visually-hidden">{t('imp.tableCaption')}</caption>
                 <thead>
                   <tr>
-                    <th scope="col">Line</th>
-                    <th scope="col">Date</th>
-                    <th scope="col">Type</th>
-                    <th scope="col">Category</th>
-                    <th scope="col">Amount</th>
-                    <th scope="col">Description</th>
+                    <th scope="col">{t('ui.line')}</th>
+                    <th scope="col">{t('ui.date')}</th>
+                    <th scope="col">{t('ui.type')}</th>
+                    <th scope="col">{t('ui.category')}</th>
+                    <th scope="col">{t('ui.amount')}</th>
+                    <th scope="col">{t('ui.description')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -212,7 +208,7 @@ export default function ImportCsv() {
                       <td className="num text-nowrap">{dayLabel(row.date)}</td>
                       <td>
                         <span className={row.type === 'income' ? 'pill pill-income' : 'pill pill-expense'}>
-                          {row.type === 'income' ? '+ Income' : '− Expense'}
+                          {row.type === 'income' ? t('txf.incomeChip') : t('txf.expenseChip')}
                         </span>
                       </td>
                       <td>{row.category}</td>
@@ -233,10 +229,10 @@ export default function ImportCsv() {
               disabled={busy || preview.rows?.length === 0}
             >
               {busy && <span className="spinner" aria-hidden="true" />}
-              {busy ? 'Importing…' : 'Confirm import'}
+              {busy ? t('imp.importing') : t('imp.confirm')}
             </button>
             <button type="button" className="btn btn-ghost" onClick={startOver} disabled={busy}>
-              Start over
+              {t('imp.startOver')}
             </button>
           </div>
 

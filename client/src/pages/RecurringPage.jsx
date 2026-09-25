@@ -7,6 +7,9 @@ import EmptyState from '../components/EmptyState.jsx';
 import { api } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
+import { currencySymbol } from '../money.js';
+import { useLocale } from '../locale.jsx';
+import { uiLang } from '../dates.js';
 
 const ICONS = {
   wallet: '👛', cup: '☕', bus: '🚌', book: '📚', gift: '🎁', film: '🎞️',
@@ -20,7 +23,7 @@ function dayLabel(value) {
   if (!value) return '—';
   const [y, m, d] = String(value).slice(0, 10).split('-').map(Number);
   if (!y || !m || !d) return '—';
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+  return new Date(y, m - 1, d).toLocaleDateString(uiLang(), { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function ordinal(n) {
@@ -30,15 +33,16 @@ function ordinal(n) {
 }
 
 /** "Every Monday" for weekly rules, "Monthly on the 5th" for monthly ones. */
-function whenLabel(rule) {
+function whenLabel(rule, t) {
   if (rule.frequency === 'weekly') {
     const [y, m, d] = String(rule.startDate || '').slice(0, 10).split('-').map(Number);
     const weekday = y && m && d
-      ? new Date(y, m - 1, d).toLocaleDateString('en-US', { weekday: 'long' })
-      : 'week';
-    return `Every ${weekday}`;
+      ? new Date(y, m - 1, d).toLocaleDateString(uiLang(), { weekday: 'long' })
+      : t('rec.week');
+    return t('rec.everyWeekday', { day: weekday });
   }
-  return `Monthly on the ${ordinal(Number(rule.dayOfPeriod) || 1)}`;
+  const n = Number(rule.dayOfPeriod) || 1;
+  return t('rec.monthlyOn', { day: uiLang().startsWith('en') ? ordinal(n) : String(n) });
 }
 
 const BLANK_RULE = { type: 'expense', amount: '', categoryId: '', frequency: 'monthly', description: '', startDate: '' };
@@ -53,6 +57,7 @@ function todayISO() {
  * by the generator so nobody has to remember the 1st of the month.
  */
 export default function RecurringPage() {
+  const { t } = useLocale();
   const { push } = useToast();
   const [rows, setRows] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -98,11 +103,11 @@ export default function RecurringPage() {
     event.preventDefault();
     setDraftError('');
     if (!draft.amount || Number(draft.amount) <= 0) {
-      setDraftError('Amount must be more than 0.');
+      setDraftError(t('txf.amountMore'));
       return;
     }
     if (!draft.categoryId) {
-      setDraftError('Please choose a category.');
+      setDraftError(t('txf.chooseCategory'));
       return;
     }
 
@@ -118,7 +123,7 @@ export default function RecurringPage() {
       });
       setShowNew(false);
       setDraft({ ...BLANK_RULE, startDate: todayISO() });
-      push('Recurring entry added.');
+      push(t('rec.added'));
       load();
     } catch (err) {
       setDraftError(err.message);
@@ -141,7 +146,7 @@ export default function RecurringPage() {
     event.preventDefault();
     setEditError('');
     if (!editForm.amount || Number(editForm.amount) <= 0) {
-      setEditError('Amount must be more than 0.');
+      setEditError(t('txf.amountMore'));
       return;
     }
     setSaving(true);
@@ -152,7 +157,7 @@ export default function RecurringPage() {
         endDate: editForm.endDate || null,
       });
       setEditing(null);
-      push('Recurring entry updated.');
+      push(t('rec.updated'));
       load();
     } catch (err) {
       setEditError(err.message);
@@ -165,7 +170,7 @@ export default function RecurringPage() {
     setBusyId(rule.id);
     try {
       await api.patch(`/api/recurring/${rule.id}`, { isActive: !rule.isActive });
-      push(rule.isActive ? 'Paused — no new entries will appear.' : 'Active again.');
+      push(rule.isActive ? t('rec.pausedMsg') : t('rec.activeMsg'));
       load();
     } catch (err) {
       push(err.message, 'error');
@@ -180,7 +185,7 @@ export default function RecurringPage() {
     try {
       await api.del(`/api/recurring/${target.id}`);
       setRemoving(null);
-      push('Recurring entry removed. Entries already generated stay in your list.');
+      push(t('rec.removed'));
       load();
     } catch (err) {
       push(err.message, 'error');
@@ -191,18 +196,17 @@ export default function RecurringPage() {
 
   return (
     <Page
-      trail={[{ label: 'Recurring' }]}
-      title="Recurring entries"
-      subtitle="Monthly allowance, weekly transport, every subscription."
+      trail={[{ label: t('nav.recurring') }]}
+      title={t('rec.title')}
+      subtitle={t('rec.subtitle')}
       actions={
         <button type="button" className="btn btn-primary" onClick={() => setShowNew(true)}>
-          + New recurring
+          {t('rec.addBtn')}
         </button>
       }
     >
       <div className="card mb-3 smallish muted">
-        <span aria-hidden="true"> ℹ️</span> Entries appear automatically — the generator only fills dates that
-        don't exist yet.
+        <span aria-hidden="true"> ℹ️</span> {t('rec.autoNote')}
       </div>
 
       {error && (
@@ -217,7 +221,7 @@ export default function RecurringPage() {
           <div className="skeleton" style={{ height: 64, marginBottom: 10 }} />
           <div className="skeleton" style={{ height: 64, marginBottom: 10 }} />
           <div className="skeleton" style={{ height: 64 }} />
-          <p className="smallish muted mb-0 mt-3">Loading your rules…</p>
+          <p className="smallish muted mb-0 mt-3">{t('rec.loading')}</p>
         </div>
       )}
 
@@ -225,14 +229,14 @@ export default function RecurringPage() {
         <div className="card">
           <EmptyState
             icon="🔁"
-            title="No recurring entries yet"
+            title={t('rec.emptyTitle')}
             action={
               <button type="button" className="btn btn-primary mt-2" onClick={() => setShowNew(true)}>
-                Add your first one
+                {t('rec.emptyBtn')}
               </button>
             }
           >
-            Set your allowance once and it logs itself every month.
+            {t('rec.emptyBody')}
           </EmptyState>
         </div>
       )}
@@ -246,19 +250,19 @@ export default function RecurringPage() {
                   {glyph(rule.category?.icon)}
                 </span>
                 <span className="txn-main">
-                  <span className="txn-desc">{rule.description || rule.category?.name || 'Recurring entry'}</span>
+                  <span className="txn-desc">{rule.description || rule.category?.name || t('rec.untitled')}</span>
                   <span className="txn-meta">
                     <span className="pill" style={{ marginRight: 8 }}>
                       {rule.category?.name || '—'}
                     </span>
-                    {whenLabel(rule)} · last generated {dayLabel(rule.lastGeneratedOn)}
+                    {whenLabel(rule, t)} · {t('rec.lastGenerated', { date: dayLabel(rule.lastGeneratedOn) })}
                   </span>
                 </span>
                 <span className={`txn-amount ${rule.type === 'income' ? 'amount-income' : 'amount-expense'}`}>
                   {rule.type === 'income' ? `+ ↑ ${money(rule.amount)}` : `− ↓ ${money(rule.amount)}`}
                 </span>
                 <span className={rule.isActive ? 'pill pill-income' : 'pill'}>
-                  {rule.isActive ? '▶ Active' : '⏸ Paused'}
+                  {rule.isActive ? t('rec.active') : t('rec.paused')}
                 </span>
                 <span className="d-flex gap-1">
                   <button
@@ -266,16 +270,16 @@ export default function RecurringPage() {
                     className="btn btn-ghost btn-sm"
                     disabled={busyId === rule.id}
                     onClick={() => togglePause(rule)}
-                    aria-label={`${rule.isActive ? 'Pause' : 'Resume'} ${rule.description || 'this rule'}`}
+                    aria-label={rule.isActive ? t('rec.pauseAria', { name: rule.description || t('rec.thisRule') }) : t('rec.resumeAria', { name: rule.description || t('rec.thisRule') })}
                   >
-                    {rule.isActive ? 'Pause' : 'Resume'}
+                    {rule.isActive ? t('rec.pause') : t('rec.resume')}
                   </button>
                   <button
                     type="button"
                     className="icon-btn"
                     onClick={() => openEdit(rule)}
-                    aria-label={`Edit ${rule.description || 'this rule'}`}
-                    title="Edit"
+                    aria-label={t('tx.editAria', { name: rule.description || t('rec.thisRule') })}
+                    title={t('ui.edit')}
                   >
                     ✏️
                   </button>
@@ -283,8 +287,8 @@ export default function RecurringPage() {
                     type="button"
                     className="icon-btn"
                     onClick={() => setRemoving(rule)}
-                    aria-label={`Delete ${rule.description || 'this rule'}`}
-                    title="Delete"
+                    aria-label={t('tx.deleteAria', { name: rule.description || t('rec.thisRule') })}
+                    title={t('ui.delete')}
                   >
                     🗑
                   </button>
@@ -297,7 +301,7 @@ export default function RecurringPage() {
 
       {showNew && (
         <Modal
-          title="New recurring entry"
+          title={t('rec.newTitle')}
           onClose={() => setShowNew(false)}
           footer={
             <>
@@ -306,7 +310,7 @@ export default function RecurringPage() {
               </button>
               <button type="submit" form="recurring-new-form" className="btn btn-primary" disabled={saving}>
                 {saving && <span className="spinner" aria-hidden="true" />}
-                {saving ? 'Saving…' : 'Save'}
+                {saving ? t('ui.saving') : t('ui.save')}
               </button>
             </>
           }
@@ -321,7 +325,7 @@ export default function RecurringPage() {
 
             <div className="field">
               <span id="recurring-type-label" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: 6 }}>
-                Type
+                {t('ui.type')}
               </span>
               <div className="chip-grid" role="group" aria-labelledby="recurring-type-label">
                 <button
@@ -330,7 +334,7 @@ export default function RecurringPage() {
                   aria-pressed={draft.type === 'income'}
                   onClick={() => setDraft((d) => ({ ...d, type: 'income', categoryId: '' }))}
                 >
-                  + Income
+                  {t('txf.incomeChip')}
                 </button>
                 <button
                   type="button"
@@ -338,14 +342,14 @@ export default function RecurringPage() {
                   aria-pressed={draft.type === 'expense'}
                   onClick={() => setDraft((d) => ({ ...d, type: 'expense', categoryId: '' }))}
                 >
-                  − Expense
+                  {t('txf.expenseChip')}
                 </button>
               </div>
             </div>
 
-            <FormField label="Amount" htmlFor="recurring-amount">
+            <FormField label={t('ui.amount')} htmlFor="recurring-amount">
               <div className="amount-wrap">
-                <span className="amount-prefix" aria-hidden="true">$</span>
+                <span className="amount-prefix" aria-hidden="true">{currencySymbol()}</span>
                 <input
                   id="recurring-amount"
                   className="input"
@@ -360,7 +364,7 @@ export default function RecurringPage() {
 
             <div className="field">
               <span id="recurring-cat-label" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: 6 }}>
-                Category
+                {t('ui.category')}
               </span>
               <div className="chip-grid" role="group" aria-labelledby="recurring-cat-label">
                 {draftOptions.map((c) => (
@@ -375,11 +379,11 @@ export default function RecurringPage() {
                     {c.name}
                   </button>
                 ))}
-                {draftOptions.length === 0 && <span className="muted smallish">No categories for this type.</span>}
+                {draftOptions.length === 0 && <span className="muted smallish">{t('rec.noCats')}</span>}
               </div>
             </div>
 
-            <FormField label="Frequency" htmlFor="recurring-frequency">
+            <FormField label={t('ui.frequency')} htmlFor="recurring-frequency">
               {(a) => (
                 <select
                   id="recurring-frequency"
@@ -388,20 +392,20 @@ export default function RecurringPage() {
                   onChange={(e) => setDraftField('frequency', e.target.value)}
                   {...a}
                 >
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
+                  <option value="weekly">{t('rec.weekly')}</option>
+                  <option value="monthly">{t('rec.monthly')}</option>
                 </select>
               )}
             </FormField>
 
-            <FormField label="Description" htmlFor="recurring-description">
+            <FormField label={t('ui.description')} htmlFor="recurring-description">
               {(a) => (
                 <input
                   id="recurring-description"
                   className="input"
                   type="text"
                   maxLength={255}
-                  placeholder="e.g. monthly allowance"
+                  placeholder={t('rec.descPlaceholder')}
                   value={draft.description}
                   onChange={(e) => setDraftField('description', e.target.value)}
                   {...a}
@@ -409,7 +413,7 @@ export default function RecurringPage() {
               )}
             </FormField>
 
-            <FormField label="Start date" htmlFor="recurring-start" help="The first period begins here.">
+            <FormField label={t('rec.startDate')} htmlFor="recurring-start" help={t('rec.startHelp')}>
               {(a) => (
                 <input
                   id="recurring-start"
@@ -427,7 +431,7 @@ export default function RecurringPage() {
 
       {editing && (
         <Modal
-          title="Edit recurring entry"
+          title={t('rec.editTitle')}
           onClose={() => setEditing(null)}
           footer={
             <>
@@ -436,7 +440,7 @@ export default function RecurringPage() {
               </button>
               <button type="submit" form="recurring-edit-form" className="btn btn-primary" disabled={saving}>
                 {saving && <span className="spinner" aria-hidden="true" />}
-                {saving ? 'Saving…' : 'Save changes'}
+                {saving ? t('ui.saving') : t('ui.saveChanges')}
               </button>
             </>
           }
@@ -449,9 +453,9 @@ export default function RecurringPage() {
               </div>
             )}
 
-            <FormField label="Amount" htmlFor="edit-amount">
+            <FormField label={t('ui.amount')} htmlFor="edit-amount">
               <div className="amount-wrap">
-                <span className="amount-prefix" aria-hidden="true">$</span>
+                <span className="amount-prefix" aria-hidden="true">{currencySymbol()}</span>
                 <input
                   id="edit-amount"
                   className="input"
@@ -463,7 +467,7 @@ export default function RecurringPage() {
               </div>
             </FormField>
 
-            <FormField label="Description" htmlFor="edit-description">
+            <FormField label={t('ui.description')} htmlFor="edit-description">
               {(a) => (
                 <input
                   id="edit-description"
@@ -477,7 +481,7 @@ export default function RecurringPage() {
               )}
             </FormField>
 
-            <FormField label="End date (optional)" htmlFor="edit-end" help="Leave blank to keep it running.">
+            <FormField label={t('rec.endDate')} htmlFor="edit-end" help={t('rec.endHelp')}>
               {(a) => (
                 <input
                   id="edit-end"
@@ -495,7 +499,7 @@ export default function RecurringPage() {
 
       {removing && (
         <Modal
-          title="Remove this recurring entry?"
+          title={t('rec.removeTitle')}
           onClose={() => setRemoving(null)}
           footer={
             <>
@@ -503,14 +507,13 @@ export default function RecurringPage() {
                 Cancel
               </button>
               <button type="button" className="btn btn-danger-outline" onClick={removeRule}>
-                Remove
+                {t('ui.remove')}
               </button>
             </>
           }
         >
           <p className="mb-0">
-            “{removing.description || 'This rule'}” stops here. Entries it already generated stay in your list
-            with their history.
+            {t('rec.removeBody', { name: removing.description || t('rec.thisRuleCap') })}
           </p>
         </Modal>
       )}

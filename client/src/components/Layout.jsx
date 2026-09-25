@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
+import ThemeToggle from './ThemeToggle.jsx';
 import { useLocale } from '../locale.jsx';
 import LocalePickers from './LocalePickers.jsx';
 
@@ -82,11 +83,6 @@ export default function Layout({ children }) {
     } catch {}
   }
 
-  async function cycleTheme() {
-    const current = document.documentElement.getAttribute('data-theme');
-    await updatePreferences({ theme: current === 'dark' ? 'light' : 'dark' });
-  }
-
   async function changeFont(delta) {
     const current = Number(localStorage.getItem('cc.fontScale') || 2);
     const next = Math.min(4, Math.max(1, current + delta));
@@ -117,10 +113,7 @@ export default function Layout({ children }) {
         <button type="button" className="icon-btn" onClick={() => changeFont(1)} aria-label={t('a11y.increaseText')} title={t('topbar.largerText')}>
           A+
         </button>
-        <button type="button" className="icon-btn" onClick={cycleTheme} aria-label={t('a11y.switchTheme')} title={t('topbar.lightDark')}>
-          {document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙'}
-        </button>
-
+        <ThemeToggle />
         <div className="position-relative">
           <button
             type="button"

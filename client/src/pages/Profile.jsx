@@ -5,9 +5,10 @@ import Page from '../components/Page.jsx';
 import FormField from '../components/FormField.jsx';
 import { useAuth } from '../auth.jsx';
 import { useToast } from '../components/Toast.jsx';
+import { useLocale } from '../locale.jsx';
+import { currencySymbol } from '../money.js';
 
 const YEARS = ['1st year', '2nd year', '3rd year', '4th year'];
-const SIZES = { 1: 'Size: 1 of 4', 2: 'Size: 2 of 4', 3: 'Size: 3 of 4', 4: 'Size: 4 of 4' };
 
 /** Money columns arrive as Decimal128 objects — read them the friendly way. */
 function plainMoney(value) {
@@ -20,6 +21,7 @@ export default function Profile() {
   const { user, updatePreferences, updateProfile, logout } = useAuth();
   const { push } = useToast();
   const navigate = useNavigate();
+  const { t } = useLocale();
 
   const [form, setForm] = useState({
     name: '',
@@ -62,7 +64,7 @@ export default function Profile() {
         monthlyAllowanceBaseline: String(form.allowance).trim(),
         monthlySavingsGoal: String(form.goal).trim(),
       });
-      push('Profile saved.');
+      push(t('prof.saved'));
     } catch (err) {
       setError(err.message);
       push(err.message, 'error');
@@ -103,11 +105,11 @@ export default function Profile() {
   }
 
   return (
-    <Page trail={[{ label: 'Profile & settings' }]} title="Profile & settings" subtitle="Your details, and how the app looks.">
+    <Page trail={[{ label: t('nav.profile') }]} title={t('nav.profile')} subtitle={t('prof.subtitle')}>
       <div className="d-grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
         <section className="card">
           <div className="card-title">
-            <span>Your details</span>
+            <span>{t('prof.detailsTitle')}</span>
           </div>
 
           <form onSubmit={saveDetails} noValidate>
@@ -118,7 +120,7 @@ export default function Profile() {
               </div>
             )}
 
-            <FormField label="Name" htmlFor="profile-name">
+            <FormField label={t('ui.name')} htmlFor="profile-name">
               {(a) => (
                 <input
                   id="profile-name"
@@ -132,7 +134,7 @@ export default function Profile() {
               )}
             </FormField>
 
-            <FormField label="Email" htmlFor="profile-email" help="Email is your sign-in name.">
+            <FormField label={t('ui.email')} htmlFor="profile-email" help={t('prof.emailHelp')}>
               {(a) => (
                 <input
                   id="profile-email"
@@ -146,7 +148,7 @@ export default function Profile() {
               )}
             </FormField>
 
-            <FormField label="Academic year" htmlFor="profile-year">
+            <FormField label={t('prof.academicYear')} htmlFor="profile-year">
               {(a) => (
                 <select
                   id="profile-year"
@@ -155,21 +157,19 @@ export default function Profile() {
                   onChange={(e) => setField('academicYear', e.target.value)}
                   {...a}
                 >
-                  <option value="">Not set</option>
+                  <option value="">{t('prof.notSet')}</option>
                   {YEARS.map((year) => (
                     <option key={year} value={year}>
-                      {year}
+                      {t(`prof.year.${year.replace(' ', '-')}`)}
                     </option>
                   ))}
                 </select>
               )}
             </FormField>
 
-            <FormField label="Monthly allowance baseline" htmlFor="profile-allowance" help="A rough figure for what arrives each month.">
+            <FormField label={t('prof.allowanceLabel')} htmlFor="profile-allowance" help={t('prof.allowanceHelp')}>
               <div className="amount-wrap">
-                <span className="amount-prefix" aria-hidden="true">
-                  $
-                </span>
+<span className="amount-prefix" aria-hidden="true">{currencySymbol()}</span>
                 <input
                   id="profile-allowance"
                   className="input"
@@ -182,11 +182,9 @@ export default function Profile() {
               </div>
             </FormField>
 
-            <FormField label="Monthly savings goal" htmlFor="profile-goal" help="The dashboard tracks how close you are.">
+            <FormField label={t('prof.goalLabel')} htmlFor="profile-goal" help={t('prof.goalHelp')}>
               <div className="amount-wrap">
-                <span className="amount-prefix" aria-hidden="true">
-                  $
-                </span>
+<span className="amount-prefix" aria-hidden="true">{currencySymbol()}</span>
                 <input
                   id="profile-goal"
                   className="input"
@@ -201,7 +199,7 @@ export default function Profile() {
 
             <button type="submit" className="btn btn-primary" disabled={busy}>
               {busy && <span className="spinner" aria-hidden="true" />}
-              {busy ? 'Saving…' : 'Save details'}
+              {busy ? t('ui.saving') : t('prof.saveDetails')}
             </button>
           </form>
         </section>
@@ -209,26 +207,26 @@ export default function Profile() {
         <div className="d-grid gap-3" style={{ alignContent: 'start' }}>
           <section className="card">
             <div className="card-title">
-              <span>Appearance</span>
+              <span>{t('prof.appearance')}</span>
             </div>
 
             <div className="field">
               <span id="theme-label" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: 6 }}>
-                Theme
+                {t('prof.theme')}
               </span>
               <div className="chip-grid" role="group" aria-labelledby="theme-label">
                 <button type="button" className="chip" aria-pressed={theme === 'light'} onClick={() => chooseTheme('light')}>
-                  ☀️ Light
+                  {t('prof.lightChip')}
                 </button>
                 <button type="button" className="chip" aria-pressed={theme === 'dark'} onClick={() => chooseTheme('dark')}>
-                  🌙 Dark
+                  {t('prof.darkChip')}
                 </button>
               </div>
             </div>
 
             <div className="field mb-0">
               <span id="size-label" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: 6 }}>
-                Text size
+                {t('prof.textSize')}
               </span>
               <div className="d-flex align-items-center gap-2" role="group" aria-labelledby="size-label">
                 <button
@@ -236,19 +234,19 @@ export default function Profile() {
                   className="icon-btn"
                   onClick={() => changeSize(-1)}
                   disabled={fontScale <= 1}
-                  aria-label="Decrease text size"
-                  title="Smaller text"
+                  aria-label={t('prof.decrease')}
+                  title={t('prof.smaller')}
                 >
                   A−
                 </button>
-                <span className="num smallish" aria-live="polite">{SIZES[fontScale]}</span>
+                <span className="num smallish" aria-live="polite">{t('prof.size', { n: fontScale })}</span>
                 <button
                   type="button"
                   className="icon-btn"
                   onClick={() => changeSize(1)}
                   disabled={fontScale >= 4}
-                  aria-label="Increase text size"
-                  title="Larger text"
+                  aria-label={t('prof.increase')}
+                  title={t('prof.larger')}
                 >
                   A+
                 </button>
@@ -258,19 +256,18 @@ export default function Profile() {
 
           <section className="card">
             <div className="card-title">
-              <span>Security</span>
+              <span>{t('prof.security')}</span>
             </div>
             <p className="smallish muted">
-              Changing your password sends a time-limited link to your inbox — the same one the
-              “forgot password” page uses.
+              {t('prof.securityBody')}
             </p>
             <div className="d-flex gap-2 flex-wrap">
               <Link className="btn btn-secondary btn-sm" to="/forgot-password">
-                Change password
+                {t('prof.changePassword')}
               </Link>
               <button type="button" className="btn btn-danger-outline btn-sm" onClick={signOut} disabled={signingOut}>
                 {signingOut && <span className="spinner" aria-hidden="true" />}
-                {signingOut ? 'Signing out…' : 'Sign out'}
+                {signingOut ? t('prof.signingOut') : t('prof.signOut')}
               </button>
             </div>
           </section>

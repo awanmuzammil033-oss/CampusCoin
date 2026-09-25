@@ -7,6 +7,8 @@ import EmptyState from '../components/EmptyState.jsx';
 import TipCard from '../components/TipCard.jsx';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
+import { useLocale } from '../locale.jsx';
+import { uiLang } from '../dates.js';
 
 function monthKey(date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -14,7 +16,7 @@ function monthKey(date) {
 
 function monthLabel(key) {
   const [y, m] = key.split('-').map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  return new Date(y, m - 1, 1).toLocaleDateString(uiLang(), { month: 'long', year: 'numeric' });
 }
 
 function shiftMonth(key, delta) {
@@ -23,15 +25,15 @@ function shiftMonth(key, delta) {
 }
 
 const TABS = [
-  { id: 'active', label: 'Active' },
-  { id: 'pinned', label: 'Pinned' },
-  { id: 'dismissed', label: 'Dismissed' },
+  { id: 'active', label: 'tip.tabActive' },
+  { id: 'pinned', label: 'tip.tabPinned' },
+  { id: 'dismissed', label: 'tip.tabDismissed' },
 ];
 
 const EMPTY_COPY = {
-  active: 'No tips for this month yet — they appear once there is spending to compare.',
-  pinned: 'Nothing pinned. Pin a tip and it stays at the top of the list.',
-  dismissed: 'Nothing dismissed. Anything you send away can be brought back here.',
+  active: 'tip.emptyActive',
+  pinned: 'tip.emptyPinned',
+  dismissed: 'tip.emptyDismissed',
 };
 
 /**
@@ -39,6 +41,7 @@ const EMPTY_COPY = {
  * three decisions the student owns — pin, bookmark with a note, dismiss.
  */
 export default function Tips() {
+  const { t } = useLocale();
   const { push } = useToast();
   const [month, setMonth] = useState(() => monthKey(new Date()));
   const [tab, setTab] = useState('active');
@@ -74,7 +77,7 @@ export default function Tips() {
     try {
       await api.post('/api/tips/generate', { month });
       load();
-      push('Tips refreshed.');
+      push(t('tip.refreshed'));
     } catch (err) {
       push(err.message, 'error');
     } finally {
@@ -91,7 +94,7 @@ export default function Tips() {
     setBusyId(tip.id);
     try {
       await api.post(`/api/tips/${tip.id}/${action}`);
-      if (action === 'dismiss') push('Tip dismissed for this month.');
+      if (action === 'dismiss') push(t('tip.dismissed'));
       load();
     } catch (err) {
       push(err.message, 'error');
@@ -104,7 +107,7 @@ export default function Tips() {
     setBusyId(tip.id);
     try {
       await api.post(`/api/tips/${tip.id}/unpin`);
-      push('Tip is back among the active ones.');
+      push(t('tip.broughtBack'));
       load();
     } catch (err) {
       push(err.message, 'error');
@@ -119,7 +122,7 @@ export default function Tips() {
     try {
       await api.post(`/api/tips/${bookmarkFor.id}/bookmark`, { note });
       setBookmarkFor(null);
-      push('Bookmark saved.');
+      push(t('tip.bookmarkSaved'));
       load();
     } catch (err) {
       push(err.message, 'error');
@@ -132,9 +135,9 @@ export default function Tips() {
 
   return (
     <Page
-      trail={[{ label: 'Tips' }]}
-      title="Saving tips"
-      subtitle="Tips are ranked by the money you could actually save."
+      trail={[{ label: t('nav.tips') }]}
+      title={t('tip.title')}
+      subtitle={t('tip.subtitle')}
       actions={
         <>
           <span className="d-inline-flex align-items-center gap-1">
@@ -142,8 +145,8 @@ export default function Tips() {
               type="button"
               className="icon-btn"
               onClick={() => setMonth((m) => shiftMonth(m, -1))}
-              aria-label="Previous month"
-              title="Previous month"
+              aria-label={t('ui.prevMonth')}
+              title={t('ui.prevMonth')}
             >
               ‹
             </button>
@@ -154,29 +157,29 @@ export default function Tips() {
               type="button"
               className="icon-btn"
               onClick={() => setMonth((m) => shiftMonth(m, 1))}
-              aria-label="Next month"
-              title="Next month"
+              aria-label={t('ui.nextMonth')}
+              title={t('ui.nextMonth')}
             >
               ›
             </button>
           </span>
           <button type="button" className="btn btn-secondary" onClick={refresh} disabled={refreshing}>
             {refreshing && <span className="spinner" aria-hidden="true" />}
-            {refreshing ? 'Refreshing…' : 'Refresh'}
+            {refreshing ? t('tip.refreshing') : t('tip.refresh')}
           </button>
         </>
       }
     >
-      <div className="d-flex gap-2 flex-wrap mb-3" role="group" aria-label="Tip status">
-        {TABS.map((t) => (
+      <div className="d-flex gap-2 flex-wrap mb-3" role="group" aria-label={t('tip.statusAria')}>
+        {TABS.map((tabDef) => (
           <button
-            key={t.id}
+            key={tabDef.id}
             type="button"
-            className={`btn ${tab === t.id ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-            aria-pressed={tab === t.id}
-            onClick={() => setTab(t.id)}
+            className={`btn ${tab === tabDef.id ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+            aria-pressed={tab === tabDef.id}
+            onClick={() => setTab(tabDef.id)}
           >
-            {t.label} ({(rows || []).filter((tip) => tip.status === t.id).length})
+            {t(tabDef.label)} ({(rows || []).filter((tip) => tip.status === tabDef.id).length})
           </button>
         ))}
       </div>
@@ -193,7 +196,7 @@ export default function Tips() {
           <div className="skeleton" style={{ height: 84, marginBottom: 12 }} />
           <div className="skeleton" style={{ height: 84, marginBottom: 12 }} />
           <div className="skeleton" style={{ height: 84 }} />
-          <p className="smallish muted mb-0 mt-3">Gathering your tips…</p>
+          <p className="smallish muted mb-0 mt-3">{t('tip.loading')}</p>
         </div>
       )}
 
@@ -201,16 +204,16 @@ export default function Tips() {
         <div className="card">
           <EmptyState
             icon="💡"
-            title={`Nothing in "${TABS.find((t) => t.id === tab)?.label}"`}
+            title={t('tip.emptyTabTitle', { tab: t(TABS.find((x) => x.id === tab)?.label) })}
             action={
               tab === 'active' ? (
                 <button type="button" className="btn btn-secondary mt-2" onClick={refresh} disabled={refreshing}>
-                  {refreshing ? 'Refreshing…' : 'Refresh tips'}
+                  {refreshing ? t('tip.refreshing') : t('tip.refreshTips')}
                 </button>
               ) : undefined
             }
           >
-            {EMPTY_COPY[tab]}
+            {t(EMPTY_COPY[tab])}
           </EmptyState>
         </div>
       )}
@@ -227,10 +230,10 @@ export default function Tips() {
                     className="btn btn-secondary btn-sm"
                     disabled={busyId === tip.id}
                     onClick={() => bringBack(tip)}
-                    aria-label={`Bring back this tip: ${tip.text.slice(0, 60)}`}
+                    aria-label={t('tip.bringBackAria', { text: tip.text.slice(0, 60) })}
                   >
                     {busyId === tip.id && <span className="spinner" aria-hidden="true" />}
-                    Bring back
+                    {t('tip.bringBack')}
                   </button>
                 </div>
               </div>
@@ -242,28 +245,28 @@ export default function Tips() {
       )}
 
       <p className="smallish muted mt-4 mb-0">
-        <span aria-hidden="true"> ℹ️</span> Suggestions only — not financial advice.
+        <span aria-hidden="true"> ℹ️</span> {t('ui.suggestionsOnly')}
       </p>
 
       {bookmarkFor && (
         <Modal
-          title="Bookmark this tip"
+          title={t('tip.bookmarkTitle')}
           onClose={() => setBookmarkFor(null)}
           footer={
             <>
               <button type="button" className="btn btn-ghost" onClick={() => setBookmarkFor(null)}>
-                Cancel
+                {t('ui.cancel')}
               </button>
               <button type="submit" form="tip-note-form" className="btn btn-primary" disabled={savingNote}>
                 {savingNote && <span className="spinner" aria-hidden="true" />}
-                Save
+                {t('ui.save')}
               </button>
             </>
           }
         >
           <form id="tip-note-form" onSubmit={saveNote}>
             <p className="smallish muted">“{bookmarkFor.text}”</p>
-            <FormField label="Note (optional)" htmlFor="tip-note" help="Why you want to keep this one.">
+            <FormField label={t('tip.noteLabel')} htmlFor="tip-note" help={t('tip.noteHelp')}>
               {(a) => (
                 <textarea
                   id="tip-note"

@@ -52,6 +52,11 @@ export default function Register() {
   return (
     <div className="auth-wrap">
       <div className="card auth-card">
+        <div className="auth-top">
+          <Link to="/" className="btn btn-ghost btn-sm auth-back">
+            <span aria-hidden="true">←</span> {t('auth.backToSite')}
+          </Link>
+        </div>
         <div className="auth-brand">
           <span className="brand-mark" aria-hidden="true">C</span>
         </div>

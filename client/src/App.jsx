@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import { useAuth } from './auth.jsx';
+import { useLocale } from './locale.jsx';
 import { ToastProvider } from './components/Toast.jsx';
 import Layout from './components/Layout.jsx';
 
@@ -39,9 +40,10 @@ const ControlUsers = lazy(() => import('./pages/control/Users.jsx'));
 
 function RequireStudent({ children }) {
   const { user, loading } = useAuth();
+  const { t } = useLocale();
   const location = useLocation();
 
-  if (loading) return <CenteredSpinner label="Checking your session…" />;
+  if (loading) return <CenteredSpinner label={t('app.checkingSession')} />;
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   if (user.role !== 'student') return <Navigate to="/control" replace />;
   return <Layout>{children}</Layout>;
@@ -49,8 +51,9 @@ function RequireStudent({ children }) {
 
 function RequireAdmin({ children }) {
   const { user, loading } = useAuth();
+  const { t } = useLocale();
 
-  if (loading) return <CenteredSpinner label="Checking your session…" />;
+  if (loading) return <CenteredSpinner label={t('app.checkingSession')} />;
   if (!user) return <Navigate to="/control/login" replace />;
   if (user.role !== 'admin') return <Navigate to="/login" replace />;
   return children;
@@ -68,8 +71,9 @@ function CenteredSpinner({ label }) {
 }
 
 function Screen({ children }) {
+  const { t } = useLocale();
   return (
-    <Suspense fallback={<CenteredSpinner label="Loading…" />}>{children}</Suspense>
+    <Suspense fallback={<CenteredSpinner label={t('ui.loading')} />}>{children}</Suspense>
   );
 }
 
@@ -128,13 +132,14 @@ export default function App() {
 }
 
 function NotFound() {
+  const { t } = useLocale();
   return (
     <div className="auth-wrap">
       <div className="card auth-card" style={{ textAlign: 'center' }}>
         <span style={{ fontSize: '2.5rem' }} aria-hidden="true">🧭</span>
-        <h1>Page not found</h1>
-        <p className="muted">The page you were looking for has moved or never existed.</p>
-        <a className="btn btn-primary" href="/">Back to home</a>
+        <h1>{t('app.notFoundTitle')}</h1>
+        <p className="muted">{t('app.notFoundBody')}</p>
+        <a className="btn btn-primary" href="/">{t('app.backHome')}</a>
       </div>
     </div>
   );

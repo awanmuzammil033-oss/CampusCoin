@@ -1,4 +1,5 @@
 import { money } from '../money.js';
+import { useLocale } from '../locale.jsx';
 
 /**
  * Saving tip card (TIP-2/3): one sentence, the estimated saving, and the
@@ -6,19 +7,20 @@ import { money } from '../money.js';
  * Pinned tips get the gold edge so they stand out in the list.
  */
 export default function TipCard({ tip, onAction, busy }) {
+  const { t } = useLocale();
   const pinned = tip.status === 'pinned';
 
   return (
     <div className={`card tip-card ${pinned ? 'is-pinned' : ''}`}>
       <div className="d-flex align-items-start gap-2">
-        <span aria-hidden="true" title="Saving tip">💡</span>
+        <span aria-hidden="true" title={t('ui.savingTip')}>💡</span>
         <div className="flex-grow-1">
           <p className="mb-2">{tip.text}</p>
           <div className="d-flex align-items-center gap-2 flex-wrap">
             {tip.potentialSavings > 0 && (
-              <span className="tip-saving">Save ~{money(tip.potentialSavings)}</span>
+              <span className="tip-saving">{t('ui.saveApprox', { amount: money(tip.potentialSavings) })}</span>
             )}
-            {tip.isBookmarked && <span className="pill">🔖 Saved</span>}
+            {tip.isBookmarked && <span className="pill">🔖 {t('ui.saved')}</span>}
           </div>
         </div>
         <div className="d-flex gap-1">
@@ -26,8 +28,8 @@ export default function TipCard({ tip, onAction, busy }) {
             type="button"
             className="icon-btn"
             aria-pressed={pinned}
-            title={pinned ? 'Unpin' : 'Pin this tip'}
-            aria-label={pinned ? 'Unpin this tip' : 'Pin this tip'}
+            title={pinned ? t('tip.unpin') : t('tip.pin')}
+            aria-label={pinned ? t('tip.unpin') : t('tip.pin')}
             disabled={busy}
             onClick={() => onAction(pinned ? 'unpin' : 'pin')}
           >
@@ -37,8 +39,8 @@ export default function TipCard({ tip, onAction, busy }) {
             type="button"
             className="icon-btn"
             aria-pressed={Boolean(tip.isBookmarked)}
-            title={tip.isBookmarked ? 'Remove bookmark' : 'Bookmark with a note'}
-            aria-label={tip.isBookmarked ? 'Remove bookmark' : 'Bookmark this tip'}
+            title={tip.isBookmarked ? t('tip.removeBookmark') : t('tip.bookmarkNote')}
+            aria-label={tip.isBookmarked ? t('tip.removeBookmark') : t('tip.bookmark')}
             disabled={busy}
             onClick={() => onAction('bookmark')}
           >
@@ -47,8 +49,8 @@ export default function TipCard({ tip, onAction, busy }) {
           <button
             type="button"
             className="icon-btn"
-            title="Dismiss for this month"
-            aria-label="Dismiss this tip for this month"
+            title={t('tip.dismissMonth')}
+            aria-label={t('tip.dismissMonth')}
             disabled={busy}
             onClick={() => onAction('dismiss')}
           >
