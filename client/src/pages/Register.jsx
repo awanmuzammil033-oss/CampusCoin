@@ -16,7 +16,7 @@ export default function Register() {
   const { register } = useAuth();
   const { t } = useLocale();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' });
+  const [form, setForm] = useState({ name: '', email: '', recoveryEmail: '', password: '', confirm: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -39,10 +39,21 @@ export default function Register() {
       setError(t('auth.passwordTooShort'));
       return;
     }
+    // the browser's required attribute is not enough on its own for a field
+    // this important — say it in the app's own words, in the student's language
+    if (!form.recoveryEmail.trim()) {
+      setError(t('reset.recoveryRequired'));
+      return;
+    }
 
     setBusy(true);
     try {
-      await register({ name: form.name, email: form.email, password: form.password });
+      await register({
+        name: form.name,
+        email: form.email,
+        recoveryEmail: form.recoveryEmail,
+        password: form.password,
+      });
       navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err.message);
@@ -104,6 +115,28 @@ export default function Register() {
             <FormField label={t('auth.email')} htmlFor="email" help={t('auth.emailHelp')}>
               {(a) => (
                 <input id="email" type="email" className="input" autoComplete="email" required value={form.email} onChange={update('email')} {...a} />
+              )}
+            </FormField>
+
+            {/* Required, not optional: this is the only address a password
+                reset will answer to, and it is kept apart from the sign-in
+                address on purpose (AUTH-5). */}
+            <FormField
+              label={t('reset.recoveryEmail')}
+              htmlFor="recoveryEmail"
+              help={t('reset.recoveryHelpAtSignup')}
+            >
+              {(a) => (
+                <input
+                  id="recoveryEmail"
+                  type="email"
+                  className="input"
+                  autoComplete="email"
+                  required
+                  value={form.recoveryEmail}
+                  onChange={update('recoveryEmail')}
+                  {...a}
+                />
               )}
             </FormField>
 

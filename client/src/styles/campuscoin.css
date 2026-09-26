@@ -3752,3 +3752,34 @@ textarea.input:focus {
   color: #0b3d2e;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
+
+/* ---------------------- password recovery (AUTH-5) ------------------------- */
+/* The six-digit code, shown on screen when no mail server is configured. It is
+   a development affordance, so it looks like one: a quiet panel, not a toast. */
+.reset-dev-code {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border-radius: var(--cc-radius);
+  border: 1px dashed var(--cc-primary);
+  background: var(--cc-primary-soft);
+  text-align: center;
+}
+.reset-dev-code strong {
+  font-size: 2rem;
+  line-height: 1.1;
+  letter-spacing: 0.28em;
+  text-indent: 0.28em;
+  color: var(--cc-primary);
+}
+
+/* the code itself: six digits, big enough to read off a phone screen */
+.reset-code-input {
+  font-size: 1.35rem;
+  letter-spacing: 0.3em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}

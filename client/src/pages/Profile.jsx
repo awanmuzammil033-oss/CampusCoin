@@ -32,6 +32,7 @@ export default function Profile() {
     academicYear: '',
     allowance: '',
     goal: '',
+    recoveryEmail: '',
   });
   const [theme, setTheme] = useState('light');
   const [fontScale, setFontScale] = useState(2);
@@ -68,6 +69,7 @@ export default function Profile() {
       academicYear: user.academicYear || '',
       allowance: plainMoney(user.monthlyAllowanceBaseline),
       goal: plainMoney(user.monthlySavingsGoal),
+      recoveryEmail: user.recoveryEmail || '',
     });
     setTheme(user.theme || 'light');
     setFontScale(Number(user.fontScale) || 2);
@@ -80,6 +82,12 @@ export default function Profile() {
   async function saveDetails(event) {
     event.preventDefault();
     setError('');
+    // the recovery address is the only way back into the account, so it is
+    // never allowed to be blanked
+    if (!form.recoveryEmail.trim()) {
+      setError(t('reset.recoveryRequired'));
+      return;
+    }
     setBusy(true);
     try {
       await updateProfile({
@@ -87,6 +95,7 @@ export default function Profile() {
         academicYear: form.academicYear,
         monthlyAllowanceBaseline: String(form.allowance).trim(),
         monthlySavingsGoal: String(form.goal).trim(),
+        recoveryEmail: form.recoveryEmail,
       });
       push(t('prof.saved'));
     } catch (err) {
@@ -167,6 +176,28 @@ export default function Profile() {
                   value={user?.email || ''}
                   readOnly
                   disabled
+                  {...a}
+                />
+              )}
+            </FormField>
+
+            {/* The address a reset answers to. Kept editable on purpose: a
+                student who loses access to this inbox must be able to move it
+                without losing the account (AUTH-5). */}
+            <FormField
+              label={t('reset.recoveryEmail')}
+              htmlFor="profile-recovery-email"
+              help={t('reset.recoveryHelpProfile')}
+            >
+              {(a) => (
+                <input
+                  id="profile-recovery-email"
+                  className="input"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={form.recoveryEmail}
+                  onChange={(e) => setField('recoveryEmail', e.target.value)}
                   {...a}
                 />
               )}

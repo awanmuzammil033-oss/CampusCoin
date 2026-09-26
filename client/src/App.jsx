@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+﻿import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import { useAuth } from './auth.jsx';
@@ -11,7 +11,6 @@ import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import ForgotPassword from './pages/ForgotPassword.jsx';
-import ResetPassword from './pages/ResetPassword.jsx';
 import AdminLogin from './pages/AdminLogin.jsx';
 
 // Screens inside the signed-in app are split out of the first bundle so the
@@ -90,10 +89,9 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/control/login" element={<AdminLogin />} />
 
-        {/* administrator panel — separate area, separate guard */}
+        {/* administrator panel â€” separate area, separate guard */}
         <Route
           path="/control"
           element={

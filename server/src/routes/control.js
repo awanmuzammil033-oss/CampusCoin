@@ -7,8 +7,7 @@ import Transaction from '../models/Transaction.js';
 import TipTemplate from '../models/TipTemplate.js';
 import Announcement from '../models/Announcement.js';
 import UserTip from '../models/UserTip.js';
-import { newResetToken, sendMail } from '../services/accounts.js';
-import env from '../config/env.js';
+import { newResetCode, sendMail } from '../services/accounts.js';
 import { toNum } from '../utils/money.js';
 
 /**
@@ -349,31 +348,41 @@ async function setAccountState(req, res, next, active) {
   }
 }
 
-/** Trigger a password reset exactly like the public flow does (ADM-3, AUTH-5). */
+/**
+ * Trigger a password reset exactly like the public flow does (ADM-3, AUTH-5):
+ * a six-digit code, mailed to the account's RECOVERY address — never to the
+ * sign-in address, which is the one the administrator can already see.
+ */
 router.post('/users/:id/reset', async (req, res, next) => {
   try {
     const user = await studentAccount(req, res);
     if (!user) return;
 
-    const { token, hash, expires } = newResetToken();
-    user.resetTokenHash = hash;
-    user.resetTokenExpires = expires;
+    const { code, hash, expires } = newResetCode();
+    user.resetCodeHash = hash;
+    user.resetCodeExpires = expires;
+    user.resetCodeAttempts = 0;
     await user.save();
 
-    await sendMail({
-      to: user.email,
-      subject: 'Reset your Campus Coin password',
+    const mail = await sendMail({
+      to: user.recoveryEmail,
+      subject: 'Your Campus Coin reset code',
       text:
         `Hi ${user.name},\n\n` +
-        `An administrator asked us to send you a password reset link.\n` +
-        `Open the link below within the next hour to choose a new one:\n` +
-        `${env.appUrl}/reset-password/${token}\n\n` +
-        `If this was unexpected, you can ignore this message — nothing has changed.`,
+        `An administrator asked us to send you a password reset code.\n` +
+        `Your code is ${code}. It works once, and dies in ten minutes.\n\n` +
+        `Enter it on the reset page to choose a new password.\n` +
+        `If this was unexpected, tell your campus coordinator — nothing has changed yet.`,
     });
 
-    // Same wording the public request returns: nothing here says whether
-    // the address exists.
-    res.json({ ok: true, message: 'If that address has an account, a reset link is on its way.' });
+    // Same wording the public request returns: nothing here says whether the
+    // address exists. The code is only echoed back when the console mailer is
+    // configured, so an administrator can pass it on in a demo.
+    res.json({
+      ok: true,
+      message: 'If that account has a recovery address, a reset code is on its way.',
+      ...(mail.backend === 'smtp' ? {} : { devCode: code }),
+    });
   } catch (err) {
     next(err);
   }

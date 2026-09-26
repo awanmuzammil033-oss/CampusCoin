@@ -224,9 +224,85 @@ function AdminArt() {
   );
 }
 
-const VARIANTS = { login: LoginArt, register: RegisterArt, admin: AdminArt };
+/**
+ * The reset page's scene: a student at a mailbox with a six-digit code on a
+ * phone, a key turning back the other way. It is the one form page that is
+ * about getting *into* an account, so the picture says the same thing the copy
+ * does — a code arrives, the student types it, the door opens again.
+ */
+function ResetArt() {
+  return (
+    <>
+      <circle cx="210" cy="172" r="152" fill="#e0f2fe" />
+      <circle cx="86" cy="96" r="26" fill={MINT_LIGHT} opacity="0.7" />
+      <circle cx="344" cy="120" r="18" fill={CORAL} opacity="0.35" />
 
-/** variant: 'login' | 'register' | 'admin' */
+      {/* the mailbox on its post, with a letter coming out of it */}
+      <g>
+        <ellipse cx="150" cy="318" rx="92" ry="10" fill="#0f766e" opacity="0.12" />
+        <rect x="146" y="230" width="12" height="78" rx="5" fill="#9a6b3f" />
+        <path d="M104 176h92a10 10 0 0 1 10 10v34a16 16 0 0 1-16 16h-80a16 16 0 0 1-16-16v-34a10 10 0 0 1 10-10z" fill={CORAL} />
+        <path d="M94 186h112l-8 16h-96z" fill="#f472b6" />
+        <rect x="136" y="212" width="30" height="8" rx="4" fill={PAPER} />
+        <path d="M138 176V160a12 12 0 0 1 12-12h16" stroke={CORAL} strokeWidth="8" fill="none" strokeLinecap="round" />
+        {/* the letter, half out */}
+        <g transform="rotate(-14 176 132)">
+          <rect x="150" y="112" width="52" height="36" rx="4" fill={PAPER} stroke={LINE} strokeWidth="2" />
+          <path d="M150 114l26 20 26-20" stroke={LINE} strokeWidth="2" fill="none" />
+        </g>
+        <path d="M188 214l8 8 14-16" stroke={PAPER} strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      </g>
+
+      {/* the phone in the student's hand, showing the code */}
+      <g transform="rotate(-8 300 172)">
+        <rect x="266" y="112" width="68" height="112" rx="12" fill="#1f2937" />
+        <rect x="272" y="122" width="56" height="86" rx="6" fill="#dbeafe" />
+        <rect x="282" y="134" width="36" height="8" rx="4" fill="#93c5fd" />
+        <g fill={AMBER}>
+          <circle cx="288" cy="164" r="9" />
+          <circle cx="311" cy="164" r="9" />
+          <circle cx="288" cy="188" r="9" />
+          <circle cx="311" cy="188" r="9" />
+        </g>
+        <g fill="#7c4a03" fontSize="12" fontWeight="700" textAnchor="middle">
+          <text x="288" y="168">1</text>
+          <text x="311" y="168">4</text>
+          <text x="288" y="192">8</text>
+          <text x="311" y="192">2</text>
+        </g>
+        <rect x="288" y="214" width="24" height="4" rx="2" fill="#cbd5e1" />
+      </g>
+
+      {/* the student: looking at the phone, key in the other hand */}
+      <g>
+        <Head x={214} y={214} r={26} long />
+        <rect x="200" y="238" width="28" height="18" rx="8" fill={SKIN_DARK} />
+        <path d="M172 288c0-19 14-32 32-32s32 13 32 32v22h-64z" fill={SHIRT} />
+        <path d="M172 288c5 15 15 22 32 22s27-7 32-22c-7 9-17 14-32 14s-25-5-32-14z" fill={SHIRT_DARK} />
+        <rect x="180" y="304" width="20" height="26" rx="9" fill={PANTS} />
+        <rect x="208" y="304" width="20" height="26" rx="9" fill={PANTS} />
+        <rect x="176" y="326" width="27" height="12" rx="6" fill="#1f2937" />
+        <rect x="205" y="326" width="27" height="12" rx="6" fill="#1f2937" />
+        {/* arm up to the phone */}
+        <path d="M236 280c16-6 26-16 32-30l14 8c-8 18-20 30-40 36z" fill={SKIN} />
+        {/* the other hand holding a key */}
+        <g transform="translate(166 268) rotate(-18)">
+          <circle cx="0" cy="0" r="11" fill="none" stroke={AMBER_DARK} strokeWidth="6" />
+          <rect x="9" y="-3" width="34" height="6" rx="3" fill={AMBER_DARK} />
+          <rect x="26" y="2" width="6" height="9" rx="2" fill={AMBER_DARK} />
+          <rect x="36" y="2" width="6" height="7" rx="2" fill={AMBER_DARK} />
+        </g>
+      </g>
+
+      <Sparkles x={330} y={244} scale={0.9} />
+      <Plant x={300} y={244} scale={0.75} />
+    </>
+  );
+}
+
+const VARIANTS = { login: LoginArt, register: RegisterArt, admin: AdminArt, reset: ResetArt };
+
+/** variant: 'login' | 'register' | 'admin' | 'reset' */
 export default function AuthArt({ variant = 'login' }) {
   const Art = VARIANTS[variant] || LoginArt;
   return (

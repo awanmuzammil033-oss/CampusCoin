@@ -11,6 +11,35 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true, maxlength: 254 },
     passwordHash: { type: String, required: true, select: false },
 
+    /**
+     * The address a password reset is sent to (AUTH-5) — and the ONLY address
+     * one works from.
+     *
+     * It is separate from `email` on purpose. `email` is the sign-in name: it
+     * shows up in screenshots, on shared machines and in the seed, so anyone who
+     * can type it must not be able to take the account over. The recovery
+     * address is the one the student keeps private, is asked for at sign-up
+     * (never optional) and can be changed from the profile. Knowing it is what
+     * proves the request is really yours.
+     *
+     * Unique, so one address can only ever point at one account — otherwise
+     * "which student does this reset belong to?" would be a coin toss.
+     */
+    recoveryEmail: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      maxlength: 254,
+    },
+    /**
+     * True once the student has picked this address themselves (at sign-up or
+     * from the profile). The demo seed will fill in an address for the accounts
+     * it owns, but never overwrites one a person chose.
+     */
+    recoveryEmailChosen: { type: Boolean, default: false },
+
     role: { type: String, enum: ['student', 'admin'], default: 'student' },
     isActive: { type: Boolean, default: true }, // admins can disable an account (ADM-3)
 
@@ -47,11 +76,12 @@ const userSchema = new mongoose.Schema(
       since: { type: Date, default: null },
     },
 
-    // Password reset (AUTH-5): we store only the hash of the token that was
-    // emailed, it dies after an hour, and clearing it on success makes the
-    // link single-use.
-    resetTokenHash: { type: String, default: null, select: false },
-    resetTokenExpires: { type: Date, default: null, select: false },
+    // Password reset (AUTH-5): a six-digit code, of which only the hash is
+    // kept. It dies after ten minutes, after five wrong guesses, and is wiped
+    // the moment it works. `attempts` is what makes guessing a code useless.
+    resetCodeHash: { type: String, default: null, select: false },
+    resetCodeExpires: { type: Date, default: null, select: false },
+    resetCodeAttempts: { type: Number, default: 0, select: false },
   },
   { timestamps: true }
 );
@@ -61,6 +91,8 @@ userSchema.methods.toPublic = function toPublic() {
     id: this._id.toString(),
     name: this.name,
     email: this.email,
+    // the student's own address, so the profile can show which one resets work
+    recoveryEmail: this.recoveryEmail,
     role: this.role,
     academicYear: this.academicYear,
     monthlyAllowanceBaseline: this.monthlyAllowanceBaseline,

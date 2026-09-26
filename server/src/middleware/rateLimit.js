@@ -1,4 +1,5 @@
 import RateLimit from 'express-rate-limit';
+import env from '../config/env.js';
 
 /**
  * Brute-force guard. Five wrong attempts on one account from one address
@@ -9,7 +10,7 @@ import RateLimit from 'express-rate-limit';
  */
 export const loginLimiter = RateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 5,
+  limit: env.rateLimits.login,
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true,
@@ -20,7 +21,7 @@ export const loginLimiter = RateLimit({
 /** Same idea for account creation and reset requests. */
 export const accountLimiter = RateLimit({
   windowMs: 60 * 60 * 1000,
-  limit: 15,
+  limit: env.rateLimits.account,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests. Please try again a little later.' },

@@ -26,6 +26,14 @@ const env = {
 
   sessionIdleMinutes: Number(process.env.SESSION_IDLE_MINUTES || 30),
 
+  // Brute-force guards. The defaults are deliberately tight; the test suite
+  // raises them, because one file exercising a dozen reset calls in a row is
+  // the test being thorough, not an attack.
+  rateLimits: {
+    login: Number(process.env.RATE_LIMIT_LOGIN || 5),
+    account: Number(process.env.RATE_LIMIT_ACCOUNT || 15),
+  },
+
   // Optional: a remote text-generation endpoint for monthly narratives.
   // The app is fully functional without it — templates are the default.
   narrativeApiKey: process.env.NARRATIVE_API_KEY || '',

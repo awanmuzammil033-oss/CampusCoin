@@ -7,8 +7,8 @@ import {
   verifyPassword,
   passwordProblem,
   emailProblem,
-  newResetToken,
-  applyReset,
+  requestPasswordReset,
+  applyResetCode,
   sendMail,
 } from '../services/accounts.js';
 import env from '../config/env.js';
@@ -19,7 +19,7 @@ const router = Router();
 
 router.post('/register', accountLimiter, async (req, res, next) => {
   try {
-    const { name, email, password, currency } = req.body;
+    const { name, email, recoveryEmail, password, currency } = req.body;
 
     const emailErr = emailProblem(email);
     if (emailErr) return res.status(400).json({ error: emailErr });
@@ -30,16 +30,29 @@ router.post('/register', accountLimiter, async (req, res, next) => {
       return res.status(400).json({ error: 'Unknown currency code.' });
     }
 
+    // The recovery address is not optional: without it the student has no way
+    // back into the account if they forget the password.
+    const recoveryErr = emailProblem(recoveryEmail);
+    if (recoveryErr) {
+      return res.status(400).json({ error: `Recovery email: ${recoveryErr}` });
+    }
+
     const cleanEmail = String(email).trim().toLowerCase();
+    const cleanRecovery = String(recoveryEmail).trim().toLowerCase();
     if (await User.exists({ email: cleanEmail })) {
       // Same wording whether or not the address exists keeps us from
       // telling strangers who has an account here.
       return res.status(409).json({ error: 'That email is already registered. Try signing in.' });
     }
+    if (await User.exists({ recoveryEmail: cleanRecovery })) {
+      return res.status(409).json({ error: 'That recovery email is already used by another account.' });
+    }
 
     const user = await User.create({
       name: String(name).trim().slice(0, 100),
       email: cleanEmail,
+      recoveryEmail: cleanRecovery,
+      recoveryEmailChosen: true,
       passwordHash: await hashPassword(password),
       role: 'student',
       // What the student picks at sign-up is what their amounts are in. The
@@ -124,32 +137,17 @@ router.post('/logout', (req, res) => {
 });
 
 /* --------------------------- password reset (AUTH-5) ------------------------- */
+/*
+ * Two steps on one screen: ask for the RECOVERY address, get a six-digit code,
+ * type the code with a new password. The sign-in address is not accepted here
+ * on purpose — it is the name that shows up in screenshots and on shared
+ * machines, so anyone who can type it must not be able to take the account.
+ */
 
 router.post('/password-reset/request', accountLimiter, async (req, res, next) => {
   try {
-    const email = String(req.body.email || '').trim().toLowerCase();
-    const user = await User.findOne({ email });
-
-    if (user && user.isActive) {
-      const { token, hash, expires } = newResetToken();
-      user.resetTokenHash = hash;
-      user.resetTokenExpires = expires;
-      await user.save();
-
-      const link = `${env.appUrl}/reset-password/${token}`;
-      await sendMail({
-        to: user.email,
-        subject: 'Reset your Campus Coin password',
-        text:
-          `Hi ${user.name},\n\n` +
-          `Someone asked to reset the password for this account.\n` +
-          `Open the link below within the next hour to choose a new one:\n${link}\n\n` +
-          `If it was not you, you can ignore this message — nothing has changed.`,
-      });
-    }
-
-    // One identical answer either way: no account enumeration from here.
-    res.json({ ok: true, message: 'If that address has an account, a reset link is on its way.' });
+    const result = await requestPasswordReset(req.body.email);
+    res.json(result);
   } catch (err) {
     next(err);
   }
@@ -157,7 +155,11 @@ router.post('/password-reset/request', accountLimiter, async (req, res, next) =>
 
 router.post('/password-reset/confirm', accountLimiter, async (req, res, next) => {
   try {
-    const result = await applyReset(req.body.token, req.body.password);
+    const result = await applyResetCode({
+      email: req.body.email,
+      code: req.body.code,
+      password: req.body.password,
+    });
     if (!result.ok) return res.status(400).json({ error: result.error });
     res.json({ ok: true });
   } catch (err) {
@@ -227,12 +229,21 @@ router.patch('/me/preferences', requireAuth, async (req, res, next) => {
 
 router.patch('/me/profile', requireStudent, async (req, res, next) => {
   try {
-    const { name, academicYear, monthlyAllowanceBaseline, monthlySavingsGoal } = req.body;
+    const { name, academicYear, monthlyAllowanceBaseline, monthlySavingsGoal, recoveryEmail } = req.body;
 
     if (name !== undefined) {
       const clean = String(name).trim();
       if (!clean) return res.status(400).json({ error: 'Name cannot be empty.' });
       req.user.name = clean.slice(0, 100);
+    }
+    if (recoveryEmail !== undefined) {
+      const err = emailProblem(recoveryEmail);
+      if (err) return res.status(400).json({ error: err });
+      const clean = String(recoveryEmail).trim().toLowerCase();
+      const taken = await User.exists({ recoveryEmail: clean, _id: { $ne: req.user._id } });
+      if (taken) return res.status(409).json({ error: 'That recovery email is already used by another account.' });
+      req.user.recoveryEmail = clean;
+      req.user.recoveryEmailChosen = true;
     }
     if (academicYear !== undefined) {
       req.user.academicYear = String(academicYear).trim().slice(0, 30);

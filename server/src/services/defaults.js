@@ -1,5 +1,6 @@
 import Category from '../models/Category.js';
 import TipTemplate from '../models/TipTemplate.js';
+import { ensureRecoveryEmails } from './accounts.js';
 
 /**
  * First-run bootstrap: the catalogue and starter wording every fresh
@@ -96,5 +97,9 @@ export async function ensureDefaults() {
     );
   }
 
-  return { categories: DEFAULT_CATEGORIES.length, templates: STARTER_TEMPLATES.length };
+  // Accounts from before the reset page asked for a recovery address: give them
+  // their own sign-in address so nobody is locked out of the reset flow.
+  const repaired = await ensureRecoveryEmails();
+
+  return { categories: DEFAULT_CATEGORIES.length, templates: STARTER_TEMPLATES.length, recoveryEmails: repaired };
 }

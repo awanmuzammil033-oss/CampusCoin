@@ -34,20 +34,24 @@ import { create as createWish, deposit } from '../services/wishlist.js';
 import { toDec } from '../utils/money.js';
 
 /* ---------------------------------- accounts ----------------------------------- */
-
+/*
+ * The recovery address is deliberately NOT the sign-in address in the demo: it
+ * shows the rule the app follows — a password reset only ever answers to the
+ * address the student chose for it, never to the name they type to sign in.
+ */
 const ACCOUNTS = [
-  { name: 'Campus Coordinator', email: 'admin@campuscoin.test', password: 'Admin@12345', role: 'admin' },
-  { name: 'Aisha', email: 'aisha@campuscoin.test', password: 'Student@12345', role: 'student', academicYear: '1st year', allowance: '600', savingsGoal: '200' },
-  { name: 'Bilal', email: 'bilal@campuscoin.test', password: 'Student@12345', role: 'student', academicYear: '3rd year', allowance: '750', savingsGoal: '300' },
-  { name: 'New User', email: 'newuser@campuscoin.test', password: 'Student@12345', role: 'student' }, // deliberately empty: first-run flow
+  { name: 'Campus Coordinator', email: 'admin@campuscoin.test', recovery: 'admin.backup@campuscoin.test', password: 'Admin@12345', role: 'admin' },
+  { name: 'Aisha', email: 'aisha@campuscoin.test', recovery: 'aisha.backup@campuscoin.test', password: 'Student@12345', role: 'student', academicYear: '1st year', allowance: '600', savingsGoal: '200' },
+  { name: 'Bilal', email: 'bilal@campuscoin.test', recovery: 'bilal.backup@campuscoin.test', password: 'Student@12345', role: 'student', academicYear: '3rd year', allowance: '750', savingsGoal: '300' },
+  { name: 'New User', email: 'newuser@campuscoin.test', recovery: 'newuser.backup@campuscoin.test', password: 'Student@12345', role: 'student' }, // deliberately empty: first-run flow
 ];
 
 const CREDENTIAL_ROWS = [
-  ['Role', 'Email', 'Password'],
-  ['Administrator', 'admin@campuscoin.test', 'Admin@12345'],
-  ['Student 1 — Aisha', 'aisha@campuscoin.test', 'Student@12345'],
-  ['Student 2 — Bilal', 'bilal@campuscoin.test', 'Student@12345'],
-  ['Student 3 — empty account', 'newuser@campuscoin.test', 'Student@12345'],
+  ['Role', 'Email', 'Password', 'Reset code goes to'],
+  ['Administrator', 'admin@campuscoin.test', 'Admin@12345', 'admin.backup@campuscoin.test'],
+  ['Student 1 — Aisha', 'aisha@campuscoin.test', 'Student@12345', 'aisha.backup@campuscoin.test'],
+  ['Student 2 — Bilal', 'bilal@campuscoin.test', 'Student@12345', 'bilal.backup@campuscoin.test'],
+  ['Student 3 — empty account', 'newuser@campuscoin.test', 'Student@12345', 'newuser.backup@campuscoin.test'],
 ];
 
 /* ------------------------------- month recipes --------------------------------- */
@@ -167,12 +171,20 @@ async function findOrCreate(spec) {
   const existing = await User.findOne({ email: spec.email });
   if (existing) {
     console.log(`  ${spec.email} already exists — reusing it`);
+    // an account from before the recovery address existed gets the demo one,
+    // so the reset page works out of the box — but never over an address the
+    // student chose themselves
+    if (spec.recovery && !existing.recoveryEmailChosen && existing.recoveryEmail !== spec.recovery) {
+      existing.recoveryEmail = spec.recovery;
+      await existing.save();
+    }
     return { user: existing, created: false };
   }
 
   const user = await User.create({
     name: spec.name,
     email: spec.email,
+    recoveryEmail: spec.recovery || spec.email,
     passwordHash: await hashPassword(spec.password),
     role: spec.role,
     isActive: true,

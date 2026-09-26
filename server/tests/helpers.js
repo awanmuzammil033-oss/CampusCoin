@@ -10,6 +10,12 @@ export async function startApp() {
   process.env.SESSION_SECRET = 'test-secret-do-not-reuse';
   process.env.EMAIL_BACKEND = 'console';
   process.env.SESSION_IDLE_MINUTES = '30';
+  // A suite that walks the whole reset flow makes dozens of calls in a row from
+  // one address. The production numbers (5 sign-ins, 15 account calls) are the
+  // right ones for a real server, so the test raises them instead of the guard
+  // being weakened.
+  process.env.RATE_LIMIT_LOGIN = '500';
+  process.env.RATE_LIMIT_ACCOUNT = '1000';
 
   const mongod = await MongoMemoryServer.create();
   process.env.MONGODB_URI = mongod.getUri('campuscoin-test');
@@ -36,9 +42,13 @@ export async function startApp() {
 
 /** Registers a student through the real endpoint and returns their session. */
 export async function registerStudent(agent, payload = {}) {
+  const stamp = Math.random().toString(36).slice(2);
   const body = {
     name: payload.name || 'Test Student',
-    email: payload.email || `student-${Math.random().toString(36).slice(2)}@test.local`,
+    email: payload.email || `student-${stamp}@test.local`,
+    // the reset page only answers to this address, so every test account needs
+    // one of its own (AUTH-5)
+    recoveryEmail: payload.recoveryEmail || `recovery-${stamp}@test.local`,
     password: payload.password || 'Str0ngPass!',
   };
 
@@ -51,6 +61,7 @@ export async function registerStudent(agent, payload = {}) {
     csrf: me.body.csrfToken,
     password: body.password,
     email: body.email,
+    recoveryEmail: body.recoveryEmail,
   };
 }
 

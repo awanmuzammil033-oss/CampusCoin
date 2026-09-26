@@ -27,18 +27,27 @@ test('register creates a student session and returns their profile', async () =>
 
 test('register rejects a bad email, a short password and a duplicate email', async () => {
   const agent = newAgent();
+  const stamp = Math.random().toString(36).slice(2);
 
-  const weak = await agent.post('/api/auth/register').send({ name: 'X', email: 'nope', password: 'whatever1' });
+  const weak = await agent.post('/api/auth/register').send({
+    name: 'X', email: 'nope', recoveryEmail: `w-${stamp}@test.local`, password: 'whatever1',
+  });
   assert.equal(weak.status, 400);
 
-  const short = await agent.post('/api/auth/register').send({ name: 'X', email: 'a@b.co', password: '123' });
+  const short = await agent.post('/api/auth/register').send({
+    name: 'X', email: 'a@b.co', recoveryEmail: `s-${stamp}@test.local`, password: '123',
+  });
   assert.equal(short.status, 400);
 
-  const email = `dup-${Math.random().toString(36).slice(2)}@test.local`;
-  const first = await agent.post('/api/auth/register').send({ name: 'A', email, password: 'Str0ngPass!' });
+  const email = `dup-${stamp}@test.local`;
+  const first = await agent.post('/api/auth/register').send({
+    name: 'A', email, recoveryEmail: `r-${stamp}@test.local`, password: 'Str0ngPass!',
+  });
   assert.equal(first.status, 201);
 
-  const again = await newAgent().post('/api/auth/register').send({ name: 'B', email, password: 'Str0ngPass!' });
+  const again = await newAgent().post('/api/auth/register').send({
+    name: 'B', email, recoveryEmail: `r2-${stamp}@test.local`, password: 'Str0ngPass!',
+  });
   assert.equal(again.status, 409);
 });
 
@@ -50,6 +59,7 @@ test('the student door refuses an administrator and the control door refuses a s
   await User.create({
     name: 'Coordinator',
     email: 'staff@test.local',
+    recoveryEmail: 'staff.recovery@test.local',
     passwordHash: await bcrypt.hash('Str0ngPass!', 4),
     role: 'admin',
   });
@@ -81,37 +91,21 @@ test('wrong password and unknown account give the same answer', async () => {
 });
 
 /* ----------------------------- password reset (AUTH-5) ---------------------- */
-
-test('reset link works once, then the same token is rejected', async () => {
+/* The full recovery flow — a six-digit code, the recovery address, guessing,
+   expiry — lives in tests/password-reset.test.js. What belongs here is the one
+   thing that is a property of the account rather than of the flow: a password
+   reset never answers to the sign-in address. */
+test('a reset request never answers to the sign-in address', async () => {
   const agent = newAgent();
   const student = await registerStudent(agent);
 
-  // Recovery is done while signed out — a fresh browser session, no CSRF token.
   const asked = await newAgent().post('/api/auth/password-reset/request').send({ email: student.email });
   assert.equal(asked.status, 200);
+  assert.equal(asked.body.devCode, undefined, 'the sign-in address is not a recovery address');
 
   const { default: User } = await import('../src/models/User.js');
-  const fresh = await User.findById(student.user.id).select('+resetTokenHash');
-  assert.ok(fresh.resetTokenHash, 'a token hash should be stored');
-
-  // The plaintext token only ever exists inside the emailed link, so the
-  // test mints one the same way the service does and attaches it.
-  const { newResetToken, applyReset } = await import('../src/services/accounts.js');
-  const { token, hash, expires } = newResetToken();
-  fresh.resetTokenHash = hash;
-  fresh.resetTokenExpires = expires;
-  await fresh.save();
-
-  const first = await newAgent().post('/api/auth/password-reset/confirm').send({ token, password: 'BrandNewPass!' });
-  assert.equal(first.status, 200);
-
-  const reuse = await newAgent().post('/api/auth/password-reset/confirm').send({ token, password: 'AnotherPass!' });
-  assert.equal(reuse.status, 400, 'a used token must not work twice');
-
-  // and the new password actually signs you in
-  const signin = await newAgent().post('/api/auth/login').send({ email: student.email, password: 'BrandNewPass!' });
-  assert.equal(signin.status, 200);
-  void applyReset;
+  const fresh = await User.findById(student.user.id).select('+resetCodeHash +resetCodeExpires');
+  assert.equal(fresh.resetCodeHash, null, 'no code is created for it either');
 });
 
 test('a disabled student cannot use their session anymore', async () => {
