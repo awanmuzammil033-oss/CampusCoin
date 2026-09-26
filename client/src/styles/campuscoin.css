@@ -2647,8 +2647,17 @@ button.lp-nav-link {
   .lp2-overview,
   .lp2-cats,
   .lp2-privacy {
-    grid-template-columns: 1fr;
+    /* minmax(0, 1fr), not 1fr: a bare 1fr track has an `auto` minimum, so a
+       child with a wide mock-up inside it drags the whole section - and then the
+       page - past the width of a phone. The landing was 95px too wide here. */
+    grid-template-columns: minmax(0, 1fr);
     gap: 34px;
+  }
+  .lp2-features > *,
+  .lp2-overview > *,
+  .lp2-cats > *,
+  .lp2-privacy > * {
+    min-width: 0;
   }
   .lp2-feat-head h2 {
     max-width: none;
@@ -2666,7 +2675,8 @@ button.lp-nav-link {
     grid-template-columns: repeat(3, 1fr);
   }
   .lp2-dash {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 100%;
   }
   .lp2-dash-side {
     display: none;
