@@ -1498,4 +1498,21 @@ export default {
   /* --- the converter says which figures are live and which are a snapshot --- */
   'conv.referenceMark': 'عکس فوری',
   'conv.mixedNote': 'ارزهایی که با (عکس فوری) مشخص شده‌اند از جدول تاریخ‌دار برنامه می‌آیند؛ بقیه نرخ‌های زنده‌اند.',
+
+  /* --- the notification panel: filters, read state, relative times --- */
+  'noti.filterAll': 'همه',
+  'noti.filterUnread': 'خوانده‌نشده',
+  'noti.unreadCount': '{n} خوانده‌نشده',
+  'noti.allClear': 'همه خوانده شده‌اند',
+  'noti.markRead': 'علامت خوانده‌شده',
+  'noti.markUnread': 'علامت خوانده‌نشده',
+  'noti.markedRead': 'به‌عنوان خوانده‌شده علامت خورد.',
+  'noti.markedUnread': 'به‌عنوان خوانده‌نشده علامت خورد.',
+  'noti.campusTag': 'اعلان دانشگاه',
+  'noti.openBudgets': 'باز کردن بودجه‌ها',
+  'noti.noneUnread': 'چیز خوانده‌نشده‌ای نیست.',
+  'noti.justNow': 'همین الان',
+  'noti.minutesAgo': '{n} دقیقه پیش',
+  'noti.hoursAgo': '{n} ساعت پیش',
+  'noti.daysAgo': '{n} روز پیش',
 };

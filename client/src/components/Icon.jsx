@@ -40,6 +40,12 @@ const EMOJI = {
   // purpose: a missing glyph in the navbar would be the first thing a judge
   // noticed, and a newer pictograph is exactly the kind that goes tofu.
   exchange: '💱', swap: '🔄',
+  // "put it back" - an old emoji on purpose, for the same reason as the two
+  // above: a glyph a judge's font is missing is worse than a plain one
+  undo: '↩️',
+  // the jar history needed a down arrow and there was no name for it: the row
+  // rendered an empty box rather than an arrow
+  arrowDown: '⬇',
 
   /* ------------------------------------------- categories (student life) */
   cup: '☕', bus: '🚌', book: '📚', books: '📚', gift: '🎁', film: '🎞️',

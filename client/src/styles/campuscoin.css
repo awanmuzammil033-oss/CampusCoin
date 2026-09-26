@@ -4386,3 +4386,332 @@ textarea.input:focus {
   gap: 6px;
   margin: -2px 0 0;
 }
+
+/* ==========================================================================
+   The notification panel.
+
+   One component, two homes: a popover behind the bell, and the full page. The
+   rules below are shared so the two cannot look or behave differently.
+
+   The read state is carried three ways on purpose - a background tint, a dot,
+   and a toggle button - because "did I see this?" is answered differently by
+   sight, by a screen reader and by somebody with low vision, and a tint alone
+   answers none of them.
+   ========================================================================== */
+
+.cc-noti {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: min(70vh, 560px);
+}
+
+.cc-noti-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--cc-border);
+  background: var(--cc-bg);
+}
+.cc-noti-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.cc-noti-head-text strong { font-size: 0.95rem; }
+.cc-noti-count {
+  font-size: 0.76rem;
+  color: var(--cc-muted);
+  white-space: nowrap;
+}
+.cc-noti-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+
+/* the two filters, with their counts - a count you can read is a count you can
+   trust, so "unread" is never just a word */
+.cc-noti-filters {
+  display: flex;
+  gap: 6px;
+  padding: 10px 12px 6px;
+  border-bottom: 1px solid var(--cc-border);
+}
+.cc-noti-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 4px 12px;
+  border: 1px solid var(--cc-border);
+  border-radius: 999px;
+  background: var(--cc-surface);
+  color: var(--cc-text);
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.cc-noti-tab:hover { background: var(--cc-primary-soft); }
+.cc-noti-tab.active {
+  background: var(--cc-primary);
+  border-color: var(--cc-primary);
+  color: #fff;
+}
+.cc-noti-tab-n {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--cc-bg);
+  color: var(--cc-muted);
+  font-size: 0.72rem;
+}
+.cc-noti-tab.active .cc-noti-tab-n {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+.cc-noti-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.cc-note-row {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--cc-border);
+}
+.cc-note-row:last-child { border-bottom: none; }
+.cc-note-row-read { background: transparent; }
+.cc-note-row:not(.cc-note-row-read) { background: var(--cc-primary-soft); }
+
+.cc-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 11px 6px 11px 14px;
+  border: 0;
+  background: none;
+  text-align: start;
+  font: inherit;
+  color: var(--cc-text);
+  cursor: pointer;
+}
+.cc-note-static { cursor: default; }
+.cc-note:hover { background: rgba(16, 185, 129, 0.07); }
+.cc-note:focus-visible { outline: 2px solid var(--cc-primary); outline-offset: -2px; }
+
+.cc-note-ico {
+  flex: none;
+  margin-top: 1px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: var(--cc-bg);
+  border: 1px solid var(--cc-border);
+}
+.cc-note-danger { background: var(--cc-danger-soft); border-color: transparent; }
+.cc-note-warn { background: var(--cc-warning-soft); border-color: transparent; }
+.cc-note-campus { background: var(--cc-primary-soft); border-color: transparent; }
+
+.cc-note-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.cc-note-msg {
+  font-size: 0.88rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.cc-note-row:not(.cc-note-row-read) .cc-note-msg { font-weight: 600; }
+.cc-note-when {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.76rem;
+  color: var(--cc-muted);
+}
+.cc-note-tag {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--cc-bg);
+  border: 1px solid var(--cc-border);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+/* the read control: a dot showing the state, and a button that flips it */
+.cc-note-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding-inline-end: 8px;
+}
+.cc-note-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cc-primary);
+}
+.cc-note-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--cc-border);
+  border-radius: 9px;
+  background: var(--cc-surface);
+  color: var(--cc-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.cc-note-toggle:hover { background: var(--cc-primary-soft); color: var(--cc-primary); }
+.cc-note-toggle:focus-visible { outline: 2px solid var(--cc-primary); outline-offset: 1px; }
+
+.cc-note-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  flex: none;
+  margin-inline-end: 10px;
+  color: var(--cc-muted);
+  text-decoration: none;
+  border-radius: 8px;
+}
+.cc-note-go:hover { color: var(--cc-primary); background: var(--cc-primary-soft); }
+
+.cc-noti-foot {
+  padding: 8px;
+  border-top: 1px solid var(--cc-border);
+  background: var(--cc-bg);
+}
+
+.cc-noti-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 26px 18px;
+  text-align: center;
+  color: var(--cc-muted);
+  font-size: 0.88rem;
+}
+.cc-noti-empty-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--cc-primary-soft);
+}
+
+.cc-noti-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 14px;
+  color: var(--cc-danger);
+  background: var(--cc-danger-soft);
+}
+
+.cc-noti-skeleton {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+
+/* the page version: no popover chrome, so it gets the screen it has */
+.noti-page-card { padding: 0; }
+.noti-page-card .cc-noti { max-height: none; }
+.noti-page-card .cc-noti-head,
+.noti-page-card .cc-noti-foot { display: none; }
+.noti-page-card .cc-noti-filters {
+  padding: 14px 16px 10px;
+  background: var(--cc-bg);
+}
+.noti-page-card .cc-note { padding: 14px 10px 14px 16px; }
+.noti-page-card .cc-note-msg { font-size: 0.92rem; }
+.noti-page-card .cc-note-toggle { width: 36px; height: 36px; }
+.noti-page-card .cc-noti-empty { padding: 40px 20px; }
+
+@media (max-width: 640px) {
+  .cc-noti { max-height: min(66vh, 480px); }
+  .cc-noti-head { padding: 10px 12px; }
+  .cc-noti-head-actions .btn { padding: 6px 8px; font-size: 0.78rem; }
+  .cc-note { padding: 11px 4px 11px 12px; }
+  .cc-noti-filters { padding: 9px 10px 5px; }
+}
+
+/* --------------------------------------------------------------------------
+   The notification panel on a phone.
+
+   The bell sits second from the left of the bar, so a right-anchored 360px
+   panel hangs off the left edge of the screen. On a narrow screen the panel
+   spans the width of the screen under the bar instead, exactly like the
+   converter popover.
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  .cc-popover-notifications {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    top: 58px;
+    width: auto;
+    max-width: none;
+  }
+  .cc-popover-notifications::before { display: none; }
+}
+
+/* The ghost button in this app is coloured for a dark surface (it lives in the
+   topbar). Inside the panel - which is a light card in the light theme - that
+   colour is white on white, so the "mark all read" label and the footer link
+   were invisible. Give them a colour that works on the panel's own surface. */
+.cc-noti .btn-ghost {
+  color: var(--cc-primary);
+  font-weight: 600;
+}
+.cc-noti .btn-ghost:hover:not(:disabled) {
+  background: var(--cc-primary-soft);
+  color: var(--cc-primary);
+}
+.cc-noti .btn-ghost:disabled {
+  color: var(--cc-muted);
+  opacity: 0.65;
+}
+.cc-noti-foot {
+  padding: 10px 12px;
+}
+.cc-noti-foot .btn {
+  border: 1px solid var(--cc-border);
+  background: var(--cc-surface);
+  color: var(--cc-primary);
+  font-weight: 600;
+}
+.cc-noti-foot .btn:hover {
+  background: var(--cc-primary-soft);
+}

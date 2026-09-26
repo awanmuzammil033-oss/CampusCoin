@@ -1519,4 +1519,21 @@ export default {
   /* --- the converter says which figures are live and which are a snapshot --- */
   'conv.referenceMark': 'snapshot',
   'conv.mixedNote': 'Currencies marked (snapshot) come from the dated table in the app; the rest are live rates.',
+
+  /* --- the notification panel: filters, read state, relative times --- */
+  'noti.filterAll': 'All',
+  'noti.filterUnread': 'Unread',
+  'noti.unreadCount': '{n} unread',
+  'noti.allClear': 'You are up to date',
+  'noti.markRead': 'Mark as read',
+  'noti.markUnread': 'Mark as unread',
+  'noti.markedRead': 'Marked as read.',
+  'noti.markedUnread': 'Marked as unread.',
+  'noti.campusTag': 'Campus notice',
+  'noti.openBudgets': 'Open budgets',
+  'noti.noneUnread': 'Nothing unread.',
+  'noti.justNow': 'just now',
+  'noti.minutesAgo': '{n} min ago',
+  'noti.hoursAgo': '{n} h ago',
+  'noti.daysAgo': '{n} d ago',
 };

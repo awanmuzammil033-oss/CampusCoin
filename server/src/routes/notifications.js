@@ -55,6 +55,49 @@ router.post('/:id/read', async (req, res, next) => {
   }
 });
 
+/**
+ * PATCH /api/notifications/:id  { isRead: true | false }
+ *
+ * The panel needs both directions: marking something read is how you clear the
+ * bell, and marking it unread again is how you put a warning back in front of
+ * yourself after reading it too early. One endpoint, one boolean, and the row is
+ * scoped to the signed-in person inside the query - so there is no way to reach
+ * somebody else's notification, and a bad id is a 404 rather than a 500.
+ */
+router.patch('/:id', async (req, res, next) => {
+  try {
+    const isRead = req.body?.isRead;
+    if (typeof isRead !== 'boolean') {
+      return res.status(400).json({ error: 'Send isRead as true or false.' });
+    }
+
+    const row = await Notification.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      { $set: { isRead } },
+      { new: true }
+    );
+    if (!row) {
+      return res.status(404).json({ error: 'That notification is not in your list.' });
+    }
+
+    res.json({
+      id: row._id.toString(),
+      kind: row.kind,
+      message: row.message,
+      isRead: row.isRead,
+      createdAt: row.createdAt,
+      source: 'app',
+      unread: await Notification.countDocuments({ user: req.user._id, isRead: false }),
+    });
+  } catch (err) {
+    // an id that is not an ObjectId lands here, and it is a 404, not a crash
+    if (err.name === 'CastError') {
+      return res.status(404).json({ error: 'That notification is not in your list.' });
+    }
+    next(err);
+  }
+});
+
 router.post('/read-all', async (req, res, next) => {
   try {
     await Notification.updateMany({ user: req.user._id, isRead: false }, { $set: { isRead: true } });

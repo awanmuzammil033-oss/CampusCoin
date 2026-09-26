@@ -1527,4 +1527,21 @@ export default {
   /* --- the converter says which figures are live and which are a snapshot --- */
   'conv.referenceMark': 'snapshot',
   'conv.mixedNote': 'Mata uang bertanda (snapshot) berasal dari tabel bertanggal di aplikasi; sisanya adalah kurs langsung.',
+
+  /* --- the notification panel: filters, read state, relative times --- */
+  'noti.filterAll': 'Semua',
+  'noti.filterUnread': 'Belum dibaca',
+  'noti.unreadCount': '{n} belum dibaca',
+  'noti.allClear': 'Semua sudah dibaca',
+  'noti.markRead': 'Tandai sudah dibaca',
+  'noti.markUnread': 'Tandai belum dibaca',
+  'noti.markedRead': 'Ditandai sudah dibaca.',
+  'noti.markedUnread': 'Ditandai belum dibaca.',
+  'noti.campusTag': 'Pengumuman kampus',
+  'noti.openBudgets': 'Buka anggaran',
+  'noti.noneUnread': 'Tidak ada yang belum dibaca.',
+  'noti.justNow': 'baru saja',
+  'noti.minutesAgo': '{n} mnt lalu',
+  'noti.hoursAgo': '{n} jam lalu',
+  'noti.daysAgo': '{n} hr lalu',
 };

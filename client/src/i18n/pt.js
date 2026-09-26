@@ -1527,4 +1527,21 @@ export default {
   /* --- the converter says which figures are live and which are a snapshot --- */
   'conv.referenceMark': 'instantâneo',
   'conv.mixedNote': 'As moedas marcadas (instantâneo) vêm da tabela datada do aplicativo; o resto são taxas atuais.',
+
+  /* --- the notification panel: filters, read state, relative times --- */
+  'noti.filterAll': 'Todas',
+  'noti.filterUnread': 'Não lidas',
+  'noti.unreadCount': '{n} não lidas',
+  'noti.allClear': 'Está em dia',
+  'noti.markRead': 'Marcar como lida',
+  'noti.markUnread': 'Marcar como não lida',
+  'noti.markedRead': 'Marcada como lida.',
+  'noti.markedUnread': 'Marcada como não lida.',
+  'noti.campusTag': 'Aviso do campus',
+  'noti.openBudgets': 'Abrir orçamentos',
+  'noti.noneUnread': 'Nada por ler.',
+  'noti.justNow': 'agora mesmo',
+  'noti.minutesAgo': 'há {n} min',
+  'noti.hoursAgo': 'há {n} h',
+  'noti.daysAgo': 'há {n} d',
 };

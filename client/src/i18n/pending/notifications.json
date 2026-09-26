@@ -1,0 +1,17 @@
+{
+  "noti.filterAll": "All",
+  "noti.filterUnread": "Unread",
+  "noti.unreadCount": "{n} unread",
+  "noti.allClear": "You are up to date",
+  "noti.markRead": "Mark as read",
+  "noti.markUnread": "Mark as unread",
+  "noti.markedRead": "Marked as read.",
+  "noti.markedUnread": "Marked as unread.",
+  "noti.campusTag": "Campus notice",
+  "noti.openBudgets": "Open budgets",
+  "noti.noneUnread": "Nothing unread.",
+  "noti.justNow": "just now",
+  "noti.minutesAgo": "{n} min ago",
+  "noti.hoursAgo": "{n} h ago",
+  "noti.daysAgo": "{n} d ago"
+}

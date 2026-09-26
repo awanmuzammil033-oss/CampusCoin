@@ -1492,4 +1492,21 @@ export default {
   /* --- the converter says which figures are live and which are a snapshot --- */
   'conv.referenceMark': 'स्नैपशॉट',
   'conv.mixedNote': 'जिन करेंसियों के साथ (स्नैपशॉट) चिह्न है वे ऐप की तारीख वाली तालिका से हैं; बाकी लाइव दरें हैं।',
+
+  /* --- the notification panel: filters, read state, relative times --- */
+  'noti.filterAll': 'सभी',
+  'noti.filterUnread': 'अपठित',
+  'noti.unreadCount': '{n} अपठित',
+  'noti.allClear': 'सब कुछ पढ़ लिया गया है',
+  'noti.markRead': 'पढ़ा हुआ चिह्नित करें',
+  'noti.markUnread': 'अपठित चिह्नित करें',
+  'noti.markedRead': 'पढ़ा हुआ चिह्नित कर दिया गया।',
+  'noti.markedUnread': 'अपठित चिह्नित कर दिया गया।',
+  'noti.campusTag': 'कैंपस सूचना',
+  'noti.openBudgets': 'बजट खोलें',
+  'noti.noneUnread': 'कोई अपठित नहीं।',
+  'noti.justNow': 'अभी-अभी',
+  'noti.minutesAgo': '{n} मिनट पहले',
+  'noti.hoursAgo': '{n} घंटे पहले',
+  'noti.daysAgo': '{n} दिन पहले',
 };

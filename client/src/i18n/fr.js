@@ -1492,4 +1492,21 @@ export default {
   /* --- the converter says which figures are live and which are a snapshot --- */
   'conv.referenceMark': 'instantané',
   'conv.mixedNote': 'Les devises marquées (instantané) viennent du tableau daté de l’application ; les autres sont des taux en direct.',
+
+  /* --- the notification panel: filters, read state, relative times --- */
+  'noti.filterAll': 'Toutes',
+  'noti.filterUnread': 'Non lues',
+  'noti.unreadCount': '{n} non lues',
+  'noti.allClear': 'Vous êtes à jour',
+  'noti.markRead': 'Marquer comme lue',
+  'noti.markUnread': 'Marquer comme non lue',
+  'noti.markedRead': 'Marquée comme lue.',
+  'noti.markedUnread': 'Marquée comme non lue.',
+  'noti.campusTag': 'Annonce du campus',
+  'noti.openBudgets': 'Ouvrir les budgets',
+  'noti.noneUnread': 'Rien de non lu.',
+  'noti.justNow': 'à l’instant',
+  'noti.minutesAgo': 'il y a {n} min',
+  'noti.hoursAgo': 'il y a {n} h',
+  'noti.daysAgo': 'il y a {n} j',
 };

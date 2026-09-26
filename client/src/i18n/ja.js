@@ -1505,4 +1505,21 @@ export default {
   /* --- the converter says which figures are live and which are a snapshot --- */
   'conv.referenceMark': 'スナップショット',
   'conv.mixedNote': '（スナップショット）印の通貨はアプリ内の日付付きテーブル由来で、それ以外はライブレートです。',
+
+  /* --- the notification panel: filters, read state, relative times --- */
+  'noti.filterAll': 'すべて',
+  'noti.filterUnread': '未読',
+  'noti.unreadCount': '未読 {n} 件',
+  'noti.allClear': 'すべて読みました',
+  'noti.markRead': '既読にする',
+  'noti.markUnread': '未読に戻す',
+  'noti.markedRead': '既読にしました。',
+  'noti.markedUnread': '未読に戻しました。',
+  'noti.campusTag': 'キャンパスのお知らせ',
+  'noti.openBudgets': '予算を開く',
+  'noti.noneUnread': '未読はありません。',
+  'noti.justNow': 'たった今',
+  'noti.minutesAgo': '{n} 分前',
+  'noti.hoursAgo': '{n} 時間前',
+  'noti.daysAgo': '{n} 日前',
 };

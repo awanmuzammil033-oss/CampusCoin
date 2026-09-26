@@ -1495,4 +1495,21 @@ export default {
   /* --- the converter says which figures are live and which are a snapshot --- */
   'conv.referenceMark': '快照',
   'conv.mixedNote': '标注（快照）的货币来自应用内的日期表，其余为实时汇率。',
+
+  /* --- the notification panel: filters, read state, relative times --- */
+  'noti.filterAll': '全部',
+  'noti.filterUnread': '未读',
+  'noti.unreadCount': '{n} 条未读',
+  'noti.allClear': '已全部读完',
+  'noti.markRead': '标为已读',
+  'noti.markUnread': '标为未读',
+  'noti.markedRead': '已标为已读。',
+  'noti.markedUnread': '已标为未读。',
+  'noti.campusTag': '校园通知',
+  'noti.openBudgets': '打开预算',
+  'noti.noneUnread': '没有未读消息。',
+  'noti.justNow': '刚刚',
+  'noti.minutesAgo': '{n} 分钟前',
+  'noti.hoursAgo': '{n} 小时前',
+  'noti.daysAgo': '{n} 天前',
 };

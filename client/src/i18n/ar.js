@@ -1492,4 +1492,21 @@ export default {
   /* --- the converter says which figures are live and which are a snapshot --- */
   'conv.referenceMark': 'لقطة مؤرخة',
   'conv.mixedNote': 'العملات الموسومة (لقطة مؤرخة) تأتي من الجدول المؤرّخ داخل التطبيق، وبقية العملات أسعار حية.',
+
+  /* --- the notification panel: filters, read state, relative times --- */
+  'noti.filterAll': 'الكل',
+  'noti.filterUnread': 'غير مقروء',
+  'noti.unreadCount': '{n} غير مقروء',
+  'noti.allClear': 'لا جديد لديك',
+  'noti.markRead': 'تعليم كمقروء',
+  'noti.markUnread': 'تعليم كغير مقروء',
+  'noti.markedRead': 'تم التعليم كمقروء.',
+  'noti.markedUnread': 'تم التعليم كغير مقروء.',
+  'noti.campusTag': 'إعلان الحرم الجامعي',
+  'noti.openBudgets': 'فتح الميزانيات',
+  'noti.noneUnread': 'لا شيء غير مقروء.',
+  'noti.justNow': 'الآن',
+  'noti.minutesAgo': 'قبل {n} دقيقة',
+  'noti.hoursAgo': 'قبل {n} ساعة',
+  'noti.daysAgo': 'قبل {n} يوم',
 };

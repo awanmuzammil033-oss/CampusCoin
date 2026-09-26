@@ -1542,4 +1542,21 @@ export default {
   /* --- the converter says which figures are live and which are a snapshot --- */
   'conv.referenceMark': 'снимок',
   'conv.mixedNote': 'Валюты с пометкой (снимок) взяты из датированной таблицы в приложении; остальные — текущие курсы.',
+
+  /* --- the notification panel: filters, read state, relative times --- */
+  'noti.filterAll': 'Все',
+  'noti.filterUnread': 'Непрочитанные',
+  'noti.unreadCount': '{n} непрочитанных',
+  'noti.allClear': 'Всё прочитано',
+  'noti.markRead': 'Отметить как прочитанное',
+  'noti.markUnread': 'Отметить как непрочитанное',
+  'noti.markedRead': 'Отмечено как прочитанное.',
+  'noti.markedUnread': 'Отмечено как непрочитанное.',
+  'noti.campusTag': 'Объявление кампуса',
+  'noti.openBudgets': 'Открыть бюджеты',
+  'noti.noneUnread': 'Непрочитанных нет.',
+  'noti.justNow': 'только что',
+  'noti.minutesAgo': '{n} мин назад',
+  'noti.hoursAgo': '{n} ч назад',
+  'noti.daysAgo': '{n} дн назад',
 };

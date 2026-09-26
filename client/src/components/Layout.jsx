@@ -7,6 +7,7 @@ import { useLocale } from '../locale.jsx';
 import LocalePickers from './LocalePickers.jsx';
 import Icon from './Icon.jsx';
 import CurrencyConverter from './CurrencyConverter.jsx';
+import { NotificationBell } from './NotificationPanel.jsx';
 
 const NAV = [
   { sectionKey: 'nav.section.money' },
@@ -50,64 +51,21 @@ export default function Layout({ children }) {
   const { user, logout, updatePreferences } = useAuth();
   const { t } = useLocale();
   const navigate = useNavigate();
-  const [unread, setUnread] = useState(0);
-  const [bellOpen, setBellOpen] = useState(false);
-  const [feed, setFeed] = useState([]);
   const [accountOpen, setAccountOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Escape closes whichever panel is open, and the sheet never stays open
   // behind a route change.
   useEffect(() => {
-    if (!bellOpen && !accountOpen && !menuOpen) return undefined;
+    if (!accountOpen && !menuOpen) return undefined;
     const onKey = (event) => {
       if (event.key !== 'Escape') return;
-      setBellOpen(false);
       setAccountOpen(false);
       setMenuOpen(false);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [bellOpen, accountOpen, menuOpen]);
-
-  // Recent notifications for the bell — fetched once when the chrome mounts.
-  useEffect(() => {
-    let alive = true;
-    api
-      .get('/api/notifications')
-      .then((data) => {
-        if (!alive) return;
-        setUnread(data.unread || 0);
-        setFeed(data.rows.slice(0, 8));
-      })
-      .catch(() => {});
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  async function toggleBell() {
-    const next = !bellOpen;
-    setBellOpen(next);
-    setAccountOpen(false);
-    setMenuOpen(false);
-    if (next) {
-      try {
-        const data = await api.get('/api/notifications');
-        setFeed(data.rows.slice(0, 8));
-        setUnread(data.unread || 0);
-      } catch {}
-    }
-  }
-
-  async function markRead(id) {
-    if (String(id).startsWith('ann-')) return; // campus notices are not per-person
-    try {
-      await api.post(`/api/notifications/${id}/read`);
-      setUnread((n) => Math.max(0, n - 1));
-      setFeed((rows) => rows.map((r) => (r.id === id ? { ...r, isRead: true } : r)));
-    } catch {}
-  }
+  }, [accountOpen, menuOpen]);
 
   async function changeFont(delta) {
     const current = Number(localStorage.getItem('cc.fontScale') || 2);
@@ -138,73 +96,21 @@ export default function Layout({ children }) {
             a control nobody can find. */}
         <div className="topbar-utility">
           <CurrencyConverter compact />
-          <LocalePickers onOpen={() => { setBellOpen(false); setAccountOpen(false); setMenuOpen(false); }} />
+          <LocalePickers onOpen={() => { setAccountOpen(false); setMenuOpen(false); }} />
         </div>
 
         <div className="topbar-actions">
           <ThemeToggle />
 
-          <div className="position-relative">
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={toggleBell}
-              aria-expanded={bellOpen}
-              aria-label={`${t('topbar.notifications')}${unread ? `, ${unread} ${t('topbar.unread')}` : ''}`}
-            >
-              <Icon name="bell" />
-              {unread > 0 && <span className="badge-count">{unread > 9 ? '9+' : unread}</span>}
-            </button>
-
-            {bellOpen && (
-              <div className="cc-popover cc-popover-notifications" role="dialog" aria-label={t('topbar.notifications')}>
-                <div className="cc-popover-head">
-                  <strong>{t('topbar.notifications')}</strong>
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => api.post('/api/notifications/read-all').then(() => { setUnread(0); setFeed((r) => r.map((x) => ({ ...x, isRead: true }))); }).catch(() => {})}
-                    disabled={unread === 0}
-                  >
-                    {t('topbar.markAllRead')}
-                  </button>
-                </div>
-
-                {feed.length === 0 ? (
-                  <p className="muted smallish mb-0 cc-popover-empty">{t('topbar.nothingNew')}</p>
-                ) : (
-                  <ul className="cc-popover-list">
-                    {feed.map((n) => (
-                      <li key={n.id}>
-                        <button
-                          type="button"
-                          className={`cc-note ${n.isRead ? '' : 'cc-note-unread'}`}
-                          onClick={() => markRead(n.id)}
-                        >
-                          <span className="cc-note-ico" aria-hidden="true">
-                            <Icon name={iconFor(n.kind)} size={17} />
-                          </span>
-                          <span className="cc-note-text">{n.message}</span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                <div className="cc-popover-foot">
-                  <Link to="/notifications" className="btn btn-ghost btn-sm w-100" onClick={() => setBellOpen(false)}>
-                    {t('topbar.allNotifications')}
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
+          {/* the bell and the panel behind it live in one component, so the
+              popover and the notifications page cannot drift apart */}
+          <NotificationBell />
 
           <div className="position-relative">
             <button
               type="button"
               className="icon-btn"
-              onClick={() => { setAccountOpen((v) => !v); setBellOpen(false); setMenuOpen(false); }}
+              onClick={() => { setAccountOpen((v) => !v); setMenuOpen(false); }}
               aria-expanded={accountOpen}
               aria-label={t('topbar.account')}
             >
@@ -235,7 +141,7 @@ export default function Layout({ children }) {
           <button
             type="button"
             className="icon-btn topbar-menu-btn"
-            onClick={() => { setMenuOpen((v) => !v); setBellOpen(false); setAccountOpen(false); }}
+            onClick={() => { setMenuOpen((v) => !v); setAccountOpen(false); }}
             aria-expanded={menuOpen}
             aria-label={t('topbar.allPages')}
           >

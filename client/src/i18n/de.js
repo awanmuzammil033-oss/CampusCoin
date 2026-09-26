@@ -1491,4 +1491,21 @@ export default {
   /* --- the converter says which figures are live and which are a snapshot --- */
   'conv.referenceMark': 'Momentaufnahme',
   'conv.mixedNote': 'Mit (Momentaufnahme) markierte Währungen stammen aus der datierten Tabelle in der App; der Rest sind Live-Kurse.',
+
+  /* --- the notification panel: filters, read state, relative times --- */
+  'noti.filterAll': 'Alle',
+  'noti.filterUnread': 'Ungelesen',
+  'noti.unreadCount': '{n} ungelesen',
+  'noti.allClear': 'Alles gelesen',
+  'noti.markRead': 'Als gelesen markieren',
+  'noti.markUnread': 'Als ungelesen markieren',
+  'noti.markedRead': 'Als gelesen markiert.',
+  'noti.markedUnread': 'Als ungelesen markiert.',
+  'noti.campusTag': 'Campus-Hinweis',
+  'noti.openBudgets': 'Budgets öffnen',
+  'noti.noneUnread': 'Nichts ungelesen.',
+  'noti.justNow': 'gerade eben',
+  'noti.minutesAgo': 'vor {n} Min.',
+  'noti.hoursAgo': 'vor {n} Std.',
+  'noti.daysAgo': 'vor {n} T.',
 };

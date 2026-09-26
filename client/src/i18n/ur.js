@@ -1489,4 +1489,21 @@ export default {
   /* --- the converter says which figures are live and which are a snapshot --- */
   'conv.referenceMark': 'اسنیپ شاٹ',
   'conv.mixedNote': 'جن کرنسیوں کے ساتھ (اسنیپ شاٹ) لکھا ہے وہ ایپ کی تاریخ دار ٹیبل سے ہیں؛ باقی لائیو شرحیں ہیں۔',
+
+  /* --- the notification panel: filters, read state, relative times --- */
+  'noti.filterAll': 'سب',
+  'noti.filterUnread': 'غیر پڑھے',
+  'noti.unreadCount': '{n} غیر پڑھے',
+  'noti.allClear': 'سب کچھ پڑھ لیا گیا ہے',
+  'noti.markRead': 'پڑھا ہوا mark کریں',
+  'noti.markUnread': 'غیر پڑھا mark کریں',
+  'noti.markedRead': 'پڑھا ہوا mark کر دیا گیا۔',
+  'noti.markedUnread': 'غیر پڑھا mark کر دیا گیا',
+  'noti.campusTag': 'کیمپس اطلاع',
+  'noti.openBudgets': 'بجٹ کھولیں',
+  'noti.noneUnread': 'کوئی غیر پڑھی ہوئی نہیں۔',
+  'noti.justNow': 'ابھی ابھی',
+  'noti.minutesAgo': '{n} منٹ پہلے',
+  'noti.hoursAgo': '{n} گھنٹے پہلے',
+  'noti.daysAgo': '{n} دن پہلے',
 };

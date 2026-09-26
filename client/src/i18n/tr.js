@@ -1491,4 +1491,21 @@ export default {
   /* --- the converter says which figures are live and which are a snapshot --- */
   'conv.referenceMark': 'anlık görüntü',
   'conv.mixedNote': '(anlık görüntü) ile işaretlenen para birimleri uygulamadaki tarihli tablodan gelir; geri kalanlar canlı kurlardır.',
+
+  /* --- the notification panel: filters, read state, relative times --- */
+  'noti.filterAll': 'Tümü',
+  'noti.filterUnread': 'Okunmayan',
+  'noti.unreadCount': '{n} okunmayan',
+  'noti.allClear': 'Hepsini okudunuz',
+  'noti.markRead': 'Okundu işaretle',
+  'noti.markUnread': 'Okunmadı işaretle',
+  'noti.markedRead': 'Okundu olarak işaretlendi.',
+  'noti.markedUnread': 'Okunmadı olarak işaretlendi.',
+  'noti.campusTag': 'Kampüs duyurusu',
+  'noti.openBudgets': 'Bütçeleri aç',
+  'noti.noneUnread': 'Okunmamış bildirim yok.',
+  'noti.justNow': 'az önce',
+  'noti.minutesAgo': '{n} dk önce',
+  'noti.hoursAgo': '{n} sa önce',
+  'noti.daysAgo': '{n} gün önce',
 };

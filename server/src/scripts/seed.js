@@ -29,6 +29,7 @@ import JarMovement from '../models/JarMovement.js';
 import { hashPassword } from '../services/accounts.js';
 import { ensureDefaults } from '../services/defaults.js';
 import { generateInsight } from '../services/insight.js';
+import { checkBudgetAlerts } from '../services/alerts.js';
 import { createGroup, addExpense, settleUp } from '../services/groups.js';
 import { create as createBankRate } from '../services/bankRates.js';
 import { create as createIncomeIdea } from '../services/incomeIdeas.js';
@@ -351,6 +352,9 @@ async function main() {
   await seedWishlist(aisha);
   await seedBankRates();
   await seedIncomeIdeas();
+  await seedAlerts(aisha, categories);
+  await seedAlerts(bilal, categories);
+  await seedWelcomeNotice(aisha);
   await seedAnnouncements(admin);
   await pregenerateInsight(aisha);
 
@@ -750,6 +754,43 @@ async function seedWishlist(aisha) {
 }
 
 /* ------------------------------- announcements --------------------------------- */
+
+/**
+ * Run the real budget alert check for every budget in the current month, so the
+ * panel holds the sentences the app itself would have written - not invented
+ * ones. Only budgets that are genuinely past 80% produce anything, and the
+ * unique index means re-running the seed changes nothing.
+ */
+async function seedAlerts(student, categories) {
+  // budgets are stored at the first instant of the month, so "this month" has to
+  // be asked for the same way the app asks for it
+  const month = monthStart(new Date());
+  const budgets = await Budget.find({ user: student._id, month });
+  let made = 0;
+  for (const budget of budgets) {
+    // categories arrive as a Map keyed by the name key, and the budget stores
+    // the id, so the match goes through the map's own entries
+    const category = [...categories.values()].find((c) => String(c._id) === String(budget.category));
+    if (!category) continue;
+    const row = await checkBudgetAlerts(student, category, month);
+    if (row) made += 1;
+  }
+  if (made) console.log(`  ${student.email}: ${made} budget alert(s) in the panel`);
+}
+
+/** One system notice per demo student, so the "read" state has something to show. */
+async function seedWelcomeNotice(student) {
+  // matched on the wording, not on the kind: the vault writes its own system
+  // notes, and one of those is not a welcome
+  const existing = await Notification.findOne({ user: student._id, message: { $regex: '^Welcome aboard' } });
+  if (existing) return;
+  await Notification.create({
+    user: student._id,
+    kind: 'system',
+    message: 'Welcome aboard — set one budget this week and the app will nudge you at 80%.',
+  });
+  console.log(`  ${student.email}: a welcome notice in the panel`);
+}
 
 async function seedAnnouncements(admin) {
   if (await Announcement.exists({})) {

@@ -1523,4 +1523,21 @@ export default {
   /* --- the converter says which figures are live and which are a snapshot --- */
   'conv.referenceMark': 'instantánea',
   'conv.mixedNote': 'Las monedas marcadas (instantánea) vienen de la tabla fechada de la app; el resto son tipos en vivo.',
+
+  /* --- the notification panel: filters, read state, relative times --- */
+  'noti.filterAll': 'Todas',
+  'noti.filterUnread': 'No leídas',
+  'noti.unreadCount': '{n} sin leer',
+  'noti.allClear': 'Estás al día',
+  'noti.markRead': 'Marcar como leída',
+  'noti.markUnread': 'Marcar como no leída',
+  'noti.markedRead': 'Marcada como leída.',
+  'noti.markedUnread': 'Marcada como no leída.',
+  'noti.campusTag': 'Aviso del campus',
+  'noti.openBudgets': 'Abrir presupuestos',
+  'noti.noneUnread': 'No hay nada sin leer.',
+  'noti.justNow': 'ahora mismo',
+  'noti.minutesAgo': 'hace {n} min',
+  'noti.hoursAgo': 'hace {n} h',
+  'noti.daysAgo': 'hace {n} d',
 };
