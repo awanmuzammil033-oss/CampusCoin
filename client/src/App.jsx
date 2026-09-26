@@ -31,6 +31,11 @@ const Bookmarks = lazy(() => import('./pages/Bookmarks.jsx'));
 const WishlistPage = lazy(() => import('./pages/WishlistPage.jsx'));
 const GroupsPage = lazy(() => import('./pages/GroupsPage.jsx'));
 const VaultPage = lazy(() => import('./pages/VaultPage.jsx'));
+const GrowMoneyPage = lazy(() => import('./pages/GrowMoneyPage.jsx'));
+const SavingsOptionsPage = lazy(() => import('./pages/SavingsOptionsPage.jsx'));
+const SideIncomePage = lazy(() => import('./pages/SideIncomePage.jsx'));
+const ControlSavingsOptionsAdmin = lazy(() => import('./pages/control/SavingsOptionsAdmin.jsx'));
+const ControlSideIncomeAdmin = lazy(() => import('./pages/control/SideIncomeAdmin.jsx'));
 const Profile = lazy(() => import('./pages/Profile.jsx'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage.jsx'));
 
@@ -90,6 +95,10 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/control/login" element={<AdminLogin />} />
+        {/* reference libraries: readable before signing in, because a student
+            comparing a rate should not have to make an account first */}
+        <Route path="/savings-options" element={<Screen><SavingsOptionsPage /></Screen>} />
+        <Route path="/side-income" element={<Screen><SideIncomePage /></Screen>} />
 
         {/* administrator panel â€” separate area, separate guard */}
         <Route
@@ -107,6 +116,9 @@ export default function App() {
           <Route path="templates" element={<Screen><ControlTemplates /></Screen>} />
           <Route path="announcements" element={<Screen><ControlAnnouncements /></Screen>} />
           <Route path="users" element={<Screen><ControlUsers /></Screen>} />
+          {/* the reference data behind the two public libraries */}
+          <Route path="savings-options" element={<Screen><ControlSavingsOptionsAdmin /></Screen>} />
+          <Route path="side-income" element={<Screen><ControlSideIncomeAdmin /></Screen>} />
         </Route>
 
         {/* student app */}
@@ -127,6 +139,9 @@ export default function App() {
         <Route path="/wishlist" element={<Screen><RequireStudent><WishlistPage /></RequireStudent></Screen>} />
         <Route path="/groups" element={<Screen><RequireStudent><GroupsPage /></RequireStudent></Screen>} />
         <Route path="/vault" element={<Screen><RequireStudent><VaultPage /></RequireStudent></Screen>} />
+        {/* the educational guide reads the student's own surplus, so it lives
+            inside the signed-in app */}
+        <Route path="/grow-money" element={<Screen><RequireStudent><GrowMoneyPage /></RequireStudent></Screen>} />
         <Route path="/profile" element={<Screen><RequireStudent><Profile /></RequireStudent></Screen>} />
         <Route path="/notifications" element={<Screen><RequireStudent><NotificationsPage /></RequireStudent></Screen>} />
 
@@ -149,3 +164,4 @@ function NotFound() {
     </div>
   );
 }
+

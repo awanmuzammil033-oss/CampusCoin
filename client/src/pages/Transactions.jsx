@@ -327,7 +327,7 @@ export default function Transactions() {
       {data && rows.length > 0 && (
         <div className="card" style={{ padding: 0 }}>
           <div className="table-scroll">
-            <table className="table">
+            <table className="table cc-stack-table">
               <caption className="visually-hidden">{t('tx.tableCaption')}</caption>
               <thead>
                 <tr>
@@ -344,16 +344,16 @@ export default function Transactions() {
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.id}>
-                    <td className="num text-nowrap">{dayLabel(row.date)}</td>
-                    <td>
+                    <td className="num text-nowrap" data-label={t('ui.date')}>{dayLabel(row.date)}</td>
+                    <td data-label={t('ui.category')}>
                       <span className="pill">{row.category?.name || '—'}</span>
                     </td>
-                    <td>{row.description || <span className="muted">{t('ui.noDescription')}</span>}</td>
-                    <td className={`num ${row.type === 'income' ? 'amount-income' : 'amount-expense'}`}>
+                    <td data-label={t('ui.description')}>{row.description || <span className="muted">{t('ui.noDescription')}</span>}</td>
+                    <td data-label={t('ui.amount')} className={`num ${row.type === 'income' ? 'amount-income' : 'amount-expense'}`}>
                       {row.type === 'income' ? '+' : '−'} <Icon name={row.type === 'income' ? 'trendUp' : 'trendDown'} />{' '}
                       {money(row.amount)}
                     </td>
-                    <td>
+                    <td data-label={t('ui.flag')}>
                       {row.flag === 'duplicate' && (
                         <span className="d-inline-flex align-items-center gap-1 flex-wrap">
                           <span className="flag-badge">{t('tx.looksDuplicate')}</span>
@@ -369,7 +369,7 @@ export default function Transactions() {
                       {row.flag === 'large' && <span className="flag-badge">{t('tx.unusuallyLarge')}</span>}
                       {!row.flag || row.flag === 'none' ? <span className="muted">—</span> : null}
                     </td>
-                    <td>
+                    <td data-label={t('ui.actions')}>
                       <div className="d-flex gap-1 justify-content-end">
                         <Link
                           className="icon-btn"

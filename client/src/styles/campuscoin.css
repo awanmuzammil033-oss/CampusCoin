@@ -3783,3 +3783,596 @@ textarea.input:focus {
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
+
+/* ==========================================================================
+   Chrome polish: a proper dropdown instead of a floating card, the phone's
+   all-pages sheet, and a top bar that stays on one line.
+   ========================================================================== */
+
+/* --------------------------------- popovers -------------------------------- */
+/* The bell and the account used to be a .card with inline absolute offsets,
+   which is why a long list spilled across the page. A popover is anchored,
+   capped, scrollable and never wider than the screen. */
+.cc-popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 140;
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-card);
+  box-shadow: 0 18px 44px rgba(6, 40, 32, 0.18);
+  overflow: hidden;
+}
+.cc-popover::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  right: 18px;
+  width: 10px;
+  height: 10px;
+  background: var(--cc-surface);
+  border-left: 1px solid var(--cc-border);
+  border-top: 1px solid var(--cc-border);
+  transform: rotate(45deg);
+}
+.cc-popover-notifications { width: min(360px, calc(100vw - 24px)); }
+.cc-popover-account { width: min(260px, calc(100vw - 24px)); padding: 6px; }
+
+.cc-popover-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--cc-border);
+  background: var(--cc-bg);
+}
+.cc-popover-head strong { font-size: 0.95rem; }
+.cc-popover-empty { padding: 14px; }
+
+.cc-popover-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: min(56vh, 420px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.cc-popover-list li + li { border-top: 1px solid var(--cc-border); }
+
+.cc-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 14px;
+  border: 0;
+  background: none;
+  text-align: start;
+  font: inherit;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--cc-text);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.cc-note:hover { background: var(--cc-primary-soft); }
+.cc-note:focus-visible { outline: 2px solid var(--cc-primary); outline-offset: -2px; }
+.cc-note-ico { flex: none; margin-top: 1px; }
+.cc-note-text { min-width: 0; overflow-wrap: anywhere; }
+.cc-note-unread {
+  background: var(--cc-primary-soft);
+  font-weight: 600;
+}
+.cc-note-unread .cc-note-text::after {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-inline-start: 8px;
+  border-radius: 50%;
+  background: var(--cc-primary);
+  vertical-align: middle;
+}
+
+.cc-popover-foot {
+  padding: 8px;
+  border-top: 1px solid var(--cc-border);
+  background: var(--cc-bg);
+}
+
+.cc-popover-account-email {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--cc-border);
+  overflow-wrap: anywhere;
+}
+.cc-popover .nav-link-cc { border-radius: var(--cc-radius); }
+.cc-signout {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  text-align: start;
+  font: inherit;
+  color: var(--cc-danger);
+}
+
+/* --------------------------- the all-pages sheet -------------------------- */
+/* On a phone the sidebar is hidden, so pages like Recurring or Vault would
+   simply be unreachable. This sheet is that sidebar, in a thumb-friendly
+   panel that slides up from the bottom. */
+.topbar-menu-btn { display: none; }
+
+.cc-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 180;
+  background: rgba(6, 20, 17, 0.45);
+  backdrop-filter: blur(2px);
+}
+.cc-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 190;
+  max-height: 78vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--cc-surface);
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -18px 48px rgba(6, 40, 32, 0.28);
+  transform: translateY(102%);
+  transition: transform 0.24s ease;
+  visibility: hidden;
+  padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+}
+.cc-sheet-open { transform: translateY(0); visibility: visible; }
+.cc-sheet-grip {
+  width: 44px;
+  height: 4px;
+  margin: 10px auto 4px;
+  border-radius: 999px;
+  background: var(--cc-border);
+}
+.cc-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 16px 10px;
+  border-bottom: 1px solid var(--cc-border);
+}
+.cc-sheet-body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px 12px 16px;
+  display: grid;
+  gap: 2px;
+}
+.cc-sheet-section {
+  margin: 12px 0 4px;
+  padding-inline: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cc-muted);
+}
+.cc-sheet-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 10px;
+  border-radius: var(--cc-radius);
+  color: var(--cc-text);
+  text-decoration: none;
+  font-weight: 600;
+}
+.cc-sheet-link:hover { background: var(--cc-primary-soft); }
+.cc-sheet-link.active {
+  background: var(--cc-primary-soft);
+  color: var(--cc-primary);
+}
+.cc-sheet-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 10px;
+  background: var(--cc-bg);
+  border: 1px solid var(--cc-border);
+}
+
+@media (max-width: 860px) {
+  .topbar-menu-btn { display: inline-flex; }
+}
+
+/* ------------------------------ the top bar ------------------------------- */
+/* One line on a phone. The controls shrink to 40px, the brand keeps only its
+   mark, and the row wraps as a last resort rather than by default. */
+@media (max-width: 640px) {
+  .topbar {
+    height: auto;
+    min-height: var(--cc-topbar-h);
+    flex-wrap: wrap;
+    row-gap: 8px;
+    column-gap: 4px;
+    padding: 8px 10px;
+  }
+  .topbar .nav-label { display: none; }
+  .topbar .icon-btn {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0 6px;
+  }
+  .topbar-utility,
+  .topbar-actions { gap: 4px; }
+  .topbar-spacer { display: none; }
+  .topbar-actions { margin-left: auto; }
+  /* the pickers come last, and only wrap when the row really cannot hold them */
+  .topbar-utility { order: 10; }
+  .cc-popover { top: calc(100% + 8px); }
+  .cc-popover::before { right: 14px; }
+}
+
+@media (max-width: 380px) {
+  .topbar .icon-btn { min-width: 36px; min-height: 36px; padding: 0 4px; }
+  .topbar-utility { order: 0; width: 100%; justify-content: flex-start; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-sheet { transition: none; }
+}
+
+/* --------------------------- converter (ADV-1) ---------------------------- */
+.cc-converter { position: relative; display: inline-flex; }
+.cc-converter-label {
+  margin-inline-start: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.cc-converter-popover { width: min(360px, calc(100vw - 20px)); }
+.cc-converter-body { padding: 12px 14px 14px; display: grid; gap: 10px; }
+.cc-converter-pair {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 8px;
+}
+.cc-converter-side { display: grid; gap: 4px; min-width: 0; }
+.cc-converter-side > span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cc-muted);
+}
+.cc-converter-side .input { width: 100%; min-width: 0; }
+.cc-converter-swap { flex: none; }
+.cc-converter-result {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: var(--cc-radius);
+  background: var(--cc-primary-soft);
+  border: 1px solid var(--cc-border);
+}
+.cc-converter-result strong { font-size: 1.15rem; color: var(--cc-text); }
+.cc-converter-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  color: var(--cc-warning);
+}
+.cc-converter-hint { margin: 0; }
+.pill-sm { font-size: 0.7rem; padding: 2px 8px; }
+
+@media (max-width: 420px) {
+  .cc-converter-popover { right: -6px; }
+  .cc-converter-pair { grid-template-columns: 1fr; }
+  .cc-converter-swap { justify-self: center; }
+}
+
+/* ==========================================================================
+   Dashboard: one card at a time, in the order the student thinks in, and cards
+   that keep their own height instead of stretching to the tallest in the row.
+   ========================================================================== */
+.dash-stack {
+  display: grid;
+  gap: 14px;
+  /* each card is as tall as its own content: survival mode can be much taller
+     than quick text, and the neighbour must not grow to match it */
+  align-items: start;
+}
+
+@media (min-width: 1100px) {
+  /* wide screens still get the two headline cards side by side, but from the
+     top of the same stack so the reading order is unchanged */
+  .dash-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    align-items: start;
+  }
+}
+
+/* --------------------------- voice input (ADV) ----------------------------- */
+/* The microphone sits inside the field it fills, so it is obviously the same
+   box - the transcript lands in the input, not somewhere else on the page. */
+.cc-input-with-action {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cc-input-with-action .input { flex: 1 1 auto; min-width: 0; }
+
+.voice-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: var(--cc-radius);
+  border: 1px solid var(--cc-border);
+  background: var(--cc-surface);
+  color: var(--cc-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+.voice-btn:hover { background: var(--cc-primary-soft); color: var(--cc-primary); }
+.voice-btn:focus-visible { outline: 2px solid var(--cc-primary); outline-offset: 2px; }
+.voice-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.voice-btn-live {
+  background: var(--cc-danger);
+  border-color: var(--cc-danger);
+  color: #fff;
+  animation: voice-pulse 1.4s ease-in-out infinite;
+}
+@keyframes voice-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(185, 28, 28, 0.45); }
+  50% { box-shadow: 0 0 0 7px rgba(185, 28, 28, 0); }
+}
+
+/* the quick-text row: sentence, microphone, then the button */
+.quick-text-form { align-items: stretch; }
+.quick-text-form .voice-btn { height: auto; }
+.quick-text-form p { display: flex; align-items: center; gap: 6px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .voice-btn-live { animation: none; }
+}
+
+/* the three utility rooms on the landing page: the same card, as a link */
+.lp2-scard-link { text-decoration: none; color: inherit; }
+.lp2-scard-link:hover { text-decoration: none; }
+.lp2-rooms-grid { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.lp2-scard .lp2-f-ico {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+  font-size: 1.2rem;
+  flex: none;
+}
+
+/* ==========================================================================
+   Narrow-screen correctness, found by measuring a real phone-sized render.
+
+   Three separate things were pushing the page sideways, and each is fixed at
+   its own source rather than papered over:
+
+   1. `.visually-hidden` was a 1px box still sitting in the flow, with
+      `white-space: nowrap`. Inside a table it became an anonymous caption, and
+      a caption the browser will not let shrink made the whole table - and then
+      the whole page - wider than the screen. Hidden text has to be out of the
+      flow, not merely small.
+   2. `.txn-desc` was an inline box with `nowrap` + `text-overflow`, and neither
+      of those does anything to an inline box: a long line simply spilled out
+      and dragged the layout viewport to nearly three times the phone's width.
+      A block box is what makes the ellipsis work.
+   3. `overflow-x: clip` on the shell is the guard: even if a future table
+      insists on being wide, it scrolls inside its own card and the page keeps
+      its width. `clip` rather than `hidden`, because `hidden` would turn the
+      shell into a scroll container and trap the fixed popovers.
+   ========================================================================== */
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.txn-desc,
+.txn-meta {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* a notification is a sentence, not a table cell: show all of it */
+.txn-desc-wrap {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .app-shell { overflow-x: clip; }
+  .cc-popover { max-width: calc(100vw - 16px); }
+}
+
+/* --------------------------------------------------------------------------
+   The phone top bar: one line, always.
+
+   Nine 40px controls cannot fit across 360px, so the bar carries only the ones
+   a person reaches for mid-task (brand, converter, currency, language, theme,
+   bell, account, all-pages) and the text-size pair moved into the sheet.
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  .topbar {
+    height: auto;
+    min-height: 52px;
+    flex-wrap: nowrap;
+    gap: 4px;
+    padding: 7px 8px;
+  }
+  .topbar .nav-label { display: none; }
+  .topbar .icon-btn {
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0 4px;
+    gap: 1px;
+  }
+  .topbar-utility,
+  .topbar-actions { gap: 3px; }
+  .topbar-spacer { display: none; }
+  .topbar-actions { margin-left: auto; }
+  .topbar .brand { margin-right: auto; }
+  .cc-popover { top: calc(100% + 8px); }
+  .cc-popover::before { right: 14px; }
+  /* the converter sits on the left of the bar on a phone, so its panel opens
+     to the right of the button instead of hanging off the left edge */
+  .cc-converter-popover { left: 0; right: auto; }
+}
+
+@media (max-width: 380px) {
+  .topbar { gap: 3px; padding: 6px; }
+  .topbar .icon-btn { min-width: 34px; min-height: 34px; }
+}
+
+/* the text-size row inside the all-pages sheet */
+.cc-sheet-textsize {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: var(--cc-radius);
+  background: var(--cc-bg);
+  border: 1px solid var(--cc-border);
+}
+.cc-sheet-textsize-btns { display: inline-flex; gap: 8px; }
+.cc-sheet-textsize .icon-btn { min-width: 44px; min-height: 40px; }
+
+/* --------------------------------------------------------------------------
+   Tables on a phone.
+
+   A six-column table has no honest way to fit 360px, and forcing it to leaves
+   unreadable slivers or a page that scrolls sideways. So on a narrow screen a
+   table that carries the page becomes a list of label/value rows: the header
+   row stays in the accessibility tree (clipped, not removed), every cell shows
+   its own column name, and the card never grows wider than the screen.
+   -------------------------------------------------------------------------- */
+@media (max-width: 700px) {
+  /* the safety net for every other table: fit the container, wrap the words */
+  .table-scroll .table {
+    table-layout: fixed;
+    width: 100%;
+  }
+  .table-scroll .table th,
+  .table-scroll .table td {
+    padding: 8px 6px;
+    font-size: 0.8rem;
+    overflow-wrap: anywhere;
+  }
+
+  .cc-stack-table,
+  .cc-stack-table tbody,
+  .cc-stack-table tr,
+  .cc-stack-table td {
+    display: block;
+    width: auto;
+    table-layout: auto;
+  }
+  /* the header labels move onto the cells themselves, so the header row is
+     hidden from sight but not from a screen reader */
+  .cc-stack-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .cc-stack-table tr {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--cc-border);
+  }
+  .cc-stack-table tr:last-child { border-bottom: 0; }
+  .cc-stack-table td {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 3px 12px;
+    border: 0;
+    text-align: end;
+  }
+  .cc-stack-table td::before {
+    content: attr(data-label);
+    flex: none;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--cc-muted);
+    text-align: start;
+  }
+  .cc-stack-table td:empty { display: none; }
+  .cc-stack-table .amount-wrap { width: auto !important; }
+  .cc-stack-table .d-inline-flex { justify-content: flex-end; }
+}
+
+/* --------------------------------------------------------------------------
+   The converter panel on a phone: full width under the bar, not tethered to a
+   button that sits in the middle of it. Anchoring it to the button is right on
+   a desktop and wrong here - at 393px a 360px panel hanging off a button 150px
+   from the left edge runs off the right side of the screen.
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  .cc-converter-popover {
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    top: 58px;
+    width: auto;
+    max-width: none;
+  }
+  /* the little arrow points at the button, which is no longer what anchors it */
+  .cc-converter-popover::before { display: none; }
+}
+
+@media (max-width: 340px) {
+  .cc-converter-pair { grid-template-columns: 1fr; }
+  .cc-converter-swap { justify-self: center; }
+}
+.cc-converter-names {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -2px 0 0;
+}

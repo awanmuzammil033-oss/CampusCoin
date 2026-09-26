@@ -82,7 +82,7 @@ export default function NotificationsPage() {
                     <Icon name={row.kind === 'budget_exceeded' ? 'ban' : row.kind === 'budget_near' ? 'warning' : row.kind === 'announcement' ? 'megaphone' : 'info'} />
                   </span>
                   <span className="txn-main">
-                    <span className="txn-desc">{row.message}</span>
+                    <span className="txn-desc txn-desc-wrap">{row.message}</span>
                     <span className="txn-meta">{new Date(row.createdAt).toLocaleString(uiLang())}</span>
                   </span>
                   {!row.isRead && !String(row.id).startsWith('ann-') && (

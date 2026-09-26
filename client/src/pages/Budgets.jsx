@@ -210,7 +210,7 @@ export default function Budgets() {
       {rows && rows.length > 0 && (
         <div className="card" style={{ padding: 0 }}>
           <div className="table-scroll">
-            <table className="table">
+            <table className="table cc-stack-table">
               <caption className="visually-hidden">{t('bud.caption', { month: monthLabel(month) })}</caption>
               <thead>
                 <tr>
@@ -226,7 +226,7 @@ export default function Budgets() {
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.id}>
-                    <td>
+                    <td data-label={t('ui.category')}>
                       <span className="d-inline-flex align-items-center gap-2">
                         <span className="txn-ico" style={{ width: 32, height: 32 }}>
                           <CategoryIcon name={row.category?.icon} />
@@ -234,7 +234,7 @@ export default function Budgets() {
                         <strong>{row.category?.name || t('ui.category')}</strong>
                       </span>
                     </td>
-                    <td>
+                    <td data-label={t('ui.limit')}>
                       <span className="amount-wrap" style={{ display: 'inline-block', width: 120 }}>
 <span className="amount-prefix" aria-hidden="true">{ledgerCurrencySymbol()}</span>
                         <input
@@ -247,11 +247,11 @@ export default function Budgets() {
                         />
                       </span>
                     </td>
-                    <td className="num">{money(row.spent)}</td>
-                    <td style={{ minWidth: 220 }}>
+                    <td className="num" data-label={t('ui.spent')}>{money(row.spent)}</td>
+                    <td data-label={t('ui.progress')} style={{ minWidth: 220 }}>
                       <Progress pct={row.pct} label={t('bud.spentOf', { spent: money(row.spent), limit: money(row.limit) })} />
                     </td>
-                    <td>
+                    <td data-label={t('ui.actions')}>
                       <div className="d-flex gap-1 justify-content-end">
                         <button
                           type="button"

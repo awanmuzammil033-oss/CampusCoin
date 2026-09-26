@@ -120,18 +120,57 @@ export default function Dashboard() {
       )}
 
       {summary && (
-        <>
-          {/* the two things a student reaches for first: say it in a sentence,
-              or see how many days of spending are left */}
-          <div className="d-grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
-            <QuickTextCard />
-            <SurvivalCard />
+        <div className="dash-stack">
+          {/* 1 - where the money stands */}
+          <div className="card">
+            <div className="card-title">
+              <span>{t('dash.balanceMonth', { month: monthLabel() })}</span>
+            </div>
+            <div className="balance-display">{money(summary.balance)}</div>
+            <div className="d-flex gap-4 mt-2 flex-wrap">
+              <div>
+                <div className="amount-income num">+ <Icon name="trendUp" /> {money(summary.income)}</div>
+                <div className="smallish muted">{plural('dash.incomeCount', summary.counts?.income ?? 0, { n: summary.counts?.income ?? 0 })}</div>
+              </div>
+              <div>
+                <div className="amount-expense num">- <Icon name="trendDown" /> {money(summary.expense)}</div>
+                <div className="smallish muted">{plural('dash.expenseCount', summary.counts?.expense ?? 0, { n: summary.counts?.expense ?? 0 })}</div>
+              </div>
+            </div>
           </div>
 
-          {/* the other three standout tools. On a phone the sidebar is gone and
-              the bottom bar has no room for six tabs, so the dashboard is where
-              they live — one tap from every screen. */}
-          <section className="dash-tools mt-3" aria-label={t('dash.toolsTitle')}>
+          {/* 2 - the goal that balance is measured against */}
+          {summary.savingsGoal && (
+            <div className="card">
+              <div className="card-title">
+                <span>{t('dash.savingsGoal')}</span>
+                <Link className="btn btn-ghost btn-sm" to="/profile">
+                  {t('dash.adjust')}
+                </Link>
+              </div>
+              <Progress
+                variant="goal"
+                pct={summary.savingsGoal.pct}
+                label={t('dash.savedOf', { saved: money(summary.savingsGoal.saved), goal: money(summary.savingsGoal.goal) })}
+              />
+              <p className="smallish muted mb-0 mt-3">
+                {summary.savingsGoal.saved >= summary.savingsGoal.goal
+                  ? t('dash.goalReached', { amount: money(summary.savingsGoal.saved - summary.savingsGoal.goal) })
+                  : t('dash.toGo', { amount: money(summary.savingsGoal.goal - summary.savingsGoal.saved) })}
+              </p>
+            </div>
+          )}
+
+          {/* 3 - say it in a sentence */}
+          <QuickTextCard />
+
+          {/* 4 - how many days of spending are left */}
+          <SurvivalCard />
+
+          {/* 5 - the standout tools. On a phone the sidebar is gone and the
+              bottom bar has no room for six tabs, so the dashboard is where
+              they live: one tap from every screen. */}
+          <section className="dash-tools" aria-label={t('dash.toolsTitle')}>
             <div className="dash-tools-head">
               <h2 className="mb-1">
                 <Icon name="sparkles" /> {t('dash.toolsTitle')}
@@ -158,94 +197,52 @@ export default function Dashboard() {
             </div>
           </section>
 
-          {/* balance + savings goal */}
-          <div className="d-grid gap-3 mt-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
-            <div className="card">
-              <div className="card-title">
-                <span>{t('dash.balanceMonth', { month: monthLabel() })}</span>
-              </div>
-              <div className="balance-display">{money(summary.balance)}</div>
-              <div className="d-flex gap-4 mt-2 flex-wrap">
-                <div>
-                  <div className="amount-income num">+ <Icon name="trendUp" /> {money(summary.income)}</div>
-                  <div className="smallish muted">{plural('dash.incomeCount', summary.counts?.income ?? 0, { n: summary.counts?.income ?? 0 })}</div>
-                </div>
-                <div>
-                  <div className="amount-expense num">− <Icon name="trendDown" /> {money(summary.expense)}</div>
-                  <div className="smallish muted">{plural('dash.expenseCount', summary.counts?.expense ?? 0, { n: summary.counts?.expense ?? 0 })}</div>
-                </div>
-              </div>
+          {/* 6 - where the money actually went */}
+          <div className="card">
+            <div className="card-title">
+              <span>{t('dash.topCategory')}</span>
             </div>
-
-            {summary.savingsGoal && (
-              <div className="card">
-                <div className="card-title">
-                  <span>{t('dash.savingsGoal')}</span>
-                  <Link className="btn btn-ghost btn-sm" to="/profile">
-                    {t('dash.adjust')}
-                  </Link>
+            {summary.topCategory ? (
+              <div className="d-flex align-items-center gap-3">
+                <span className="txn-ico">
+                  <CategoryIcon name={summary.topCategory.icon} />
+                </span>
+                <div className="flex-grow-1">
+                  <div style={{ fontWeight: 600 }}>{summary.topCategory.name}</div>
+                  <div className="num">{money(summary.topCategory.amount)}</div>
                 </div>
-                <Progress
-                  variant="goal"
-                  pct={summary.savingsGoal.pct}
-                  label={t('dash.savedOf', { saved: money(summary.savingsGoal.saved), goal: money(summary.savingsGoal.goal) })}
-                />
-                <p className="smallish muted mb-0 mt-3">
-                  {summary.savingsGoal.saved >= summary.savingsGoal.goal
-                    ? t('dash.goalReached', { amount: money(summary.savingsGoal.saved - summary.savingsGoal.goal) })
-                    : t('dash.toGo', { amount: money(summary.savingsGoal.goal - summary.savingsGoal.saved) })}
-                </p>
+                <span className="pill pill-expense num">{t('dash.pctOfSpending', { pct: summary.topCategory.share })}</span>
               </div>
+            ) : (
+              <p className="muted mb-0">{t('dash.noExpensesYet')}</p>
             )}
           </div>
 
-          {/* the two widgets */}
-          <div className="d-grid gap-3 mt-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
-            <div className="card">
-              <div className="card-title">
-                <span>{t('dash.topCategory')}</span>
-              </div>
-              {summary.topCategory ? (
-                <div className="d-flex align-items-center gap-3">
-                  <span className="txn-ico">
-                    <CategoryIcon name={summary.topCategory.icon} />
-                  </span>
-                  <div className="flex-grow-1">
-                    <div style={{ fontWeight: 600 }}>{summary.topCategory.name}</div>
-                    <div className="num">{money(summary.topCategory.amount)}</div>
-                  </div>
-                  <span className="pill pill-expense num">{t('dash.pctOfSpending', { pct: summary.topCategory.share })}</span>
-                </div>
-              ) : (
-                <p className="muted mb-0">{t('dash.noExpensesYet')}</p>
-              )}
+          {/* 7 - the limits against that spending */}
+          <div className="card">
+            <div className="card-title">
+              <span>{t('dash.budgetVsActual')}</span>
+              <Link className="btn btn-ghost btn-sm" to="/budgets">
+                {t('dash.manageBudgets')}
+              </Link>
             </div>
-
-            <div className="card">
-              <div className="card-title">
-                <span>{t('dash.budgetVsActual')}</span>
-                <Link className="btn btn-ghost btn-sm" to="/budgets">
-                  {t('dash.manageBudgets')}
-                </Link>
+            {summary.budgets?.length ? (
+              <div className="d-grid gap-3">
+                {summary.budgets.map((b) => (
+                  <Progress
+                    key={b.id}
+                    pct={b.pct}
+                    label={t('dash.budgetRow', { category: b.category.name, spent: money(b.spent), limit: money(b.limit) })}
+                  />
+                ))}
               </div>
-              {summary.budgets?.length ? (
-                <div className="d-grid gap-3">
-                  {summary.budgets.map((b) => (
-                    <Progress
-                      key={b.id}
-                      pct={b.pct}
-                      label={t('dash.budgetRow', { category: b.category.name, spent: money(b.spent), limit: money(b.limit) })}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <p className="muted mb-0">{t('dash.noLimits', { month: monthLabel() })}</p>
-              )}
-            </div>
+            ) : (
+              <p className="muted mb-0">{t('dash.noLimits', { month: monthLabel() })}</p>
+            )}
           </div>
 
           {nothingYet ? (
-            <div className="card mt-3">
+            <div className="card">
               <EmptyState
                 icon="wallet"
                 title={t('dash.emptyTitle')}
@@ -265,33 +262,33 @@ export default function Dashboard() {
             </div>
           ) : (
             <>
-              {/* charts sit side by side and stack on small screens */}
-              <div className="d-grid gap-3 mt-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))' }}>
+              {/* 8 and 9 - the charts follow the same order as everything
+                  above, so the page never asks the eye to jump sideways */}
                 <ChartCard
-                  title={t('dash.chartSpending')}
-                  type="doughnut"
-                  data={charts ? doughnutData : { labels: [], datasets: [] }}
-                  loading={!charts}
-                  emptyText={t('dash.chartSpendingEmpty')}
-                  table={{
-                    columns: [t('ui.category'), t('ui.amount')],
-                    rows: doughnutRows.map((r) => [r.category, money(r.total)]),
-                  }}
-                />
-                <ChartCard
-                  title={t('dash.chartTrend')}
-                  type="bar"
-                  data={charts ? trendData : { labels: [], datasets: [] }}
-                  loading={!charts}
-                  emptyText={t('dash.chartTrendEmpty')}
-                  table={{
-                    columns: [t('ui.month'), t('ui.income'), t('ui.expense')],
-                    rows: trendRows.map((r) => [r.label, money(r.income), money(r.expense)]),
-                  }}
-                />
-              </div>
+                title={t('dash.chartSpending')}
+                type="doughnut"
+                data={charts ? doughnutData : { labels: [], datasets: [] }}
+                loading={!charts}
+                emptyText={t('dash.chartSpendingEmpty')}
+                table={{
+                  columns: [t('ui.category'), t('ui.amount')],
+                  rows: doughnutRows.map((r) => [r.category, money(r.total)]),
+                }}
+              />
+              <ChartCard
+                title={t('dash.chartTrend')}
+                type="bar"
+                data={charts ? trendData : { labels: [], datasets: [] }}
+                loading={!charts}
+                emptyText={t('dash.chartTrendEmpty')}
+                table={{
+                  columns: [t('ui.month'), t('ui.income'), t('ui.expense')],
+                  rows: trendRows.map((r) => [r.label, money(r.income), money(r.expense)]),
+                }}
+              />
 
-              <section className="mt-4">
+
+              <section>
                 <div className="d-flex align-items-center justify-content-between mb-2">
                   <h2 className="mb-0"><Icon name="bulb" /> {t('dash.tipsTitle')}</h2>
                   <Link className="btn btn-ghost btn-sm" to="/tips">
@@ -352,7 +349,7 @@ export default function Dashboard() {
               )}
             </>
           )}
-        </>
+        </div>
       )}
     </Page>
   );

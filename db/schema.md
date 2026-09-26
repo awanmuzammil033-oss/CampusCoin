@@ -465,9 +465,67 @@ cannot both take the last coin and the jar can never go negative.
 |---|---|
 | `user`, `date` | descending on `date` |
 
+## 19. `bankrates`
+
+A reference row on the public "Compare savings options" page (ADV-3): what one
+bank published for one product, on one date. It is **shared reference data, not a
+personal record** — there is no `user`, and no student's money is involved, which
+is why the read is open to a signed-out visitor and only the write is behind the
+administrator door. The page that shows it carries a disclaimer that cannot be
+dismissed, and `sourceNote` exists so the figure can be traced to the bank it
+came from rather than floating free.
+
+| Field | Type | R | U | Notes / enum |
+|---|---|---|---|---|
+| `bank` | String | ✔ | | maxlength 60, trim |
+| `accountType` | String | ✔ | | enum `savings` \| `fd` |
+| `ratePercent` | Number | ✔ | | 0–100, at most 2 decimals |
+| `minAmount` | Decimal128 | | | default 0; shown as "none published" |
+| `tenureMonths` | Number | | | 1–120 for a deposit, nullable |
+| `region` | String | | | maxlength 60 |
+| `note` | String | | | maxlength 200 |
+| `sourceNote` | String | | | maxlength 200 — where the figure came from |
+| `isActive` | Boolean | | | default true; a retired row stays for the record |
+
+**Indexes**
+
+| Keys | Options |
+|---|---|
+| `accountType`, `ratePercent` | descending on `ratePercent` — the page sorts by rate |
+| `isActive` | the public read filters on it |
+
+## 20. `incomeideas`
+
+One entry in the side-income library (ADV-5): a way students earn on the side,
+with what it costs to start and where the claim came from. Like `bankrates` this
+is shared reference data. The rule that makes it defensible in front of judges is
+in the service, not the database: an entry marked **trending** must carry a
+source (`sourceUrl` or `sourceNote`), so a badge can never point at nothing.
+
+| Field | Type | R | U | Notes / enum |
+|---|---|---|---|---|
+| `title` | String | ✔ | | maxlength 90 |
+| `category` | String | ✔ | | enum `part-time` \| `freelance` \| `reselling` \| `services` |
+| `summary` | String | ✔ | | maxlength 300 |
+| `howItWorks` | String | | | maxlength 1200 |
+| `typicalEffort` | String | | | maxlength 120, plain words |
+| `startupCost` | String | | | maxlength 120, plain words |
+| `isTrending` | Boolean | | | default false; needs a source |
+| `sourceUrl` | String | | | maxlength 300, http(s) only when present |
+| `sourceNote` | String | | | maxlength 200 |
+| `icon` | String | | | maxlength 16, an emoji |
+| `isActive` | Boolean | | | default true |
+| `sortOrder` | Number | | | default 0 |
+
+**Indexes**
+
+| Keys | Options |
+|---|---|
+| `isActive`, `isTrending`, `sortOrder` | descending on `isTrending` — trending first, then editorial order |
+
 ---
 
-## 19. Relationships
+## 21. Relationships
 
 | From | Field | To | Meaning |
 |---|---|---|---|

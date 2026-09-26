@@ -36,6 +36,10 @@ const EMOJI = {
   wallet: '💰', coin: '🪙', coins: '🪙', coinsAlt: '🪙',
   card: '💳', cash: '💵', bank: '🏦', piggy: '🐷',
   trendUp: '↑', trendDown: '↓', trendFlat: '→', scale: '⚖️', percent: '%',
+  // the converter button. Both of these are old, widely available emoji on
+  // purpose: a missing glyph in the navbar would be the first thing a judge
+  // noticed, and a newer pictograph is exactly the kind that goes tofu.
+  exchange: '💱', swap: '🔄',
 
   /* ------------------------------------------- categories (student life) */
   cup: '☕', bus: '🚌', book: '📚', books: '📚', gift: '🎁', film: '🎞️',
@@ -57,6 +61,7 @@ const EMOJI = {
   clipboard: '📝', key: '🔑', note: '📝', inbox: '📥', rocket: '🚀',
   trophy: '🏆', wave: '🌊', hand: '👋', layers: '🗂️',
   sparkle: '✨', sparkles: '✨', question: '❓', help: '❓',
+  mic: '🎤', micLive: '🎙', stop: '⏹', record: '⏺',
 };
 
 export const ICON_NAMES = Object.keys(EMOJI);

@@ -4,6 +4,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import Page from '../components/Page.jsx';
 import FormField from '../components/FormField.jsx';
 import Icon from '../components/Icon.jsx';
+import VoiceInput from '../components/VoiceInput.jsx';
 import CategoryIcon from '../components/CategoryIcon.jsx';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
@@ -26,7 +27,7 @@ export default function TransactionForm() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { push } = useToast();
-  const { t } = useLocale();
+  const { t, language } = useLocale();
   const creating = !id;
 
   const [form, setForm] = useState({
@@ -278,17 +279,26 @@ export default function TransactionForm() {
 
           <FormField label={t('ui.description')} htmlFor="description" help={t('txf.descHelp')}>
             {(a) => (
-              <input
-                id="description"
-                className="input"
-                type="text"
-                maxLength={255}
-                autoComplete="off"
-                placeholder={t('txf.descPlaceholder')}
-                value={form.description}
-                onChange={(e) => setField('description', e.target.value)}
-                {...a}
-              />
+              <div className="cc-input-with-action">
+                <input
+                  id="description"
+                  className="input"
+                  type="text"
+                  maxLength={255}
+                  autoComplete="off"
+                  placeholder={t('txf.descPlaceholder')}
+                  value={form.description}
+                  onChange={(e) => setField('description', e.target.value)}
+                  {...a}
+                />
+                {/* describing an entry out loud fills the same field; the amount
+                    and category are still chosen by hand */}
+                <VoiceInput
+                  onText={(text) => setField('description', text)}
+                  lang={language}
+                  onError={(message) => push(message, 'error')}
+                />
+              </div>
             )}
           </FormField>
 

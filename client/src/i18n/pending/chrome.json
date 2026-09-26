@@ -1,0 +1,21 @@
+{
+  "topbar.account": "Account menu",
+  "topbar.allNotifications": "See all notifications",
+  "topbar.allPages": "All pages",
+  "ui.close": "Close",
+  "topbar.converter": "Convert money",
+  "conv.title": "Convert money",
+  "conv.amount": "Amount",
+  "conv.from": "From",
+  "conv.to": "To",
+  "conv.result": "That is",
+  "conv.swap": "Swap the two currencies",
+  "conv.rateLine": "1 {from} = {rate} {to}",
+  "conv.updated": "Rates updated {when}",
+  "conv.offline": "Showing the last saved rates — the live service could not be reached.",
+  "conv.error": "Could not load live rates. Showing the last saved ones.",
+  "conv.same": "Pick two different currencies.",
+  "conv.hint": "Student rates, for quick reference — not a money transfer service.",
+  "conv.referenceMark": "snapshot",
+  "conv.mixedNote": "Currencies marked (snapshot) come from the dated table in the app; the rest are live rates."
+}

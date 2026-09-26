@@ -4,6 +4,7 @@ import { useAuth } from '../auth.jsx';
 import { useLocale } from '../locale.jsx';
 import LocalePickers from '../components/LocalePickers.jsx';
 import ThemeToggle from '../components/ThemeToggle.jsx';
+import CurrencyConverter from '../components/CurrencyConverter.jsx';
 import Icon from '../components/Icon.jsx';
 import HeroWaves from '../components/art/HeroWaves.jsx';
 import FaqArt from '../components/art/FaqArt.jsx';
@@ -30,6 +31,7 @@ import CatsArt from '../components/art/CatsArt.jsx';
 const NAV = [
   { id: 'top', label: 'home.nav.home' },
   { id: 'features', label: 'home.nav.features' },
+  { id: 'rooms', label: 'home.nav.rooms' },
   { id: 'how', label: 'home.nav.how' },
   { id: 'overview', label: 'home.nav.insights' },
   { id: 'faq', label: 'home.nav.faq' },
@@ -123,6 +125,9 @@ export default function Home() {
         </nav>
 
         <div className="lp-nav-right">
+          {/* the site-wide converter sits in the public navbar too, so it works
+              before anyone signs in (ADV-1) */}
+          <CurrencyConverter compact />
           <ThemeToggle className="icon-btn lp-nav-icon" />
           <LocalePickers variant="nav" />
           {loading ? null : user ? (
@@ -372,6 +377,36 @@ export default function Home() {
               <p>{t('home.s5b')}</p>
               <span className="lp2-scard-arrow"><Icon name="arrowRight" /></span>
             </article>
+          </div>
+        </section>
+
+        {/* ----------------- the utility rooms (Tier 4) ---------------------- */}
+        <section id="rooms" className="lp2-section lp2-standout" aria-labelledby="rooms-heading">
+          <div className="lp2-standout-head lp-reveal">
+            <span className="lp2-eyebrow">{t('home.roomsEyebrow')}</span>
+            <h2 id="rooms-heading">{t('home.roomsTitle')}</h2>
+            <p>{t('home.roomsSub')}</p>
+          </div>
+
+          <div className="lp2-standout-grid lp2-rooms-grid">
+            <Link to="/savings-options" className="lp2-scard lp2-scard-link lp-reveal">
+              <span className="lp2-f-ico t4"><Icon name="piggy" /></span>
+              <h3>{t('home.room1t')}</h3>
+              <p>{t('home.room1b')}</p>
+              <span className="lp2-scard-arrow"><Icon name="arrowRight" /></span>
+            </Link>
+            <Link to="/grow-money" className="lp2-scard lp2-scard-link lp-reveal" style={{ transitionDelay: '80ms' }}>
+              <span className="lp2-f-ico t3"><Icon name="trophy" /></span>
+              <h3>{t('home.room2t')}</h3>
+              <p>{t('home.room2b')}</p>
+              <span className="lp2-scard-arrow"><Icon name="arrowRight" /></span>
+            </Link>
+            <Link to="/side-income" className="lp2-scard lp2-scard-link lp-reveal" style={{ transitionDelay: '160ms' }}>
+              <span className="lp2-f-ico t2"><Icon name="briefcase" /></span>
+              <h3>{t('home.room3t')}</h3>
+              <p>{t('home.room3b')}</p>
+              <span className="lp2-scard-arrow"><Icon name="arrowRight" /></span>
+            </Link>
           </div>
         </section>
 
@@ -715,6 +750,14 @@ export default function Home() {
                 <li><Link to="/recurring">{t('home.link.recurringEntries')}</Link></li>
                 <li><Link to="/categories">{t('nav.categories')}</Link></li>
                 <li><Link to="/budgets">{t('nav.budgets')}</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3>{t('nav.section.tools')}</h3>
+              <ul>
+                <li><Link to="/savings-options">{t('nav.savingsOptions')}</Link></li>
+                <li><Link to="/grow-money">{t('nav.growMoney')}</Link></li>
+                <li><Link to="/side-income">{t('nav.sideIncome')}</Link></li>
               </ul>
             </div>
             <div>

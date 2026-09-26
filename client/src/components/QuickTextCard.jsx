@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import Icon from './Icon.jsx';
+import VoiceInput from './VoiceInput.jsx';
 import { api } from '../api.js';
 import { useToast } from './Toast.jsx';
 import { money } from '../money.js';
@@ -144,10 +145,20 @@ export default function QuickTextCard() {
           autoComplete="off"
           maxLength={240}
         />
+        {/* saying the sentence IS the sentence: the transcript goes through the
+            same reader, the same confirmation and the same undo as typing */}
+        <VoiceInput
+          onText={setText}
+          lang={language}
+          onError={(message) => push(message, 'error')}
+        />
         <button className="btn btn-primary" type="submit" disabled={busy || text.trim().length < 2}>
           <Icon name="bolt" /> {busy ? t('quick.saving') : t('quick.add')}
         </button>
       </form>
+      <p className="smallish muted mt-2 mb-0">
+        <Icon name="mic" size={14} /> {t('voice.hint')}
+      </p>
 
       {/* live reading of the sentence, before anything is saved */}
       {checking && !draft && <p className="smallish muted mb-0 mt-2">{t('quick.reading')}</p>}

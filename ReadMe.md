@@ -11,6 +11,12 @@ mess bill and settle it back to zero, a one-sentence expense logger, a
 by a micro-savings jar, and a subscription vault that names the payments you
 are still making for things you stopped using.
 
+**Four utility rooms on top of that:** a currency converter in the navbar,
+a reference table of savings and Fixed Deposit rates, an educational guide to
+saving and investing with the risk level of every option written down, and a
+curated library of ways to earn on the side — each with a trending badge and a
+source where the claim has one.
+
 ---
 
 ## 1. Stack
@@ -95,16 +101,24 @@ student login, and the server refuses the wrong role at each.
 
 ```powershell
 cd server
-npm test          # 80 tests across 6 suites:
-                  #   auth & sessions · transactions & audit trail
-                  #   budget alert boundaries · CSV import safety
+npm test          # every suite, one in-memory MongoDB each:
+                  #   auth, sessions & the password reset
+                  #   transactions & the audit trail
+                  #   budget alert boundaries
+                  #   CSV import safety
                   #   roommate groups, splits & settlements
-                  #   wishlist & savings jar · subscription vault
+                  #   wishlist & the savings jar
+                  #   subscription vault
                   #   quick-text logger & survival-mode arithmetic
+                  #   savings & FD reference table (admin CRUD, validation)
+                  #   side-income library (the citation rule)
+                  #   growth guide (the nudge is a key, never a sentence)
+                  #   currency converter (cache, fallback, refusal)
 ```
 
 Each test file gets its own in-memory MongoDB, so tests never touch real data
-and need no setup.
+and need no setup. The converter suite never reaches the network: the upstream
+fetch is injectable, and the tests supply their own.
 
 ## 5. Project layout
 
@@ -113,10 +127,12 @@ CampusCoin/
 ├── server/
 │   ├── src/
 │   │   ├── config/        env + database connection
-│   │   ├── models/        18 collections (see db/schema.md)
+│   │   ├── models/        20 collections (see db/schema.md)
 │   │   ├── services/      business logic: ledger, alerts, tips, reports,
 │   │   │                  budgets, categoriser, insight, forecast, importer,
-│   │   │                  groups, wishlist, vault, quickText, survival…
+│   │   │                  groups, wishlist, vault, quickText, survival,
+│   │   │                  accounts, fxRates, bankRates, incomeIdeas,
+│   │   │                  growMoney…
 │   │   ├── routes/        thin HTTP layer (auth, transactions, control…)
 │   │   ├── middleware/    sessions, role guards, CSRF, rate limits, errors
 │   │   └── scripts/       seed, recurring generator, dev-local
@@ -124,7 +140,8 @@ CampusCoin/
 ├── client/
 │   └── src/
 │       ├── components/    layout, charts, modals, forms, toasts,
-│       │                  quick-text + survival-mode cards
+│       │                  quick-text + survival-mode cards, voice input,
+│       │                  currency converter, illustrations
 │       ├── pages/         student screens + pages/control (admin area)
 │       └── styles/        design tokens & components (custom CSS)
 ├── db/schema.md           collections, fields, indexes, relationships
@@ -148,11 +165,29 @@ CampusCoin/
 - **The quick-text logger parses, it does not guess** — amount, category and
   date come from the sentence (in any of the 14 languages the app is published
   in, decimal commas included), the reading is shown before anything is saved,
-  and the entry can be undone from the same confirmation.
+  and the entry can be undone from the same confirmation. **Dictation is
+  available where the browser supports it** and hidden where it does not, and
+  what it hears goes through exactly the same reader, confirmation and undo.
 - **Survival mode stores only the switch** — the daily allowance is recomputed
   from the ledger on every read, so it can never go stale.
 - **The vault explains itself** — every threshold it uses is in one exported
   object, and each verdict ships the reason in the language the student picked.
+- **The converter never invents a rate** — the navbar 💱 button asks the server,
+  which answers from a six-hour cache of the free Frankfurter feed. Currencies
+  that feed does not carry (PKR, BDT, NPR, NGN …) come from a dated table
+  shipped with the app and are labelled as a snapshot in the currency list, so
+  the popover always says which figures are live and which are not. A pair the
+  table cannot answer is refused, never guessed, and no rate is ever written to
+  a record.
+- **The rate and idea libraries are reference, never advice** — the savings
+  table carries a non-dismissible disclaimer, the growth guide is definitions
+  and risk levels with no product named, and its nudge is a translation key plus
+  the student's own surplus, so there is no sentence in the code that could
+  tell anybody what to buy. A trending side-income idea cannot be published
+  without a source.
 - **Accessibility** — skip link, visible labels, 44 px touch targets, focus
   rings, light/dark theme, 4-step text size, reduced-motion support, and every
   chart/table pair in both directions.
+- **One column, in order** — the dashboard reads top to bottom: balance, goal,
+  quick text, survival mode, the tools, then the detail. Cards keep their own
+  height, so a tall card never stretches its neighbour.

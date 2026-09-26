@@ -190,7 +190,7 @@ export default function ImportCsv() {
             </EmptyState>
           ) : (
             <div className="table-scroll">
-              <table className="table">
+              <table className="table cc-stack-table">
                 <caption className="visually-hidden">{t('imp.tableCaption')}</caption>
                 <thead>
                   <tr>
@@ -205,16 +205,16 @@ export default function ImportCsv() {
                 <tbody>
                   {(preview.rows || []).map((row) => (
                     <tr key={row.line}>
-                      <td className="num">{row.line}</td>
-                      <td className="num text-nowrap">{dayLabel(row.date)}</td>
-                      <td>
+                      <td className="num" data-label={t('ui.line')}>{row.line}</td>
+                      <td className="num text-nowrap" data-label={t('ui.date')}>{dayLabel(row.date)}</td>
+                      <td data-label={t('ui.type')}>
                         <span className={row.type === 'income' ? 'pill pill-income' : 'pill pill-expense'}>
                           {row.type === 'income' ? t('txf.incomeChip') : t('txf.expenseChip')}
                         </span>
                       </td>
-                      <td>{row.category}</td>
-                      <td className="num">{money(row.amount)}</td>
-                      <td>{row.description || <span className="muted">—</span>}</td>
+                      <td data-label={t('ui.category')}>{row.category}</td>
+                      <td className="num" data-label={t('ui.amount')}>{money(row.amount)}</td>
+                      <td data-label={t('ui.description')}>{row.description || <span className="muted">—</span>}</td>
                     </tr>
                   ))}
                 </tbody>

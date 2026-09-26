@@ -6,6 +6,7 @@ import ThemeToggle from './ThemeToggle.jsx';
 import { useLocale } from '../locale.jsx';
 import LocalePickers from './LocalePickers.jsx';
 import Icon from './Icon.jsx';
+import CurrencyConverter from './CurrencyConverter.jsx';
 
 const NAV = [
   { sectionKey: 'nav.section.money' },
@@ -18,6 +19,10 @@ const NAV = [
   { to: '/groups', labelKey: 'nav.groups', icon: 'users' },
   { to: '/wishlist', labelKey: 'nav.wishlist', icon: 'gift' },
   { to: '/vault', labelKey: 'nav.vault', icon: 'shield' },
+  { sectionKey: 'nav.section.tools' },
+  { to: '/savings-options', labelKey: 'nav.savingsOptions', icon: 'piggy' },
+  { to: '/grow-money', labelKey: 'nav.growMoney', icon: 'trophy' },
+  { to: '/side-income', labelKey: 'nav.sideIncome', icon: 'briefcase' },
   { sectionKey: 'nav.section.understand' },
   { to: '/reports', labelKey: 'nav.reports', icon: 'chart' },
   { to: '/insights', labelKey: 'nav.insights', icon: 'insightWeather' },
@@ -49,6 +54,21 @@ export default function Layout({ children }) {
   const [bellOpen, setBellOpen] = useState(false);
   const [feed, setFeed] = useState([]);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Escape closes whichever panel is open, and the sheet never stays open
+  // behind a route change.
+  useEffect(() => {
+    if (!bellOpen && !accountOpen && !menuOpen) return undefined;
+    const onKey = (event) => {
+      if (event.key !== 'Escape') return;
+      setBellOpen(false);
+      setAccountOpen(false);
+      setMenuOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [bellOpen, accountOpen, menuOpen]);
 
   // Recent notifications for the bell — fetched once when the chrome mounts.
   useEffect(() => {
@@ -70,6 +90,7 @@ export default function Layout({ children }) {
     const next = !bellOpen;
     setBellOpen(next);
     setAccountOpen(false);
+    setMenuOpen(false);
     if (next) {
       try {
         const data = await api.get('/api/notifications');
@@ -110,23 +131,19 @@ export default function Layout({ children }) {
         </Link>
         <div className="topbar-spacer" />
 
-        {/* two groups so a phone can put one on each line: everything here
-            stays reachable at 360px instead of sliding off the right edge */}
+        {/* Utility row: the converter and the two pickers, grouped so the bar
+            stays on ONE line on a phone. The text-size pair lives in the
+            all-pages sheet instead of here: nine controls do not fit across a
+            360px screen, and a control that has been squeezed off the edge is
+            a control nobody can find. */}
         <div className="topbar-utility">
-          <LocalePickers onOpen={() => { setBellOpen(false); setAccountOpen(false); }} />
-
-          <button type="button" className="icon-btn" onClick={() => changeFont(-1)} aria-label={t('a11y.decreaseText')} title={t('topbar.smallerText')}>
-            <Icon name="fontSize" />
-            <Icon name="minus" />
-          </button>
-          <button type="button" className="icon-btn" onClick={() => changeFont(1)} aria-label={t('a11y.increaseText')} title={t('topbar.largerText')}>
-            <Icon name="fontSize" />
-            <Icon name="plus" />
-          </button>
+          <CurrencyConverter compact />
+          <LocalePickers onOpen={() => { setBellOpen(false); setAccountOpen(false); setMenuOpen(false); }} />
         </div>
 
         <div className="topbar-actions">
           <ThemeToggle />
+
           <div className="position-relative">
             <button
               type="button"
@@ -138,58 +155,145 @@ export default function Layout({ children }) {
               <Icon name="bell" />
               {unread > 0 && <span className="badge-count">{unread > 9 ? '9+' : unread}</span>}
             </button>
-          {bellOpen && (
-            <div className="card position-absolute" style={{ right: 0, top: 52, width: 320, zIndex: 140 }}>
-              <div className="card-title">
-                <span>{t('topbar.notifications')}</span>
-                <button type="button" className="btn btn-ghost btn-sm" onClick={() => api.post('/api/notifications/read-all').then(() => { setUnread(0); setFeed((r) => r.map((x) => ({ ...x, isRead: true }))); }).catch(() => {})}>
-                  {t('topbar.markAllRead')}
+
+            {bellOpen && (
+              <div className="cc-popover cc-popover-notifications" role="dialog" aria-label={t('topbar.notifications')}>
+                <div className="cc-popover-head">
+                  <strong>{t('topbar.notifications')}</strong>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => api.post('/api/notifications/read-all').then(() => { setUnread(0); setFeed((r) => r.map((x) => ({ ...x, isRead: true }))); }).catch(() => {})}
+                    disabled={unread === 0}
+                  >
+                    {t('topbar.markAllRead')}
+                  </button>
+                </div>
+
+                {feed.length === 0 ? (
+                  <p className="muted smallish mb-0 cc-popover-empty">{t('topbar.nothingNew')}</p>
+                ) : (
+                  <ul className="cc-popover-list">
+                    {feed.map((n) => (
+                      <li key={n.id}>
+                        <button
+                          type="button"
+                          className={`cc-note ${n.isRead ? '' : 'cc-note-unread'}`}
+                          onClick={() => markRead(n.id)}
+                        >
+                          <span className="cc-note-ico" aria-hidden="true">
+                            <Icon name={iconFor(n.kind)} size={17} />
+                          </span>
+                          <span className="cc-note-text">{n.message}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                <div className="cc-popover-foot">
+                  <Link to="/notifications" className="btn btn-ghost btn-sm w-100" onClick={() => setBellOpen(false)}>
+                    {t('topbar.allNotifications')}
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="position-relative">
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={() => { setAccountOpen((v) => !v); setBellOpen(false); setMenuOpen(false); }}
+              aria-expanded={accountOpen}
+              aria-label={t('topbar.account')}
+            >
+              <span><Icon name="user" /></span>
+              <span className="nav-label">{user?.name?.split(' ')[0]}</span>
+            </button>
+
+            {accountOpen && (
+              <div className="cc-popover cc-popover-account" role="dialog" aria-label={t('topbar.account')}>
+                <div className="cc-popover-account-email">
+                  <strong>{user?.name}</strong>
+                  <span className="smallish muted">{user?.email}</span>
+                </div>
+                <Link className="nav-link-cc" to="/profile" onClick={() => setAccountOpen(false)}>
+                  <Icon name="settings" /> {t('account.profileSettings')}
+                </Link>
+                <Link className="nav-link-cc" to="/bookmarks" onClick={() => setAccountOpen(false)}>
+                  <Icon name="bookmark" /> {t('account.bookmarks')}
+                </Link>
+                <button type="button" className="nav-link-cc w-100 cc-signout" onClick={handleLogout}>
+                  <Icon name="logout" /> {t('account.signOut')}
                 </button>
               </div>
-              {feed.length === 0 && <p className="muted smallish mb-0">{t('topbar.nothingNew')}</p>}
-              <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                {feed.map((n) => (
-                  <li key={n.id}>
-                    <button
-                      type="button"
-                      className="btn btn-ghost w-100 text-start smallish"
-                      style={{ minHeight: 44 }}
-                      onClick={() => markRead(n.id)}
-                    >
-                      <span><Icon name={iconFor(n.kind)} /></span>{' '}
-                      {!n.isRead && <strong>• </strong>}
-                      {n.message}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-        <div className="position-relative">
+          {/* the phone's way into the pages the sidebar holds on a desktop */}
           <button
             type="button"
-            className="icon-btn"
-            onClick={() => { setAccountOpen((v) => !v); setBellOpen(false); }}
-            aria-expanded={accountOpen}
+            className="icon-btn topbar-menu-btn"
+            onClick={() => { setMenuOpen((v) => !v); setBellOpen(false); setAccountOpen(false); }}
+            aria-expanded={menuOpen}
+            aria-label={t('topbar.allPages')}
           >
-            <span><Icon name="user" /></span>
-            <span className="nav-label">{user?.name?.split(' ')[0]}</span>
+            <Icon name="menu" />
           </button>
-          {accountOpen && (
-            <div className="card position-absolute" style={{ right: 0, top: 52, width: 240, zIndex: 140 }}>
-              <div className="smallish muted mb-2">{user?.email}</div>
-              <Link className="nav-link-cc" to="/profile" onClick={() => setAccountOpen(false)}><Icon name="settings" /> {t('account.profileSettings')}</Link>
-              <Link className="nav-link-cc" to="/bookmarks" onClick={() => setAccountOpen(false)}><Icon name="bookmark" /> {t('account.bookmarks')}</Link>
-              <button type="button" className="nav-link-cc w-100" style={{ border: 'none', background: 'none', cursor: 'pointer' }} onClick={handleLogout}>
-                <Icon name="logout" /> {t('account.signOut')}
-              </button>
-            </div>
-          )}
-          </div>
         </div>
       </header>
+
+      {/* Every page the desktop sidebar lists, as a sheet on a phone. */}
+      {menuOpen && (
+        <div className="cc-sheet-backdrop" onClick={() => setMenuOpen(false)} role="presentation" />
+      )}
+      <div className={`cc-sheet ${menuOpen ? 'cc-sheet-open' : ''}`} aria-hidden={!menuOpen}>
+        <div className="cc-sheet-grip" aria-hidden="true" />
+        <div className="cc-sheet-head">
+          <strong>{t('topbar.allPages')}</strong>
+          <button type="button" className="icon-btn" onClick={() => setMenuOpen(false)} aria-label={t('ui.close')}>
+            <Icon name="close" />
+          </button>
+        </div>
+        <div className="cc-sheet-body">
+          {/* text size: on a phone this is the only honest place for it, and it
+              is the control people reach for most when a page feels cramped */}
+          <div className="cc-sheet-textsize">
+            <span className="smallish muted">{t('prof.textSize')}</span>
+            <span className="cc-sheet-textsize-btns">
+              <button type="button" className="icon-btn" onClick={() => changeFont(-1)} aria-label={t('a11y.decreaseText')} title={t('topbar.smallerText')}>
+                <Icon name="fontSize" />
+                <Icon name="minus" />
+              </button>
+              <button type="button" className="icon-btn" onClick={() => changeFont(1)} aria-label={t('a11y.increaseText')} title={t('topbar.largerText')}>
+                <Icon name="fontSize" />
+                <Icon name="plus" />
+              </button>
+            </span>
+          </div>
+
+          {NAV.map((item, i) =>
+            item.sectionKey ? (
+              <div className="cc-sheet-section" key={`s-${i}`}>{t(item.sectionKey)}</div>
+            ) : (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) => `cc-sheet-link ${isActive ? 'active' : ''}`}
+                onClick={() => setMenuOpen(false)}
+              >
+                <span className="cc-sheet-ico"><Icon name={item.icon} /></span>
+                <span>{t(item.labelKey)}</span>
+              </NavLink>
+            )
+          )}
+          <NavLink to="/notifications" className="cc-sheet-link" onClick={() => setMenuOpen(false)}>
+            <span className="cc-sheet-ico"><Icon name="bell" /></span>
+            <span>{t('topbar.allNotifications')}</span>
+          </NavLink>
+        </div>
+      </div>
 
       <div className="layout">
         <nav className="sidebar" aria-label={t('a11y.mainNav')}>

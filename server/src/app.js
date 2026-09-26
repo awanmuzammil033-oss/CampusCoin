@@ -29,6 +29,12 @@ import survivalRoutes from './routes/survival.js';
 import groupsRoutes from './routes/groups.js';
 import wishlistRoutes from './routes/wishlist.js';
 import vaultRoutes from './routes/vault.js';
+import fxRoutes from './routes/fx.js';
+import growMoneyRoutes from './routes/growMoney.js';
+import savingsOptionsRoutes from './routes/savingsOptions.js';
+import savingsOptionsAdminRoutes from './routes/savingsOptionsAdmin.js';
+import sideIncomeRoutes from './routes/sideIncome.js';
+import sideIncomeAdminRoutes from './routes/sideIncomeAdmin.js';
 import controlRoutes from './routes/control.js';
 
 const app = express();
@@ -73,6 +79,13 @@ app.use('/api/survival', survivalRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/groups', groupsRoutes);
 app.use('/api/vault', vaultRoutes);
+app.use('/api/fx', fxRoutes);
+app.use('/api/grow-money', growMoneyRoutes);
+// Reference data, not personal records: readable signed out, written by staff.
+app.use('/api/savings-options', savingsOptionsRoutes);
+app.use('/api/side-income', sideIncomeRoutes);
+app.use('/api/control/savings-options', savingsOptionsAdminRoutes);
+app.use('/api/control/side-income', sideIncomeAdminRoutes);
 app.use('/api/control', controlRoutes);
 
 /* --------------------------- built client (prod) ----------------------------- */

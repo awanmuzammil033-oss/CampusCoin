@@ -30,6 +30,10 @@ import { hashPassword } from '../services/accounts.js';
 import { ensureDefaults } from '../services/defaults.js';
 import { generateInsight } from '../services/insight.js';
 import { createGroup, addExpense, settleUp } from '../services/groups.js';
+import { create as createBankRate } from '../services/bankRates.js';
+import { create as createIncomeIdea } from '../services/incomeIdeas.js';
+import BankRate from '../models/BankRate.js';
+import IncomeIdea from '../models/IncomeIdea.js';
 import { create as createWish, deposit } from '../services/wishlist.js';
 import { toDec } from '../utils/money.js';
 
@@ -52,6 +56,203 @@ const CREDENTIAL_ROWS = [
   ['Student 1 — Aisha', 'aisha@campuscoin.test', 'Student@12345', 'aisha.backup@campuscoin.test'],
   ['Student 2 — Bilal', 'bilal@campuscoin.test', 'Student@12345', 'bilal.backup@campuscoin.test'],
   ['Student 3 — empty account', 'newuser@campuscoin.test', 'Student@12345', 'newuser.backup@campuscoin.test'],
+];
+
+/*
+ * Demo reference data for the two public libraries (ADV-3 and ADV-5).
+ *
+ * These are ILLUSTRATIVE figures written by hand, and the page says so: the
+ * rates are a dated snapshot in the shape banks publish them, and every row
+ * carries a source note. Nothing here is scraped, and nothing here should be
+ * relied on — which is exactly the disclaimer the page carries.
+ *
+ * Re-running the seed is safe: rows are matched on bank + account type, and on
+ * the idea's title, so a second run updates rather than duplicates.
+ */
+
+const BANK_RATES = [
+  // savings accounts
+  { bank: 'Bank Alfalah', accountType: 'savings', ratePercent: 21.0, minAmount: '500', region: 'Pakistan', note: 'Classic savings account', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'Bank Alfalah', accountType: 'savings', ratePercent: 24.5, minAmount: '100000', region: 'Pakistan', note: 'Millionaire account', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'Meezan Bank', accountType: 'savings', ratePercent: 23.0, minAmount: '1000', region: 'Pakistan', note: 'Meezan savings, profit paid monthly', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'Habib Bank', accountType: 'savings', ratePercent: 22.5, minAmount: '500', region: 'Pakistan', note: 'Basic savings account', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'BRT Bank', accountType: 'savings', ratePercent: 20.0, minAmount: '500', region: 'Pakistan', note: 'Asaan banking account', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'Grameen Bank', accountType: 'savings', ratePercent: 10.0, minAmount: '100', region: 'Pakistan', note: 'Low-balance student account', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'DUBAI Islamic Bank', accountType: 'savings', ratePercent: 4.25, minAmount: null, region: 'UAE', note: 'Basic savings, monthly profit', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'Mashreq Bank', accountType: 'savings', ratePercent: 3.9, minAmount: null, region: 'UAE', note: 'Regular savings account', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'Monzo', accountType: 'savings', ratePercent: 4.6, minAmount: null, region: 'United Kingdom', note: 'Easy access saver', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'Chase', accountType: 'savings', ratePercent: 4.1, minAmount: null, region: 'United States', note: 'Premier savings', sourceNote: 'Bank website, Sep 2026' },
+
+  // fixed deposits
+  { bank: 'Bank Alfalah', accountType: 'fd', ratePercent: 22.0, minAmount: '10000', tenureMonths: 3, region: 'Pakistan', note: '3-month deposit', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'Bank Alfalah', accountType: 'fd', ratePercent: 22.75, minAmount: '10000', tenureMonths: 6, region: 'Pakistan', note: '6-month deposit', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'Meezan Bank', accountType: 'fd', ratePercent: 23.25, minAmount: '10000', tenureMonths: 12, region: 'Pakistan', note: '1-year mushaf deposit', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'Faysal Bank', accountType: 'fd', ratePercent: 22.5, minAmount: '25000', tenureMonths: 12, region: 'Pakistan', note: '1-year deposit, profit at maturity', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'MCB Bank', accountType: 'fd', ratePercent: 21.75, minAmount: '10000', tenureMonths: 6, region: 'Pakistan', note: '6-month deposit', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'DUBAI Islamic Bank', accountType: 'fd', ratePercent: 4.0, minAmount: '5000', tenureMonths: 12, region: 'UAE', note: '12-month fixed deposit', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'Emirates NBD', accountType: 'fd', ratePercent: 3.85, minAmount: '10000', tenureMonths: 6, region: 'UAE', note: '6-month fixed deposit', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'Al Rayan Bank', accountType: 'fd', ratePercent: 5.2, minAmount: '10000', tenureMonths: 12, region: 'UAE', note: '12-month profit rate, Islamic', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'Nationwide', accountType: 'fd', ratePercent: 4.2, minAmount: '1000', tenureMonths: 12, region: 'United Kingdom', note: '1-year fixed saver', sourceNote: 'Bank website, Sep 2026' },
+  { bank: 'Marcus', accountType: 'fd', ratePercent: 4.4, minAmount: null, tenureMonths: 12, region: 'United Kingdom', note: '1-year instant access saver', sourceNote: 'Bank website, Sep 2026' },
+];
+
+const INCOME_IDEAS = [
+  {
+    title: 'Tutor a first-year subject',
+    category: 'freelance',
+    icon: '📚',
+    summary: 'Teach a subject you already know to students one or two years below you, one hour a week.',
+    howItWorks: 'Post in your department group chat or on the campus noticeboard, agree a slot, and meet in a library room or online. Charge per hour or per session and collect in cash or by transfer each time - nothing is owed at the end of the month.',
+    typicalEffort: '2 hours a week',
+    startupCost: 'Your notes and a whiteboard',
+    isTrending: true,
+    sourceUrl: 'https://www.timeshighereducation.com/features',
+    sourceNote: 'Common student side hustle; general reporting on campus earning',
+    sortOrder: 1,
+  },
+  {
+    title: 'Note-taking and revision notes',
+    category: 'freelance',
+    icon: '📝',
+    summary: 'Sell typed, clean revision notes from a subject you passed well.',
+    howItWorks: 'Type a set of notes per topic, share a sample page, and sell a PDF per subject. Keep them your own work, sell at a fair price, and say clearly what is included.',
+    typicalEffort: 'A few evenings once, then selling',
+    startupCost: 'A laptop or a typing service',
+    isTrending: false,
+    sourceUrl: '',
+    sourceNote: '',
+    sortOrder: 2,
+  },
+  {
+    title: 'Campus event photography',
+    category: 'services',
+    icon: '📷',
+    summary: 'Shoot society events, sports week and farewell dinners for a flat fee per event.',
+    howItWorks: 'Start with your own society events, then ask the event officer. Deliver edited photos within a couple of days - a phone camera and one good lens is enough to start.',
+    typicalEffort: 'Weekends only',
+    startupCost: 'A phone you already own',
+    isTrending: true,
+    sourceUrl: 'https://www.theguardian.com/technology',
+    sourceNote: 'Photography is a widely reported student earner',
+    sortOrder: 3,
+  },
+  {
+    title: 'Resell textbooks and course materials',
+    category: 'reselling',
+    icon: '📕',
+    summary: 'Buy back used books and lab coats from seniors, resell to the next cohort.',
+    howItWorks: 'Post a buy-back notice in the department a few weeks before exams, collect the books, list them with photos and the edition number, and sell on campus or on a student marketplace.',
+    typicalEffort: 'Two weekends per semester',
+    startupCost: 'Your phone and some shelf space',
+    isTrending: true,
+    sourceUrl: 'https://www.theguardian.com/money',
+    sourceNote: 'Reselling course materials is a common campus earner',
+    sortOrder: 4,
+  },
+  {
+    title: 'Sell food from home',
+    category: 'reselling',
+    icon: '🍱',
+    summary: 'Cook at home and sell to classmates who miss the canteen queue.',
+    howItWorks: 'Take a small standing order from a hostel or a course group, cook in batches, and deliver at a fixed time. Price it under the canteen and keep the menu small.',
+    typicalEffort: '2-3 evenings a week',
+    startupCost: 'Ingredients',
+    isTrending: false,
+    sourceUrl: '',
+    sourceNote: '',
+    sortOrder: 5,
+  },
+  {
+    title: 'Data entry and form filling for local shops',
+    category: 'freelance',
+    icon: '🗂️',
+    summary: 'Offer small shops bookkeeping, bill payment and stock entry a few hours a week.',
+    howItWorks: 'Ask the shopkeeper what is slow - usually invoices, stock counts or utility bills. Charge per hour or per completed task and keep a simple log of hours.',
+    typicalEffort: '4-6 hours a week',
+    startupCost: 'A laptop and patience',
+    isTrending: false,
+    sourceUrl: '',
+    sourceNote: '',
+    sortOrder: 6,
+  },
+  {
+    title: 'Library and lab shift work',
+    category: 'part-time',
+    icon: '🏛️',
+    summary: 'Most universities hire students as library assistants or lab demonstrators.',
+    howItWorks: 'Watch the university careers portal from the start of term. Hours are usually around 10-15 a week, paid on the payroll, and often count towards a bursary.',
+    typicalEffort: '10-15 hours a week',
+    startupCost: 'Nothing',
+    isTrending: false,
+    sourceUrl: '',
+    sourceNote: '',
+    sortOrder: 7,
+  },
+  {
+    title: 'Graphic design for student societies',
+    category: 'freelance',
+    icon: '🎨',
+    summary: 'Posters, banners and event covers for societies that have no designer.',
+    howItWorks: 'Make three sample pieces, then offer a flat price per poster. Deliver print-ready files plus a PDF, and ask for the society logo as an SVG so future edits are easy.',
+    typicalEffort: 'Ad hoc, around events',
+    startupCost: 'Free design tools',
+    isTrending: false,
+    sourceUrl: '',
+    sourceNote: '',
+    sortOrder: 8,
+  },
+  {
+    title: 'Video editing for short-form content',
+    category: 'services',
+    icon: '🎬',
+    summary: 'Cut reels and short videos for small businesses and student creators.',
+    howItWorks: 'Learn one editor properly, show before-and-after examples, and price per finished minute. Reels and shorts for local shops are steady repeat work.',
+    typicalEffort: '3-4 hours a week',
+    startupCost: 'A phone and free editing software',
+    isTrending: true,
+    sourceUrl: 'https://www.thinkwithgoogle.com',
+    sourceNote: 'Short-form video is a growing freelance category',
+    sortOrder: 9,
+  },
+  {
+    title: 'Exam invigilation and campus event marshalling',
+    category: 'part-time',
+    icon: '📋',
+    summary: 'Short, official shifts posted by the university or the events office.',
+    howItWorks: 'Watch the student affairs board. Shifts are usually a few hours, paid at a fixed rate, and sometimes count towards attendance or a stipend.',
+    typicalEffort: 'A few shifts a term',
+    startupCost: 'Nothing',
+    isTrending: false,
+    sourceUrl: '',
+    sourceNote: '',
+    sortOrder: 10,
+  },
+  {
+    title: 'Peer tutoring for a paid course',
+    category: 'part-time',
+    icon: '🧑‍🏫',
+    summary: 'Some departments let senior students run a paid lab or tutorial session.',
+    howItWorks: 'Ask your department whether a teaching-assistant or lab-demonstrator budget exists, and apply early - the hours are limited and go to students who apply first.',
+    typicalEffort: '3-5 hours a week',
+    startupCost: 'Nothing',
+    isTrending: false,
+    sourceUrl: '',
+    sourceNote: '',
+    sortOrder: 11,
+  },
+  {
+    title: 'Second-hand electronics and repairs',
+    category: 'reselling',
+    icon: '🔧',
+    summary: 'Buy old phones, laptops and accessories, check them, and resell tested.',
+    howItWorks: 'Always test before you buy, write down the condition honestly, and price to sell quickly rather than to make a big margin. Never resell anything you have not checked.',
+    typicalEffort: 'A few hours a week',
+    startupCost: 'Working space and a charger',
+    isTrending: false,
+    sourceUrl: '',
+    sourceNote: '',
+    sortOrder: 12,
+  },
 ];
 
 /* ------------------------------- month recipes --------------------------------- */
@@ -148,6 +349,8 @@ async function main() {
   await seedSubscriptionLeaks(bilal, categories);
   await seedRoommateGroup(aisha, bilal);
   await seedWishlist(aisha);
+  await seedBankRates();
+  await seedIncomeIdeas();
   await seedAnnouncements(admin);
   await pregenerateInsight(aisha);
 
@@ -163,6 +366,51 @@ async function main() {
   console.log(`  history rows written: ${historyRows}`);
   printCredentials();
   console.log('Done.\n');
+}
+
+/* ------------------------- Tier 4 reference libraries -------------------------- */
+
+async function seedBankRates() {
+  let added = 0;
+  let updated = 0;
+  for (const row of BANK_RATES) {
+    // The natural key is bank + product + rate, NOT bank + product: a bank
+    // publishes more than one savings account and more than one deposit
+    // tenor, and matching on the pair alone made the second product overwrite
+    // the first instead of joining the table.
+    const existing = await BankRate.findOne({
+      bank: row.bank,
+      accountType: row.accountType,
+      ratePercent: row.ratePercent,
+    });
+    if (existing) {
+      // keep the demo figures current without ever creating a duplicate row
+      Object.assign(existing, row, { isActive: true });
+      await existing.save();
+      updated += 1;
+      continue;
+    }
+    await createBankRate(row.bank, row);
+    added += 1;
+  }
+  console.log(`  bank rates: ${added} added, ${updated} refreshed (reference figures, not official)`);
+}
+
+async function seedIncomeIdeas() {
+  let added = 0;
+  let updated = 0;
+  for (const idea of INCOME_IDEAS) {
+    const existing = await IncomeIdea.findOne({ title: idea.title });
+    if (existing) {
+      Object.assign(existing, idea, { isActive: true });
+      await existing.save();
+      updated += 1;
+      continue;
+    }
+    await createIncomeIdea(idea);
+    added += 1;
+  }
+  console.log(`  side income ideas: ${added} added, ${updated} refreshed`);
 }
 
 /* --------------------------------- accounts ------------------------------------ */

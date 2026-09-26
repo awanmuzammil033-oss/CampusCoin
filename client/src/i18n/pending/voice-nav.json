@@ -1,0 +1,11 @@
+{
+  "voice.hint": "No keyboard? Tap the microphone and say the sentence instead.",
+  "voice.start": "Start speaking",
+  "voice.stop": "Stop listening",
+  "voice.denied": "Microphone access was refused. Allow it in your browser settings to dictate.",
+  "voice.notAvailable": "This browser cannot take dictation, so type the sentence instead.",
+
+  "nav.savingsOptions": "Savings options",
+  "nav.growMoney": "Grow your money",
+  "nav.sideIncome": "Side income ideas"
+}
