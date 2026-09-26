@@ -5,6 +5,8 @@ import Page from '../components/Page.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import Progress from '../components/Progress.jsx';
 import ChartCard from '../components/ChartCard.jsx';
+import QuickTextCard from '../components/QuickTextCard.jsx';
+import SurvivalCard from '../components/SurvivalCard.jsx';
 import Icon from '../components/Icon.jsx';
 import CategoryIcon from '../components/CategoryIcon.jsx';
 import { categoryColor } from '../chartColors.js';
@@ -119,8 +121,45 @@ export default function Dashboard() {
 
       {summary && (
         <>
+          {/* the two things a student reaches for first: say it in a sentence,
+              or see how many days of spending are left */}
+          <div className="d-grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))' }}>
+            <QuickTextCard />
+            <SurvivalCard />
+          </div>
+
+          {/* the other three standout tools. On a phone the sidebar is gone and
+              the bottom bar has no room for six tabs, so the dashboard is where
+              they live — one tap from every screen. */}
+          <section className="dash-tools mt-3" aria-label={t('dash.toolsTitle')}>
+            <div className="dash-tools-head">
+              <h2 className="mb-1">
+                <Icon name="sparkles" /> {t('dash.toolsTitle')}
+              </h2>
+              <p className="smallish muted mb-0">{t('dash.toolsSub')}</p>
+            </div>
+            <div className="dash-tools-grid">
+              {[
+                { to: '/groups', icon: 'users', title: t('nav.groups'), body: t('dash.toolsGroups') },
+                { to: '/wishlist', icon: 'gift', title: t('nav.wishlist'), body: t('dash.toolsWishlist') },
+                { to: '/vault', icon: 'shield', title: t('nav.vault'), body: t('dash.toolsVault') },
+              ].map((tool) => (
+                <Link key={tool.to} to={tool.to} className="dash-tool">
+                  <span className="dash-tool-ico">
+                    <Icon name={tool.icon} />
+                  </span>
+                  <span className="dash-tool-body">
+                    <span className="dash-tool-title">{tool.title}</span>
+                    <span className="smallish muted">{tool.body}</span>
+                  </span>
+                  <Icon name="arrowRight" className="dash-tool-arrow" />
+                </Link>
+              ))}
+            </div>
+          </section>
+
           {/* balance + savings goal */}
-          <div className="d-grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+          <div className="d-grid gap-3 mt-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
             <div className="card">
               <div className="card-title">
                 <span>{t('dash.balanceMonth', { month: monthLabel() })}</span>

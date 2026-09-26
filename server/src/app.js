@@ -24,6 +24,11 @@ import reportRoutes from './routes/reports.js';
 import suggestionRoutes from './routes/suggest.js';
 import insightRoutes from './routes/insights.js';
 import bookmarkRoutes from './routes/bookmarks.js';
+import quickTextRoutes from './routes/quickText.js';
+import survivalRoutes from './routes/survival.js';
+import groupsRoutes from './routes/groups.js';
+import wishlistRoutes from './routes/wishlist.js';
+import vaultRoutes from './routes/vault.js';
 import controlRoutes from './routes/control.js';
 
 const app = express();
@@ -63,6 +68,11 @@ app.use('/api/reports', reportRoutes);
 app.use('/api', suggestionRoutes);
 app.use('/api/insights', insightRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
+app.use('/api/quick-text', quickTextRoutes);
+app.use('/api/survival', survivalRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/groups', groupsRoutes);
+app.use('/api/vault', vaultRoutes);
 app.use('/api/control', controlRoutes);
 
 /* --------------------------- built client (prod) ----------------------------- */

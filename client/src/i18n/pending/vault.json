@@ -1,0 +1,63 @@
+{
+  "vault.title": "Subscription vault",
+  "vault.subtitle": "Everything that leaves your account every month, and the ones that look like they are paid for nothing.",
+  "vault.loading": "Reading your subscriptions…",
+
+  "vault.monthlyLabel": "Subscriptions, every month",
+  "vault.monthlyNote": "What the cards below add up to.",
+  "vault.annualLabel": "The same, for a year",
+  "vault.annualNote": "Twelve months at the same rate.",
+  "vault.savingLabel": "You could save about",
+  "vault.savingNote": "a year if the flagged ones are cancelled.",
+  "vault.savingClean": "Nothing is flagged — your subscriptions look fine.",
+  "vault.perMonth": "a month",
+  "vault.frequencyNone": "no set schedule",
+  "vault.eachCharge": "each charge {amount}",
+
+  "vault.count.one": "{n} subscription",
+  "vault.count.other": "{n} subscriptions",
+  "vault.flagged.one": "{n} to look at",
+  "vault.flagged.other": "{n} to look at",
+  "vault.moreFlagged": "and {n} more on the list below.",
+
+  "vault.verdictInUse": "In use",
+  "vault.verdictIdle": "Not used lately",
+  "vault.verdictPriceCreep": "Price went up",
+  "vault.verdictDuplicate": "Looks like a duplicate",
+  "vault.verdictOneOff": "No rule behind it",
+
+  "vault.lastCharged.one": "last charged {n} day ago",
+  "vault.lastCharged.other": "last charged {n} days ago",
+  "vault.neverCharged": "not charged yet",
+
+  "vault.noteInUse": "Paid for and used — the charge keeps coming round, so there is nothing to do about this one.",
+  "vault.noteIdle": "Nothing has been charged in {days} days, yet {monthly} a month is still set to come out.",
+  "vault.noteIdlePaused": "Nothing has been charged in {days} days and this entry is already paused — cancel it with the provider to stop the auto-renew.",
+  "vault.notePriceCreep": "The same charge went from {from} at the start to {to} on your last one — {pct}% more.",
+  "vault.noteDuplicate": "{other} is charged for the same thing, so cancelling this copy keeps {monthly} a month.",
+  "vault.noteDuplicateNoRule": "{other} is charged for the same thing and no recurring entry tracks this copy — cancel it with the provider.",
+  "vault.noteOneOff": "It repeats {charges} times a year but no recurring entry tracks it, so nothing is checking it for you.",
+
+  "vault.alertsTitle": "Worth a look",
+  "vault.alertListAria": "Subscriptions the vault flagged",
+
+  "vault.emptyTitle": "No subscriptions found",
+  "vault.emptyBody": "Nothing here charges you every month yet. Add a recurring entry for a streaming app, the gym or a phone plan and this screen fills itself in.",
+  "vault.emptyBtn": "Add a recurring entry",
+
+  "vault.cancelBtn": "Cancel this",
+  "vault.cancelAria": "Cancel {name}",
+  "vault.cancelTitle": "Cancel this subscription?",
+  "vault.cancelBody": "\"{name}\" stops here and keeps about {amount} a month with you. The entries it already made stay in your list with their history.",
+  "vault.cancelKeeps": "The payment itself stops with the company — cancelling here only stops the app from logging it.",
+  "vault.cancelled": "\"{name}\" cancelled.",
+  "vault.alreadyPaused": "That entry was already paused.",
+  "vault.noRuleNote": "No recurring entry behind this one — cancel it with the company.",
+
+  "vault.howTitle": "How the vault decides",
+  "vault.howIdle": "Unused: nothing charged for {days} days, even though the payment is still set up.",
+  "vault.howCreep": "Price creep: the same charge up by {pct}% or more between your first and your last one.",
+  "vault.howDuplicate": "Duplicate: two live subscriptions in one category, within {pct}% of each other, with a word in common in their names.",
+  "vault.howOneOff": "No rule behind it: a charge that repeats {count} times a year on a steady beat with no recurring entry watching it.",
+  "vault.committedNote": "Your recurring entries alone commit {amount} a month, whether they are used or not."
+}

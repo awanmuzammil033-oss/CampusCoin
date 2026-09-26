@@ -35,6 +35,18 @@ const userSchema = new mongoose.Schema(
     ledgerCurrency: { type: String, uppercase: true, trim: true, match: /^[A-Z]{3}$/, default: 'USD' },
     language: { type: String, trim: true, match: /^[a-z]{2,3}(-[A-Za-z]{2,4})?$/, default: 'en' },
 
+    // Micro-savings jar (WISH-2): money the student has set aside inside the
+    // app, kept out of the transaction ledger so it never looks like spending.
+    jarBalance: { type: mongoose.Schema.Types.Decimal128, default: 0 },
+
+    // Survival mode (SURV-1): the strict daily budget the student asked for.
+    // It is a switch with a timestamp, not a derived number — the plan itself
+    // is recomputed from the ledger on every read so it can never go stale.
+    survivalMode: {
+      enabled: { type: Boolean, default: false },
+      since: { type: Date, default: null },
+    },
+
     // Password reset (AUTH-5): we store only the hash of the token that was
     // emailed, it dies after an hour, and clearing it on success makes the
     // link single-use.
@@ -57,6 +69,8 @@ userSchema.methods.toPublic = function toPublic() {
     fontScale: this.fontScale,
     currency: this.currency,
     ledgerCurrency: this.ledgerCurrency || this.currency,
+    jarBalance: this.jarBalance,
+    survivalMode: { enabled: Boolean(this.survivalMode?.enabled), since: this.survivalMode?.since || null },
     language: this.language,
     isActive: this.isActive,
     createdAt: this.createdAt,

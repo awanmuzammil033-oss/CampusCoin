@@ -7,6 +7,7 @@ import Icon from '../components/Icon.jsx';
 import { useAuth } from '../auth.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { useLocale } from '../locale.jsx';
+import { api } from '../api.js';
 import { ledgerCurrencySymbol } from '../money.js';
 import { CURRENCIES } from '../data/currencies.js';
 import { FX_AS_OF } from '../data/fx.js';
@@ -21,7 +22,7 @@ function plainMoney(value) {
 }
 
 export default function Profile() {
-  const { user, updatePreferences, updateProfile, logout } = useAuth();
+  const { user, updatePreferences, updateProfile, logout, refresh } = useAuth();
   const { push } = useToast();
   const navigate = useNavigate();
   const { t, currency, ledgerCurrency, setLedgerCurrency } = useLocale();
@@ -37,6 +38,26 @@ export default function Profile() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [signingOut, setSigningOut] = useState(false);
+  const [survivalBusy, setSurvivalBusy] = useState(false);
+
+  /**
+   * Survival mode is a switch on the account, but the plan it produces lives
+   * on the dashboard. Flipping it here therefore has to refresh the session
+   * too, or the header and profile would keep showing the old value.
+   */
+  async function toggleSurvival() {
+    const next = !user?.survivalMode?.enabled;
+    setSurvivalBusy(true);
+    try {
+      await api.patch('/api/survival', { enabled: next });
+      await refresh(); // the flag lives on the account, so the session copy must catch up
+      push(next ? t('surv.onToast') : t('surv.offToast'), 'success');
+    } catch (err) {
+      push(err.message, 'error');
+    } finally {
+      setSurvivalBusy(false);
+    }
+  }
 
   // Seed the form from the account every time it refreshes (after save, the
   // values the server stored come straight back).
@@ -286,6 +307,29 @@ export default function Profile() {
                   : t('prof.ledgerConverted', { code: ledgerCurrency, show: currency, date: FX_AS_OF })}
               </p>
             </div>
+          </section>
+
+          <section className="card">
+            <div className="card-title">
+              <span>{t('surv.title')}</span>
+            </div>
+            <p className="smallish muted">{t('prof.survivalBody')}</p>
+            <label className="cc-switch" htmlFor="profile-survival">
+              <input
+                id="profile-survival"
+                type="checkbox"
+                checked={Boolean(user?.survivalMode?.enabled)}
+                disabled={survivalBusy}
+                onChange={toggleSurvival}
+              />
+              <span className="cc-switch-track" aria-hidden="true" />
+              <span className="cc-switch-label">
+                {user?.survivalMode?.enabled ? t('surv.on') : t('surv.off')}
+              </span>
+            </label>
+            <p className="field-help mb-0">
+              <Link to="/dashboard">{t('surv.seeItOnDashboard')}</Link>
+            </p>
           </section>
 
           <section className="card">

@@ -14,6 +14,10 @@ const NAV = [
   { to: '/recurring', labelKey: 'nav.recurring', icon: 'repeat' },
   { to: '/categories', labelKey: 'nav.categories', icon: 'tag' },
   { to: '/budgets', labelKey: 'nav.budgets', icon: 'target' },
+  { sectionKey: 'nav.section.standout' },
+  { to: '/groups', labelKey: 'nav.groups', icon: 'users' },
+  { to: '/wishlist', labelKey: 'nav.wishlist', icon: 'gift' },
+  { to: '/vault', labelKey: 'nav.vault', icon: 'shield' },
   { sectionKey: 'nav.section.understand' },
   { to: '/reports', labelKey: 'nav.reports', icon: 'chart' },
   { to: '/insights', labelKey: 'nav.insights', icon: 'insightWeather' },
@@ -106,28 +110,34 @@ export default function Layout({ children }) {
         </Link>
         <div className="topbar-spacer" />
 
-        <LocalePickers onOpen={() => { setBellOpen(false); setAccountOpen(false); }} />
+        {/* two groups so a phone can put one on each line: everything here
+            stays reachable at 360px instead of sliding off the right edge */}
+        <div className="topbar-utility">
+          <LocalePickers onOpen={() => { setBellOpen(false); setAccountOpen(false); }} />
 
-        <button type="button" className="icon-btn" onClick={() => changeFont(-1)} aria-label={t('a11y.decreaseText')} title={t('topbar.smallerText')}>
-          <Icon name="fontSize" />
-          <Icon name="minus" />
-        </button>
-        <button type="button" className="icon-btn" onClick={() => changeFont(1)} aria-label={t('a11y.increaseText')} title={t('topbar.largerText')}>
-          <Icon name="fontSize" />
-          <Icon name="plus" />
-        </button>
-        <ThemeToggle />
-        <div className="position-relative">
-          <button
-            type="button"
-            className="icon-btn"
-            onClick={toggleBell}
-            aria-expanded={bellOpen}
-            aria-label={`${t('topbar.notifications')}${unread ? `, ${unread} ${t('topbar.unread')}` : ''}`}
-          >
-            <Icon name="bell" />
-            {unread > 0 && <span className="badge-count">{unread > 9 ? '9+' : unread}</span>}
+          <button type="button" className="icon-btn" onClick={() => changeFont(-1)} aria-label={t('a11y.decreaseText')} title={t('topbar.smallerText')}>
+            <Icon name="fontSize" />
+            <Icon name="minus" />
           </button>
+          <button type="button" className="icon-btn" onClick={() => changeFont(1)} aria-label={t('a11y.increaseText')} title={t('topbar.largerText')}>
+            <Icon name="fontSize" />
+            <Icon name="plus" />
+          </button>
+        </div>
+
+        <div className="topbar-actions">
+          <ThemeToggle />
+          <div className="position-relative">
+            <button
+              type="button"
+              className="icon-btn"
+              onClick={toggleBell}
+              aria-expanded={bellOpen}
+              aria-label={`${t('topbar.notifications')}${unread ? `, ${unread} ${t('topbar.unread')}` : ''}`}
+            >
+              <Icon name="bell" />
+              {unread > 0 && <span className="badge-count">{unread > 9 ? '9+' : unread}</span>}
+            </button>
           {bellOpen && (
             <div className="card position-absolute" style={{ right: 0, top: 52, width: 320, zIndex: 140 }}>
               <div className="card-title">
@@ -177,6 +187,7 @@ export default function Layout({ children }) {
               </button>
             </div>
           )}
+          </div>
         </div>
       </header>
 

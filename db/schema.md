@@ -26,6 +26,12 @@ Legend: **R** = required · **U** = unique · type shown as MongoDB/BSON type.
 | `monthlySavingsGoal` | Decimal128 | | | nullable |
 | `theme` | String | | | enum `light` \| `dark`, default `light` (UX-1) |
 | `fontScale` | Number | | | 1–4, default 2 (UX-2) |
+| `currency` | String | | | 3-letter code, default `USD` — the DISPLAY currency |
+| `ledgerCurrency` | String | | | 3-letter code, default `USD` — what the student's amounts are denominated in |
+| `language` | String | | | BCP-47 tag, default `en` |
+| `jarBalance` | Decimal128 | | | default 0 — micro-savings jar (WISH-2) |
+| `survivalMode.enabled` | Boolean | | | default `false` (SURV-1) |
+| `survivalMode.since` | Date | | | nullable — when the mode was switched on |
 | `resetTokenHash` | String | | | nullable, `select:false` — hash of the emailed reset token |
 | `resetTokenExpires` | Date | | | nullable, `select:false` — token dies after 1 hour |
 | `createdAt` / `updatedAt` | Date | ✔ | | schema timestamps |
@@ -336,7 +342,132 @@ per person are kept.
 
 ---
 
-## 14. Relationships
+## 14. `groups`
+
+A pot of shared money (GRP-1): a hostel room, a rented flat, a project team.
+The owner is always `members[0]` — every split calculation keys off that
+position, so the array order is part of the contract and is never reshuffled.
+A roommate who has not signed up yet is still a member, with `user: null` and
+just a name and email, which is what lets a bill be split before they register.
+
+| Field | Type | R | U | Notes / enum |
+|---|---|---|---|---|
+| `name` | String | ✔ | | maxlength 60 |
+| `owner` | ObjectId | ✔ | | refs `users` |
+| `members` | Array | ✔ | | `{ user, name, email, addedAt }`; `user` nullable |
+| `currency` | String | | | 3-letter code, default `USD` |
+| `archived` | Boolean | | | default false |
+
+**Indexes**
+
+| Keys | Options |
+|---|---|
+| `owner`, `archived` | |
+| `members.user`, `archived` | every read starts with "which groups am I in?" |
+
+## 15. `groupexpenses`
+
+One shared bill (GRP-2). The split is worked out **once, on the server, at
+write time** and stored as money in `split`; the balance board then sums those
+inside MongoDB, so the figures always add up to the bill. `shares` keeps what
+the person asked for (a weight for `shares`, an amount for `exact`); it is the
+request, not the answer. Uneven equal splits give the remainder cents to the
+earliest members in order, so 100.00 split three ways is 33.34 + 33.33 + 33.33.
+
+| Field | Type | R | U | Notes / enum |
+|---|---|---|---|---|
+| `group` | ObjectId | ✔ | | refs `groups` |
+| `title` | String | ✔ | | maxlength 80 |
+| `amount` | Decimal128 | ✔ | | |
+| `paidByIndex` | Number | ✔ | | position in `group.members` |
+| `splitType` | String | | | enum `equal` \| `shares` \| `exact` |
+| `shares` | Array | | | `{ memberIndex, value }` — the request |
+| `split` | Array | | | `{ memberIndex, amount }` Decimal128 — the answer |
+| `category` | ObjectId | | | refs `categories`, nullable |
+| `date` | Date | ✔ | | |
+| `note` | String | | | maxlength 200 |
+| `createdBy` | ObjectId | ✔ | | refs `users` |
+
+**Indexes**
+
+| Keys | Options |
+|---|---|
+| `group`, `date` | descending on `date` |
+
+## 16. `groupsettlements`
+
+A settlement (GRP-3): "Bilal paid Aisha 45.00 cash". Settling moves money off
+two balances without touching the bills behind them, and the row is the receipt.
+Rows are never edited — a wrong settlement is settled the other way and the
+history stays readable.
+
+| Field | Type | R | U | Notes / enum |
+|---|---|---|---|---|
+| `group` | ObjectId | ✔ | | refs `groups` |
+| `fromIndex` | Number | ✔ | | position in `group.members` |
+| `toIndex` | Number | ✔ | | position in `group.members` |
+| `amount` | Decimal128 | ✔ | | |
+| `note` | String | | | maxlength 200 |
+| `by` | ObjectId | ✔ | | refs `users` |
+| `date` | Date | | | default now |
+
+**Indexes**
+
+| Keys | Options |
+|---|---|
+| `group`, `date` | descending on `date` |
+
+## 17. `wishitems`
+
+One thing on the secret wishlist (WISH-1). The money that fills it is **not a
+transaction** — it sits in the micro-savings jar on the account
+(`users.jarBalance`) so it can never reach the income/expense ledger, the
+charts or the reports. `status` follows the arithmetic and cannot be asserted
+by the client.
+
+| Field | Type | R | U | Notes / enum |
+|---|---|---|---|---|
+| `user` | ObjectId | ✔ | | refs `users` |
+| `title` | String | ✔ | | maxlength 80 |
+| `note` | String | | | maxlength 200 |
+| `targetAmount` | Decimal128 | ✔ | | |
+| `savedAmount` | Decimal128 | | | default 0 |
+| `icon` | String | | | the emoji the student picked, default 🎁 |
+| `status` | String | | | enum `saving` \| `achieved` \| `paused` |
+| `targetDate` | Date | | | soft "by when", nullable |
+| `achievedAt` | Date | | | nullable |
+
+**Indexes**
+
+| Keys | Options |
+|---|---|
+| `user`, `status`, `createdAt` | descending on `createdAt` |
+
+## 18. `jarmovements`
+
+Every rupee into and out of the jar (WISH-2): the audit trail behind
+`users.jarBalance` and `wishitems.savedAmount`. A withdrawal is guarded inside
+the update query (`jarBalance: { $gte: amount }`), so two racing withdrawals
+cannot both take the last coin and the jar can never go negative.
+
+| Field | Type | R | U | Notes / enum |
+|---|---|---|---|---|
+| `user` | ObjectId | ✔ | | refs `users` |
+| `kind` | String | ✔ | | enum `deposit` \| `withdraw` |
+| `amount` | Decimal128 | ✔ | | always positive |
+| `wishItem` | ObjectId | | | refs `wishitems`, nullable |
+| `note` | String | | | maxlength 140 |
+| `date` | Date | | | default now |
+
+**Indexes**
+
+| Keys | Options |
+|---|---|
+| `user`, `date` | descending on `date` |
+
+---
+
+## 19. Relationships
 
 | From | Field | To | Meaning |
 |---|---|---|---|
@@ -355,6 +486,14 @@ per person are kept.
 | `announcements` | `createdBy` | `users` | the administrator who posted it |
 | `categorycorrections` | `user` / `category` | `users` / `categories` | one word's vote for one category |
 | `recentactivities` | `user` / `transaction` | `users` / `transactions` | activity strip rows |
+| `groups` | `owner` | `users` | the member at position 0 |
+| `groups` | `members.user` | `users` | nullable — a roommate may not have an account yet |
+| `groupexpenses` | `group` | `groups` | one shared bill |
+| `groupexpenses` | `createdBy` / `category` | `users` / `categories` | who logged it, what it was for |
+| `groupsettlements` | `group` | `groups` | a payment between two member positions |
+| `groupsettlements` | `by` | `users` | who recorded the settlement |
+| `wishitems` | `user` | `users` | the owner of the wish |
+| `jarmovements` | `user` / `wishItem` | `users` / `wishitems` | one movement, optionally for one wish |
 
 ### Text ER description
 
@@ -372,6 +511,15 @@ admin-managed **tiptemplates**, and administrators also publish
 vote lands in **categorycorrections**, which later suggestions count. The
 **recentactivities** table keeps each user's last twenty viewed or edited
 entries for the dashboard strip.
+
+Shared money lives beside the personal ledger rather than inside it. A **group**
+lists its members (position 0 is always the owner), holds **groupexpenses** whose
+split was resolved on the server and stored as money, and records money changing
+hands as **groupsettlements** — so "who owes whom" is a sum of stored facts, not
+a guess. Saving for something is a **wishitem** filled from the savings jar on
+the account, with every movement written to **jarmovements**; neither ever
+touches `transactions`, which is what keeps saved money from looking like
+spending.
 
 Reading order for a month of one student's data:
 `users → budgets/transactions (month) → insights/usertips/notifications`.

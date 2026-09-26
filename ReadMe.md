@@ -5,6 +5,12 @@ One web application: students log income and expenses, see where the money goes,
 set category budgets, read monthly insights and saving tips; administrators
 manage the shared categories, tip templates, announcements and accounts.
 
+**Five tools that make it more than a ledger:** roommate groups that split a
+mess bill and settle it back to zero, a one-sentence expense logger, a
+"survival mode" daily allowance for the end of the month, a private wishlist fed
+by a micro-savings jar, and a subscription vault that names the payments you
+are still making for things you stopped using.
+
 ---
 
 ## 1. Stack
@@ -89,8 +95,12 @@ student login, and the server refuses the wrong role at each.
 
 ```powershell
 cd server
-npm test          # 23 tests: auth & sessions, transactions & audit trail,
-                  # budget alert boundaries, CSV import safety
+npm test          # 80 tests across 6 suites:
+                  #   auth & sessions · transactions & audit trail
+                  #   budget alert boundaries · CSV import safety
+                  #   roommate groups, splits & settlements
+                  #   wishlist & savings jar · subscription vault
+                  #   quick-text logger & survival-mode arithmetic
 ```
 
 Each test file gets its own in-memory MongoDB, so tests never touch real data
@@ -103,16 +113,18 @@ CampusCoin/
 ├── server/
 │   ├── src/
 │   │   ├── config/        env + database connection
-│   │   ├── models/        13 collections (see db/schema.md)
+│   │   ├── models/        18 collections (see db/schema.md)
 │   │   ├── services/      business logic: ledger, alerts, tips, reports,
-│   │   │                  budgets, categoriser, insight, forecast, importer…
+│   │   │                  budgets, categoriser, insight, forecast, importer,
+│   │   │                  groups, wishlist, vault, quickText, survival…
 │   │   ├── routes/        thin HTTP layer (auth, transactions, control…)
 │   │   ├── middleware/    sessions, role guards, CSRF, rate limits, errors
 │   │   └── scripts/       seed, recurring generator, dev-local
 │   └── tests/             node:test + supertest suites
 ├── client/
 │   └── src/
-│       ├── components/    layout, charts, modals, forms, toasts
+│       ├── components/    layout, charts, modals, forms, toasts,
+│       │                  quick-text + survival-mode cards
 │       ├── pages/         student screens + pages/control (admin area)
 │       └── styles/        design tokens & components (custom CSS)
 ├── db/schema.md           collections, fields, indexes, relationships
@@ -130,6 +142,17 @@ CampusCoin/
   when echoed.
 - **Recurring entries are idempotent** — a cursor (`lastGeneratedOn`) only
   moves forward, so running the generator twice creates nothing extra.
+- **Shared money never touches the personal ledger** — group bills and
+  settlements live in their own collections, and savings-jar money lives on the
+  account, so neither can show up in a budget, a chart or a report.
+- **The quick-text logger parses, it does not guess** — amount, category and
+  date come from the sentence (in any of the 14 languages the app is published
+  in, decimal commas included), the reading is shown before anything is saved,
+  and the entry can be undone from the same confirmation.
+- **Survival mode stores only the switch** — the daily allowance is recomputed
+  from the ledger on every read, so it can never go stale.
+- **The vault explains itself** — every threshold it uses is in one exported
+  object, and each verdict ships the reason in the language the student picked.
 - **Accessibility** — skip link, visible labels, 44 px touch targets, focus
   rings, light/dark theme, 4-step text size, reduced-motion support, and every
   chart/table pair in both directions.

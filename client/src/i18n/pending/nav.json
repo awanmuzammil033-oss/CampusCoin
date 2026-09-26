@@ -1,0 +1,25 @@
+{
+  "nav.section.standout": "Standout tools",
+  "nav.groups": "Groups",
+  "nav.wishlist": "Wishlist",
+  "nav.vault": "Vault",
+
+  "prof.survivalBody": "Turn this on and the dashboard works out a strict daily allowance from your balance, the bills still due and the days left in the month — then shows you how fast you have actually been spending.",
+
+  "home.standoutEyebrow": "Standout tools",
+  "home.standoutTitle": "Five things no other budget app does for you",
+  "home.standoutSub": "Split a mess bill with your roommates, log an expense in one sentence, see exactly how many days your money lasts, save quietly towards something you want, and catch the subscriptions you pay for but never use.",
+  "home.s1t": "Roommate groups & split bills",
+  "home.s1b": "Make a group for your hostel or project team, add the mess bill, and the app works out who owes whom — then settles it back to zero in one tap.",
+  "home.s2t": "Quick-text logger",
+  "home.s2b": "Type “yaar aaj canteen par 350 kharch kiye” and it saves the entry, with the amount, category and date shown to you before anything is written.",
+  "home.s3t": "Survival mode",
+  "home.s3b": "When the month gets tight, switch it on and get one strict daily allowance, plus the working behind it.",
+  "home.s4t": "Secret wishlist & savings jar",
+  "home.s4b": "Keep the things you want in a private list, move what you saved from a pointless expense into the jar, and watch the progress bar fill.",
+  "home.s5t": "Subscription leak vault",
+  "home.s5b": "Every recurring charge in one place, with the ones you have not used in weeks flagged — before a semester of auto-renewals quietly drains you.",
+
+  "home.link.quickText": "Log an expense in one sentence",
+  "home.link.survival": "Survival mode"
+}

@@ -21,9 +21,16 @@ import Announcement from '../models/Announcement.js';
 import Insight from '../models/Insight.js';
 import Notification from '../models/Notification.js';
 import UserTip from '../models/UserTip.js';
+import Group from '../models/Group.js';
+import GroupExpense from '../models/GroupExpense.js';
+import GroupSettlement from '../models/GroupSettlement.js';
+import WishItem from '../models/WishItem.js';
+import JarMovement from '../models/JarMovement.js';
 import { hashPassword } from '../services/accounts.js';
 import { ensureDefaults } from '../services/defaults.js';
 import { generateInsight } from '../services/insight.js';
+import { createGroup, addExpense, settleUp } from '../services/groups.js';
+import { create as createWish, deposit } from '../services/wishlist.js';
 import { toDec } from '../utils/money.js';
 
 /* ---------------------------------- accounts ----------------------------------- */
@@ -134,12 +141,18 @@ async function main() {
   await seedBudgets(aisha, categories);
   await seedBudgets(bilal, categories);
   await seedRecurringRules(aisha, bilal, categories);
+  await seedSubscriptionLeaks(bilal, categories);
+  await seedRoommateGroup(aisha, bilal);
+  await seedWishlist(aisha);
   await seedAnnouncements(admin);
   await pregenerateInsight(aisha);
 
   // Every index declared in the schemas (unique keys included), so a fresh
   // database enforces its rules before the first real request.
-  for (const model of [User, Category, Transaction, Budget, Notification, UserTip, Insight]) {
+  for (const model of [
+    User, Category, Transaction, Budget, Notification, UserTip, Insight,
+    Group, GroupExpense, GroupSettlement, WishItem, JarMovement,
+  ]) {
     await model.ensureIndexes();
   }
 
@@ -329,6 +342,151 @@ function nextWeekday(dow) {
   let delta = (dow - new Date(base).getUTCDay() + 7) % 7;
   if (delta === 0) delta = 7;
   return new Date(base + delta * 24 * 60 * 60 * 1000);
+}
+
+/* ------------------- the five standout tools (demo data) --------------------- */
+/*
+ * The seeded history already gives both students a Netflix and a Spotify
+ * charge every month, so the subscription vault has something honest to show.
+ * These extra rows are the *interesting* cases a judge will ask about, written
+ * the way they really happen rather than as a random pile:
+ *
+ *   Canva Pro          last charged 47 days ago  → flagged as unused
+ *   iCloud storage     2.99 → 3.99 → 4.99       → flagged as a price rise
+ *   Zoom Pro + Zoom Meetings, same price        → flagged as a duplicate
+ *
+ * Every one of them is written through the same ledger path a student would
+ * use, and each is skipped when it is already there, so re-running the seed
+ * never doubles a subscription.
+ */
+const LEAK_CHARGES = [
+  { desc: 'Canva Pro', amounts: [12.99, 12.99, 12.99, 12.99], daysAgo: [128, 97, 66, 47] },
+  { desc: 'iCloud storage', amounts: [2.99, 3.99, 4.99, 4.99], daysAgo: [92, 61, 31, 6] },
+  { desc: 'Zoom Pro', amounts: [14.99, 14.99, 14.99, 14.99], daysAgo: [88, 58, 28, 9] },
+  { desc: 'Zoom Meetings', amounts: [14.99, 14.99, 14.99, 14.99], daysAgo: [88, 58, 28, 9] },
+];
+
+async function seedSubscriptionLeaks(bilal, categories) {
+  const category = categories.get('subscriptions');
+  if (!category) throw new Error('Missing default category "subscriptions" — run ensureDefaults first.');
+
+  const noon = Date.now();
+  const docs = [];
+  for (const line of LEAK_CHARGES) {
+    for (let i = 0; i < line.daysAgo.length; i += 1) {
+      const date = new Date(noon - line.daysAgo[i] * 24 * 60 * 60 * 1000);
+      date.setUTCHours(12, 0, 0, 0);
+      docs.push({
+        user: bilal._id,
+        category: category._id,
+        amount: toDec(line.amounts[i]),
+        type: 'expense',
+        description: line.desc,
+        date,
+        isDeleted: false,
+      });
+    }
+  }
+
+  // only the charges that are not there yet, matched on owner + description + day
+  const existing = await Transaction.find({
+    user: bilal._id,
+    description: { $in: LEAK_CHARGES.map((l) => l.desc) },
+  })
+    .select('description date')
+    .lean();
+  const seen = new Set(existing.map((t) => `${t.description}@${new Date(t.date).toISOString().slice(0, 10)}`));
+
+  const fresh = docs.filter((d) => !seen.has(`${d.description}@${d.date.toISOString().slice(0, 10)}`));
+  if (fresh.length) await Transaction.insertMany(fresh);
+  console.log(`  subscription leaks: ${fresh.length} charges added for the vault demo`);
+}
+
+/**
+ * A shared-mess group for the demo: two students who both have accounts and one
+ * roommate who has not signed up yet (the point of the feature), with a mess
+ * bill and a part settlement so the balance board shows real numbers rather
+ * than a row of zeroes.
+ */
+async function seedRoommateGroup(aisha, bilal) {
+  // Looked up rather than blindly created: a run that was interrupted half way
+  // (group saved, bills not) heals itself on the next `npm run seed` instead of
+  // leaving a group with nothing in it.
+  let group = await Group.findOne({ owner: aisha._id, name: 'Hostel Block C' });
+  if (group) {
+    console.log('  roommate group already present — checking its bills');
+  } else {
+    group = await createGroup(aisha, {
+      name: 'Hostel Block C',
+      currency: aisha.ledgerCurrency || aisha.currency || 'USD',
+      // the owner is always members[0] — only the others are listed here
+      members: [
+        { name: bilal.name, email: bilal.email, userId: bilal._id.toString() },
+        // Hamza has no account yet — a bill can still be split with him
+        { name: 'Hamza', email: 'hamza@campuscoin.test' },
+      ],
+    });
+  }
+
+  if (await GroupExpense.exists({ group: group._id })) {
+    console.log('  roommate group: bills already present — skipping');
+    return;
+  }
+
+  const today = new Date();
+  today.setUTCHours(12, 0, 0, 0);
+
+  await addExpense(aisha, group.id, {
+    title: 'September mess bill',
+    amount: '240.00',
+    type: 'expense',
+    paidByIndex: 0,
+    splitType: 'equal',
+    date: today.toISOString(),
+    note: 'Aisha paid the whole bill at the start of the month',
+  });
+  await addExpense(aisha, group.id, {
+    title: 'Shared groceries',
+    amount: '63.00',
+    type: 'expense',
+    paidByIndex: 2, // Hamza, who has no account, paid this one
+    splitType: 'equal',
+    date: today.toISOString(),
+  });
+  await settleUp(aisha, group.id, {
+    fromIndex: 1,
+    toIndex: 0,
+    amount: '50.00',
+    note: 'Bilal paid Aisha in cash',
+  });
+
+  console.log('  roommate group: 1 group, 2 bills, 1 settlement');
+}
+
+/** Two wishes in the jar so the wishlist page opens with a progress bar, not a void. */
+async function seedWishlist(aisha) {
+  if (await WishItem.exists({ user: aisha._id })) {
+    console.log('  wishlist already present — skipping');
+    return;
+  }
+
+  const headphones = await createWish(aisha, {
+    title: 'Wireless headphones',
+    targetAmount: '120.00',
+    note: 'The ones with the noise cancelling — my current pair is failing',
+    icon: '🎧',
+  });
+  await createWish(aisha, {
+    title: 'Course textbooks',
+    targetAmount: '80.00',
+    note: 'Second-hand would do, but the library copies are all out',
+    icon: '📚',
+  });
+
+  await deposit(aisha, { amount: '45.00', wishItemId: headphones._id.toString(), note: 'Skipped two weeks of takeaway' });
+  await deposit(aisha, { amount: '20.00', note: 'Left over from last month' });
+
+  console.log('  wishlist: 2 wishes, jar seeded');
 }
 
 /* ------------------------------- announcements --------------------------------- */

@@ -7,6 +7,7 @@ import ThemeToggle from '../components/ThemeToggle.jsx';
 import Icon from '../components/Icon.jsx';
 import HeroWaves from '../components/art/HeroWaves.jsx';
 import FaqArt from '../components/art/FaqArt.jsx';
+import CatsArt from '../components/art/CatsArt.jsx';
 
 /**
  * Home (public) — the design-board rebuild.
@@ -332,6 +333,48 @@ export default function Home() {
           </div>
         </section>
 
+        {/* --------------- standout tools (the five advanced features) ------- */}
+        <section id="standout" className="lp2-section lp2-standout" aria-labelledby="standout-heading">
+          <div className="lp2-standout-head lp-reveal">
+            <span className="lp2-eyebrow">{t('home.standoutEyebrow')}</span>
+            <h2 id="standout-heading">{t('home.standoutTitle')}</h2>
+            <p>{t('home.standoutSub')}</p>
+          </div>
+
+          <div className="lp2-standout-grid">
+            <article className="lp2-scard lp-reveal" style={{ transitionDelay: '60ms' }}>
+              <span className="lp2-f-ico t1"><Icon name="users" /></span>
+              <h3>{t('home.s1t')}</h3>
+              <p>{t('home.s1b')}</p>
+              <span className="lp2-scard-arrow"><Icon name="arrowRight" /></span>
+            </article>
+            <article className="lp2-scard lp-reveal" style={{ transitionDelay: '120ms' }}>
+              <span className="lp2-f-ico t2"><Icon name="bolt" /></span>
+              <h3>{t('home.s2t')}</h3>
+              <p>{t('home.s2b')}</p>
+              <span className="lp2-scard-arrow"><Icon name="arrowRight" /></span>
+            </article>
+            <article className="lp2-scard lp-reveal" style={{ transitionDelay: '180ms' }}>
+              <span className="lp2-f-ico t3"><Icon name="hourglass" /></span>
+              <h3>{t('home.s3t')}</h3>
+              <p>{t('home.s3b')}</p>
+              <span className="lp2-scard-arrow"><Icon name="arrowRight" /></span>
+            </article>
+            <article className="lp2-scard lp-reveal" style={{ transitionDelay: '240ms' }}>
+              <span className="lp2-f-ico t4"><Icon name="gift" /></span>
+              <h3>{t('home.s4t')}</h3>
+              <p>{t('home.s4b')}</p>
+              <span className="lp2-scard-arrow"><Icon name="arrowRight" /></span>
+            </article>
+            <article className="lp2-scard lp-reveal" style={{ transitionDelay: '300ms' }}>
+              <span className="lp2-f-ico t5"><Icon name="shield" /></span>
+              <h3>{t('home.s5t')}</h3>
+              <p>{t('home.s5b')}</p>
+              <span className="lp2-scard-arrow"><Icon name="arrowRight" /></span>
+            </article>
+          </div>
+        </section>
+
         {/* ------------------------ financial overview ----------------------- */}
         <section id="overview" className="lp2-section lp2-overview">
           <div className="lp2-ov-copy lp-reveal">
@@ -563,53 +606,9 @@ export default function Home() {
           </div>
 
           <div className="lp2-cats-photo lp-reveal" role="img" aria-label={t('home.handDreams')}>
-            {/* flat SVG scene: campus at golden hour, student from behind */}
-            <svg viewBox="0 0 460 300" className="lp2-scene" aria-hidden="true">
-              <defs>
-                <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stopColor="#ffd9a0" />
-                  <stop offset="0.55" stopColor="#f6b98a" />
-                  <stop offset="1" stopColor="#e98f7e" />
-                </linearGradient>
-                <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stopColor="#3f6b57" />
-                  <stop offset="1" stopColor="#274a3c" />
-                </linearGradient>
-              </defs>
-              <rect width="460" height="300" fill="url(#sky)" />
-              <circle cx="352" cy="86" r="38" fill="#ffe9b0" opacity="0.9" />
-              {/* campus buildings */}
-              <g fill="#7b5b52">
-                <rect x="24" y="118" width="132" height="118" />
-                <rect x="164" y="150" width="74" height="86" />
-                <polygon points="90,74 24,118 156,118" />
-              </g>
-              <g fill="#f7e3cf" opacity="0.85">
-                <rect x="42" y="138" width="18" height="24" /><rect x="72" y="138" width="18" height="24" />
-                <rect x="102" y="138" width="18" height="24" /><rect x="42" y="176" width="18" height="24" />
-                <rect x="72" y="176" width="18" height="24" /><rect x="102" y="176" width="18" height="24" />
-                <rect x="178" y="168" width="16" height="22" /><rect x="204" y="168" width="16" height="22" />
-                <rect x="178" y="200" width="16" height="22" /><rect x="204" y="200" width="16" height="22" />
-              </g>
-              {/* trees */}
-              <g>
-                <circle cx="418" cy="176" r="34" fill="#2f5d49" />
-                <rect x="412" y="196" width="12" height="42" fill="#5a4032" />
-                <circle cx="262" cy="196" r="24" fill="#376a53" />
-                <rect x="257" y="210" width="9" height="30" fill="#5a4032" />
-              </g>
-              <rect y="236" width="460" height="64" fill="url(#ground)" />
-              <path d="M0 260 Q 230 236 460 262 L460 300 L0 300 Z" fill="#2b5243" />
-              {/* student, seen from behind */}
-              <g>
-                <rect x="236" y="196" width="52" height="70" rx="16" fill="#37558f" />
-                <rect x="244" y="206" width="36" height="46" rx="12" fill="#4a6bb5" />
-                <circle cx="262" cy="180" r="17" fill="#3a2b25" />
-                <path d="M247 182 a15 15 0 0 1 30 0" fill="#241a16" />
-                <rect x="240" y="262" width="16" height="34" rx="6" fill="#26303f" />
-                <rect x="268" y="262" width="16" height="34" rx="6" fill="#26303f" />
-              </g>
-            </svg>
+            {/* flat SVG scene: a campus day — food cart, bus, hostel, books,
+                a game and a subscription, with three students living it */}
+            <CatsArt />
             <div className="lp2-hand hp3" aria-hidden="true">{t('home.handDreams')}</div>
           </div>
         </section>
@@ -716,6 +715,16 @@ export default function Home() {
                 <li><Link to="/recurring">{t('home.link.recurringEntries')}</Link></li>
                 <li><Link to="/categories">{t('nav.categories')}</Link></li>
                 <li><Link to="/budgets">{t('nav.budgets')}</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h3>{t('nav.section.standout')}</h3>
+              <ul>
+                <li><Link to="/groups">{t('nav.groups')}</Link></li>
+                <li><Link to="/wishlist">{t('nav.wishlist')}</Link></li>
+                <li><Link to="/vault">{t('nav.vault')}</Link></li>
+                <li><Link to="/dashboard">{t('home.link.quickText')}</Link></li>
+                <li><Link to="/dashboard">{t('home.link.survival')}</Link></li>
               </ul>
             </div>
             <div>

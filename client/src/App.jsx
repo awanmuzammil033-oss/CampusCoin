@@ -29,6 +29,9 @@ const Reports = lazy(() => import('./pages/Reports.jsx'));
 const Insights = lazy(() => import('./pages/Insights.jsx'));
 const Tips = lazy(() => import('./pages/Tips.jsx'));
 const Bookmarks = lazy(() => import('./pages/Bookmarks.jsx'));
+const WishlistPage = lazy(() => import('./pages/WishlistPage.jsx'));
+const GroupsPage = lazy(() => import('./pages/GroupsPage.jsx'));
+const VaultPage = lazy(() => import('./pages/VaultPage.jsx'));
 const Profile = lazy(() => import('./pages/Profile.jsx'));
 const NotificationsPage = lazy(() => import('./pages/NotificationsPage.jsx'));
 
@@ -123,6 +126,9 @@ export default function App() {
         <Route path="/insights" element={<Screen><RequireStudent><Insights /></RequireStudent></Screen>} />
         <Route path="/tips" element={<Screen><RequireStudent><Tips /></RequireStudent></Screen>} />
         <Route path="/bookmarks" element={<Screen><RequireStudent><Bookmarks /></RequireStudent></Screen>} />
+        <Route path="/wishlist" element={<Screen><RequireStudent><WishlistPage /></RequireStudent></Screen>} />
+        <Route path="/groups" element={<Screen><RequireStudent><GroupsPage /></RequireStudent></Screen>} />
+        <Route path="/vault" element={<Screen><RequireStudent><VaultPage /></RequireStudent></Screen>} />
         <Route path="/profile" element={<Screen><RequireStudent><Profile /></RequireStudent></Screen>} />
         <Route path="/notifications" element={<Screen><RequireStudent><NotificationsPage /></RequireStudent></Screen>} />
 

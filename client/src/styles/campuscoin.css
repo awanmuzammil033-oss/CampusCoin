@@ -2922,7 +2922,10 @@ button.lp-nav-link {
 }
 .sitemap-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  /* six columns on a wide screen (account, money, standout tools,
+     understand, settings, staff) — auto-fit so the added tools never leave a
+     stranded single column in the last row */
+  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
   gap: 26px;
 }
 .sitemap-grid h3 {
@@ -3400,4 +3403,352 @@ textarea.input:focus {
   .lp2-phone,
   .lp2-float,
   .lp2-hand { animation: none; }
+}
+
+/* ==========================================================================
+   Advanced features (competition brief): quick-text logger, survival mode.
+   Both cards live on the dashboard and both show their working — a number a
+   student cannot check is a number they will not trust.
+   ========================================================================== */
+
+/* ---------------------------------- quick text ------------------------------- */
+.quick-text-card {
+  border-color: var(--cc-primary);
+  box-shadow: 0 0 0 3px var(--cc-primary-soft);
+}
+.quick-text-form {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.quick-text-form .form-control { flex: 1 1 260px; min-width: 0; }
+.quick-text-form .btn { flex: 0 0 auto; }
+
+.quick-text-read {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: var(--cc-radius);
+  background: var(--cc-bg);
+  border: 1px dashed var(--cc-border);
+}
+.quick-text-saved {
+  padding: 12px 14px;
+  border-radius: var(--cc-radius);
+  background: var(--cc-income-soft);
+  border: 1px solid var(--cc-income);
+}
+.quick-text-saved strong { color: var(--cc-text); }
+
+/* ---------------------------------- survival --------------------------------- */
+.survival-card-on { border-color: var(--cc-warning); }
+.survival-card-tight { border-color: var(--cc-danger); }
+
+.survival-number {
+  font-size: clamp(2rem, 5vw, 2.9rem);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--cc-text);
+}
+.survival-card-on .survival-number { color: var(--cc-warning); }
+.survival-card-tight .survival-number { color: var(--cc-danger); }
+
+/* the working, in a definition list so the numbers line up in a column */
+.survival-math {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: var(--cc-radius);
+  background: var(--cc-bg);
+  border: 1px solid var(--cc-border);
+}
+.survival-math > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 0.9rem;
+}
+.survival-math dt { color: var(--cc-muted); margin: 0; }
+.survival-math dd { margin: 0; font-weight: 600; }
+.survival-math-total {
+  border-top: 1px dashed var(--cc-border);
+  padding-top: 6px;
+  margin-top: 2px;
+  font-weight: 700;
+}
+
+.survival-bills,
+.survival-advice {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+.survival-bills li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 0.88rem;
+  color: var(--cc-text);
+}
+.survival-bill-name { min-width: 0; overflow-wrap: anywhere; }
+
+.survival-advice li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+.survival-advice-ok { color: var(--cc-income); }
+.survival-advice-warn { color: var(--cc-warning); }
+.survival-advice-high { color: var(--cc-danger); }
+.survival-advice-info { color: var(--cc-muted); }
+
+/* the on/off switch — a real checkbox under a styled track, so it is
+   keyboard-operable and announced properly instead of being a clickable div */
+.cc-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.86rem;
+  color: var(--cc-muted);
+  user-select: none;
+}
+.cc-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.cc-switch-track {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+  flex: none;
+  border-radius: var(--cc-radius-pill);
+  background: var(--cc-border);
+  border: 1px solid var(--cc-border);
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+.cc-switch-track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--cc-surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: transform 0.18s ease;
+}
+.cc-switch input:checked + .cc-switch-track {
+  background: var(--cc-primary);
+  border-color: var(--cc-primary);
+}
+.cc-switch input:checked + .cc-switch-track::after { transform: translateX(18px); }
+.cc-switch input:focus-visible + .cc-switch-track {
+  outline: 2px solid var(--cc-primary);
+  outline-offset: 2px;
+}
+.cc-switch input:disabled + .cc-switch-track { opacity: 0.6; }
+.cc-switch-label { white-space: nowrap; }
+
+@media (max-width: 480px) {
+  .quick-text-form .btn { width: 100%; }
+  .survival-math > div { font-size: 0.85rem; }
+}
+
+/* --------------------- standout tools (five advanced features) ------------- */
+/* Its own band so the five things that make this project different read as
+   one story rather than as more of the same feature list. */
+.lp2-standout {
+  display: grid;
+  gap: 30px;
+}
+.lp2-standout-head {
+  max-width: 68ch;
+}
+.lp2-standout-head h2 { margin: 6px 0 10px; }
+.lp2-standout-head p { margin: 0; color: var(--lp-muted); }
+.lp2-standout-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(228px, 1fr));
+  gap: 16px;
+}
+.lp2-scard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--lp-card);
+  border: 1px solid var(--lp-border);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: var(--lp-card-shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.lp2-scard:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--lp-card-shadow-hover);
+  border-color: rgba(15, 118, 110, 0.5);
+}
+.lp2-scard h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.25;
+}
+.lp2-scard p {
+  margin: 0;
+  color: var(--lp-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.lp2-scard .lp2-f-ico {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+  font-size: 1.2rem;
+  flex: none;
+}
+.lp2-scard-arrow {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  color: var(--lp-muted);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.lp2-scard:hover .lp2-scard-arrow { opacity: 1; transform: translateX(0); }
+
+/* the sitemap grew a column for the same five tools */
+@media (max-width: 900px) {
+  .lp2-standout-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+}
+
+/* ==========================================================================
+   Phone top bar. The signed-in bar carries eight controls (two pickers, the
+   text-size pair, theme, bell, account) and 360px cannot hold them on one
+   line — measured, they pushed the page 167px wide. So the bar wraps into two
+   lines instead: brand plus the three controls that act, then the pickers and
+   the text-size pair. Nothing is hidden that the student needs, and nothing
+   slides off the edge.
+   ========================================================================== */
+.topbar-utility,
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .topbar {
+    height: auto;
+    min-height: var(--cc-topbar-h);
+    flex-wrap: wrap;
+    align-content: center;
+    row-gap: 8px;
+    padding: 8px 12px;
+  }
+  /* the brand and the first name both give up their text; the mark and the
+     avatar still identify the app and the account */
+  .topbar .nav-label { display: none; }
+  .topbar .icon-btn {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0 8px;
+  }
+  .topbar-spacer { display: none; }
+  .topbar-actions { margin-left: auto; }
+  .topbar-utility {
+    order: 10;
+    width: 100%;
+    justify-content: flex-start;
+  }
+  /* a dropdown opened from the second line must not be clipped by the bar */
+  .topbar-utility .dropdown-menu { max-height: 60vh; overflow-y: auto; }
+}
+
+/* the three tools that are not cards: a strip of links, one tap from anywhere */
+.dash-tools-head h2 {
+  font-size: 1.05rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dash-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.dash-tool {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--cc-radius-card);
+  border: 1px solid var(--cc-border);
+  background: var(--cc-surface);
+  color: var(--cc-text);
+  text-decoration: none;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.dash-tool:hover {
+  border-color: var(--cc-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(15, 118, 110, 0.12);
+}
+.dash-tool:focus-visible {
+  outline: 2px solid var(--cc-primary);
+  outline-offset: 2px;
+}
+.dash-tool-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 12px;
+  background: var(--cc-primary-soft);
+  color: var(--cc-primary);
+  font-size: 1.1rem;
+}
+.dash-tool-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.dash-tool-title { font-weight: 600; }
+.dash-tool-arrow { color: var(--cc-muted); flex: none; }
+
+@media (max-width: 420px) {
+  .dash-tool { padding: 12px 14px; }
+  .dash-tool-arrow { display: none; }
+}
+
+/* the handwritten caption sits on this picture's pale sky, so it is dark ink
+   with a light halo — the cream used elsewhere would be invisible here */
+.lp2-cats-photo .lp2-hand {
+  color: #0b3d2e;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
 }
