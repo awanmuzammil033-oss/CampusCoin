@@ -1,0 +1,10 @@
+{
+  "conv.convertShort": "Convert money",
+  "conv.ofYour": "of your {amount}",
+  "conv.drawerSub": "Convert any amount between currencies, with live rates.",
+  "conv.prefilled": "Pre-filled with this month’s balance as you see it ({amount}). Change anything you like.",
+  "conv.typeAmount": "Type an amount to see the rate.",
+  "conv.applyAll": "Apply to Entire Website",
+  "conv.applyAllHelp": "Every amount on the site — balance, income, expenses, charts — will be shown in {currency}. Your stored amounts never change.",
+  "conv.applied": "The whole site is now showing {currency}."
+}

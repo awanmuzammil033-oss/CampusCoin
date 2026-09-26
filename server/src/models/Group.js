@@ -9,7 +9,9 @@ import mongoose from 'mongoose';
  * A roommate who has not signed up yet is still added, with just a name and
  * an email address (`user: null`). That is what lets a bill be split with
  * someone before they ever register; the link fills in itself when their
- * account is found (see services/groups.js → addMember).
+ * account is found — at add time by `addMember`, and afterwards by
+ * `linkGroupsForEmail` (services/groups.js), which runs on sign-up, on sign-in
+ * and on the groups list itself.
  */
 
 const memberSchema = new mongoose.Schema(
@@ -42,6 +44,12 @@ const groupSchema = new mongoose.Schema(
 groupSchema.index({ owner: 1, archived: 1 });
 // membership lookups ("which groups am I in?") run on every read
 groupSchema.index({ 'members.user': 1, archived: 1 });
+// The email a roommate was invited with, before they have an account. The
+// account link (services/groups.js → linkGroupsForEmail) looks groups up by
+// this one field on every sign-up, sign-in and groups-list read, so it needs
+// its own index: without it the sweep would walk every group in the collection
+// to find the one or two that are waiting for a person to register.
+groupSchema.index({ 'members.email': 1 });
 
 /** Every group the person owns or sits in — the only way a read starts. */
 groupSchema.statics.forUser = function forUser(userId) {

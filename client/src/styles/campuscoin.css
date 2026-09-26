@@ -2765,6 +2765,11 @@ button.lp-nav-link {
   .nav-link-cc { justify-content: center; }
 }
 
+/* Measured on a 390x844 screen: the fixed tab bar is 70px tall. The chat's sticky
+   composer is lifted by the same number, so a message box is never parked behind
+   the tabs with its send button out of reach. */
+:root { --cc-tabs-h: 70px; }
+
 @media (max-width: 767px) {
   .sidebar { display: none; }
   .content { padding: 16px 16px 96px; }
@@ -2775,6 +2780,7 @@ button.lp-nav-link {
     bottom: 0;
     left: 0;
     right: 0;
+    min-height: var(--cc-tabs-h);
     background: var(--cc-surface);
     border-top: 1px solid var(--cc-border);
     z-index: 120;
@@ -4865,3 +4871,393 @@ textarea.input:focus {
   }
   .cc-public-signin { padding: 6px 10px; }
 }
+
+/* ==========================================================================
+   The currency converter: a trigger in the balance card, a drawer from the
+   right.
+
+   The trigger sits in the space the balance card already had spare, so the card
+   does not grow and the number stays the biggest thing on it. The drawer is
+   `position: fixed` and slides in from the right edge; nothing on the page
+   behind it moves, and `overflow: hidden` on the body while it is open stops
+   the page scrolling underneath.
+   ========================================================================== */
+
+.dash-balance-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: nowrap;
+}
+.dash-balance-main > * { min-width: 0; }
+
+.cc-conv-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  max-width: 240px;
+  padding: 10px 14px 10px 10px;
+  border: 1px solid var(--cc-border);
+  border-radius: 16px;
+  background: var(--cc-primary-soft);
+  color: var(--cc-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.cc-conv-trigger:hover {
+  transform: translateY(-1px);
+  border-color: var(--cc-primary);
+  box-shadow: 0 8px 20px rgba(6, 40, 32, 0.12);
+}
+.cc-conv-trigger:focus-visible { outline: 2px solid var(--cc-primary); outline-offset: 2px; }
+.cc-conv-trigger-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 12px;
+  background: var(--cc-surface);
+  border: 1px solid var(--cc-border);
+  font-size: 1.05rem;
+}
+.cc-conv-trigger-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.cc-conv-trigger-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.cc-conv-trigger-sub {
+  font-size: 0.76rem;
+  color: var(--cc-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cc-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 190;
+  background: rgba(6, 20, 17, 0.45);
+  backdrop-filter: blur(2px);
+  animation: cc-fade-in 0.18s ease;
+}
+
+.cc-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 200;
+  width: min(420px, 100vw);
+  display: flex;
+  flex-direction: column;
+  background: var(--cc-surface);
+  border-left: 1px solid var(--cc-border);
+  box-shadow: -18px 0 48px rgba(6, 40, 32, 0.22);
+  transform: translateX(102%);
+  visibility: hidden;
+  transition: transform 0.24s ease, visibility 0.24s;
+}
+.cc-drawer-open { transform: translateX(0); visibility: visible; }
+
+.cc-drawer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 18px 14px;
+  border-bottom: 1px solid var(--cc-border);
+  background: var(--cc-bg);
+}
+.cc-drawer-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.cc-drawer-sub { margin-top: 3px; max-width: 34ch; }
+
+.cc-drawer-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px 24px;
+}
+
+.cc-drawer-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cc-muted);
+}
+.cc-drawer-amount { font-size: 1.3rem; font-weight: 700; }
+.cc-drawer-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -4px 0 0;
+}
+
+.cc-drawer-pair {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  gap: 8px;
+  margin-top: 4px;
+}
+.cc-drawer-side { display: grid; gap: 4px; min-width: 0; }
+.cc-drawer-side > span {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cc-muted);
+}
+.cc-drawer-side .input { width: 100%; min-width: 0; }
+.cc-drawer-code {
+  font-size: 0.72rem;
+  color: var(--cc-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cc-drawer-swap { margin-top: 18px; flex: none; }
+
+.cc-drawer-result {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 14px;
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius);
+  background: var(--cc-primary-soft);
+}
+.cc-drawer-result strong { font-size: 1.35rem; color: var(--cc-text); }
+
+.cc-drawer-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+}
+.cc-drawer-note:first-of-type { color: var(--cc-warning); }
+
+.cc-drawer-apply {
+  display: grid;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--cc-border);
+}
+.cc-drawer-apply-help { margin: 0; }
+.cc-drawer-applied {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--cc-primary);
+  font-weight: 600;
+}
+.cc-drawer-foot { margin: auto 0 0; padding-top: 10px; }
+
+@keyframes cc-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 640px) {
+  .cc-drawer { width: 100vw; border-left: 0; }
+  .cc-conv-trigger { max-width: none; padding: 8px 10px 8px 8px; }
+  .cc-conv-trigger-sub { display: none; }
+  .cc-drawer-pair { grid-template-columns: 1fr; }
+  .cc-drawer-swap { margin: 0; justify-self: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-drawer { transition: none; }
+  .cc-drawer-backdrop { animation: none; }
+}
+
+/* ==========================================================================
+   Two things added with the group chat and the bill's member picker.
+
+   1. `.cc-include` - who a shared bill is between. It replaced a free-text note
+      in the middle of the form, so it is a fieldset that takes the full width
+      of the row: the question it asks is a different kind of question from the
+      amount and the date, and it needs the whole line to answer.
+
+   2. `.cc-chat*` - the small amount the chat needs on top of what its own
+      inline styles carry: the sheet's arrow, and the phone rules that stop a
+      poll card from reaching past a 360px screen.
+   ========================================================================== */
+
+.cc-include {
+  display: block;
+  min-width: 0;
+  margin: 4px 0 0;
+  padding: 10px 12px 12px;
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius-card);
+  background: var(--cc-surface-2);
+}
+
+.cc-include-legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 0 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--cc-muted);
+}
+
+.cc-include-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(212px, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* One person. The whole chip is the target, because the label is the thing
+   people aim at - a 16px checkbox on its own is not a tap you can make with a
+   thumb on a bus. */
+.cc-include-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 8px 10px;
+  border: 1px solid var(--cc-border);
+  border-radius: var(--cc-radius);
+  background: var(--cc-surface);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.cc-include-row:hover { border-color: var(--cc-primary); }
+.cc-include-row:focus-within {
+  outline: 2px solid var(--cc-primary);
+  outline-offset: 1px;
+}
+.cc-include-row-on {
+  border-color: var(--cc-primary);
+  background: var(--cc-primary-soft);
+}
+.cc-include-row input {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  accent-color: var(--cc-primary);
+  cursor: pointer;
+}
+.cc-include-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9rem;
+}
+.cc-include-row-on .cc-include-name { font-weight: 600; }
+
+/* the roommate who has not signed up yet: still countable, and a reason to
+   mention that the bill will find them on its own */
+.cc-include-tag {
+  flex: none;
+  padding: 2px 7px;
+  border: 1px dashed var(--cc-border);
+  border-radius: 999px;
+  background: var(--cc-bg);
+  font-size: 0.68rem;
+  color: var(--cc-muted);
+  white-space: nowrap;
+}
+
+.cc-include-hint { margin: 8px 0 0; }
+
+/* ----------------------------- the chat ------------------------------- */
+
+/* The sheet opens UPWARDS out of a popover whose arrow points down. That arrow
+   is not drawn here: .cc-popover clips its own overflow, so a raised arrow
+   would be sliced off, and a six-item menu reads better as a plain panel. */
+.cc-chat-sheet::before { display: none; }
+
+/* a poll card has to survive a narrow screen: the facts stack, the tally wraps,
+   and the name ellipsis does its job instead of pushing the buttons off */
+/* the sheet is positioned against the composer, so the composer has to be the
+   thing it is positioned against - the page container happened to be close
+   enough to hide the mistake until the log grew. */
+.cc-composer { position: relative; }
+
+.cc-poll-facts > * { min-width: 0; }
+.cc-poll-row { list-style: none; }
+.cc-bubble { box-sizing: border-box; }
+
+/* On a phone the composer is the point of this screen: a chat you have to
+   scroll to find the box in is not a chat. The log gives up most of its height
+   so the card fits the screen, and the composer sticks to the bottom of the
+   viewport - which holds whether the page is scrolled or not, without anyone
+   having to measure how tall the page head is this week. */
+@media (max-width: 860px) {
+  .cc-chat {
+    display: flex;
+    flex-direction: column;
+  }
+  .cc-chat-log {
+    flex: 1 1 auto;
+    min-height: 150px;
+    max-height: 40vh;
+  }
+  /* Sticky, and lifted by exactly the height of the tab bar underneath it: a
+     composer pinned to the bottom of the window would sit behind the tabs with
+     its send button unreachable. */
+  .cc-composer {
+    position: sticky;
+    bottom: var(--cc-tabs-h);
+    z-index: 5;
+    margin-bottom: -12px;
+    padding-bottom: 12px;
+    background: var(--cc-surface);
+    box-shadow: 0 -10px 18px rgba(6, 40, 32, 0.10);
+  }
+}
+
+@media (max-width: 520px) {
+  /* the number and the button stack: side by side they are wider than the
+     screen, and a card that scrolls sideways is a broken card */
+  .dash-balance-main {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .cc-conv-trigger {
+    max-width: none;
+    width: 100%;
+  }
+
+  .cc-include-grid { grid-template-columns: 1fr; }
+  .cc-include { padding: 10px; }
+  .cc-include-legend { font-size: 0.74rem; }
+}
+

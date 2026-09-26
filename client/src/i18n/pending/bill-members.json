@@ -1,0 +1,13 @@
+{
+  "groups.chatBtn": "Chat",
+  "groups.included": "Who is in this bill?",
+  "groups.includedAll": "Tick everyone",
+  "groups.includedNone": "Untick everyone",
+  "groups.includedPick": "Tick at least one person.",
+  "groups.includedCount.one": "Split between {n} person.",
+  "groups.includedCount.other": "Split between {n} people.",
+  "groups.invited": "invited",
+  "groups.notSignedUp": "They have not signed up yet. The bill still splits with them, and it links to their account the moment they do.",
+  "groups.payerNotInBill": "Tick the person who paid before you save this bill.",
+  "groups.pickMembersFirst": "Tick who is in the bill first"
+}

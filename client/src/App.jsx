@@ -32,6 +32,7 @@ const Bookmarks = lazy(() => import('./pages/Bookmarks.jsx'));
 const WishlistPage = lazy(() => import('./pages/WishlistPage.jsx'));
 const GroupsPage = lazy(() => import('./pages/GroupsPage.jsx'));
 const VaultPage = lazy(() => import('./pages/VaultPage.jsx'));
+const GroupChatPage = lazy(() => import('./pages/GroupChatPage.jsx'));
 const GrowMoneyPage = lazy(() => import('./pages/GrowMoneyPage.jsx'));
 const SavingsOptionsPage = lazy(() => import('./pages/SavingsOptionsPage.jsx'));
 const SideIncomePage = lazy(() => import('./pages/SideIncomePage.jsx'));
@@ -154,8 +155,19 @@ export default function App() {
         <Route path="/tips" element={<Screen><RequireStudent><Tips /></RequireStudent></Screen>} />
         <Route path="/bookmarks" element={<Screen><RequireStudent><Bookmarks /></RequireStudent></Screen>} />
         <Route path="/wishlist" element={<Screen><RequireStudent><WishlistPage /></RequireStudent></Screen>} />
+        {/* the list and the group itself are one screen; the group is addressable
+            so a refresh keeps your place and the back button has something to do. */}
+        <Route
+          path="/groups/:groupId"
+          element={<Screen><RequireStudent><GroupsPage /></RequireStudent></Screen>}
+        />
         <Route path="/groups" element={<Screen><RequireStudent><GroupsPage /></RequireStudent></Screen>} />
         <Route path="/vault" element={<Screen><RequireStudent><VaultPage /></RequireStudent></Screen>} />
+        {/* the group chat: WhatsApp-style, with the poll cards the "+" button posts */}
+        <Route
+          path="/groups/:groupId/chat"
+          element={<Screen><RequireStudent><GroupChatPage /></RequireStudent></Screen>}
+        />
         {/* the educational guide reads the student's own surplus, so it lives
             inside the signed-in app */}
         <Route path="/grow-money" element={<Screen><RequireStudent><GrowMoneyPage /></RequireStudent></Screen>} />

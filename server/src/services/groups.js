@@ -32,6 +32,10 @@ import { toDec, toNum, formatMoney, isPositiveAmount } from '../utils/money.js';
  * the first member (the owner, index 0) always takes the odd cent. 100.00
  * split three ways is therefore 33.34 / 33.33 / 33.33 — the shares add up to
  * the bill to the cent, every time, with no rounding drift.
+ *
+ * The rule works over a list of weights, not over a head count, which is why it
+ * covers both kinds of bill (GRP-2): a bill can name the people it is split
+ * between, and "three of these five" is the same call with three weights.
  */
 
 const MAX_MEMBERS = 20;
@@ -41,11 +45,50 @@ const MAX_SETTLEMENTS = 100;
 /* --------------------------------- reads ---------------------------------- */
 
 /**
+ * A member's email is the promise that the account is coming. This is what keeps
+ * it: the first time the person registers, signs in, or opens the groups list,
+ * the member row is filled in with their account id — and because the list
+ * matches on `members.user`, the group is simply there afterwards. Nothing is
+ * asked of the student.
+ *
+ * ONE query, and deliberately an `updateMany` with an array filter rather than
+ * a find-then-save loop:
+ *  - the same element is named on both sides (`members.email` chooses the
+ *    group, `roomie.email` chooses the row inside it), so a member who is
+ *    ALREADY linked never matches and can never be overwritten, and one
+ *    member's row can never be matched by POSITION — the mistake a bare `$`
+ *    positional operator would make;
+ *  - the repair happens inside the database, so two people registering in the
+ *    same second cannot each read the same group and write it back.
+ * `modifiedCount` is the honest answer to "how many groups were linked": a group
+ * that was already linked is not counted again.
+ */
+export async function linkGroupsForEmail(user) {
+  const email = String(user?.email || '').trim().toLowerCase();
+  if (!email) return { linked: 0 };
+
+  const result = await Group.updateMany(
+    { 'members.email': email, 'members.user': null },
+    { $set: { 'members.$[roomie].user': user._id } },
+    { arrayFilters: [{ 'roomie.email': email, 'roomie.user': null }] }
+  );
+
+  return { linked: result.modifiedCount || 0 };
+}
+
+/**
  * The group list with its counters. One aggregation: the member count comes
  * from the document, the bill and settlement counts (and the last activity)
  * from $lookups, so the page never counts rows itself.
  */
 export async function listGroups(user, { includeArchived = false } = {}) {
+  // The self-healing sweep: an account that already existed when the linking
+  // shipped is repaired here, the first time the student opens their groups.
+  // It is one indexed update on `members.email` and never a read per group, so
+  // the list cannot get visibly slower for it — and it runs BEFORE the
+  // aggregation, so a group linked by it is in the answer to this very request.
+  await linkGroupsForEmail(user);
+
   const match = { $or: [{ owner: user._id }, { 'members.user': user._id }] };
   if (!includeArchived) match.archived = { $ne: true };
 
@@ -230,7 +273,17 @@ export async function addExpense(user, groupId, payload = {}) {
   }
 
   const splitType = ['equal', 'shares', 'exact'].includes(payload.splitType) ? payload.splitType : 'equal';
-  const { split, shares } = resolveSplit(splitType, totalCents, group.members.length, payload.shares);
+
+  // Who is in this bill. Absent means everybody, so every client written before
+  // this existed — and every bill already stored — keeps its meaning.
+  const included = includedPositions(group, payload.includedIndexes);
+  if (!included.includes(paidByIndex)) {
+    throw badRequest(
+      `${group.members[paidByIndex].name} paid this bill, so they have to be one of the people it is split between.`
+    );
+  }
+
+  const { split, shares } = resolveSplit(splitType, totalCents, included, payload.shares);
 
   const date = startOfDay(payload.date);
   if (!date) throw badRequest('Please pick a valid date for the bill.');
@@ -246,6 +299,7 @@ export async function addExpense(user, groupId, payload = {}) {
     splitType,
     shares,
     split: split.map((line) => ({ memberIndex: line.memberIndex, amount: toDec(line.cents / 100) })),
+    includedIndexes: included,
     category: category ? category._id : null,
     date,
     note,
@@ -382,31 +436,72 @@ async function balancesFor(group) {
 /* -------------------------------- the split -------------------------------- */
 
 /**
+ * Who a bill is split between, as sorted, de-duplicated member positions.
+ *
+ * The list is ABSENT → everybody. That is not a default for convenience: it is
+ * the meaning of every bill stored before this feature and of every client that
+ * has not heard of it, so an old caller and an old row keep working untouched.
+ * Anything that IS sent is checked properly — a list of whole numbers, not
+ * empty, no duplicates, and every one of them a real seat in this group — and
+ * then sorted, because a split of "the ticked people" must not depend on the
+ * order the browser happened to tick them in.
+ */
+function includedPositions(group, raw) {
+  const everyone = group.members.map((_, index) => index);
+  if (raw === undefined || raw === null) return everyone;
+
+  if (!Array.isArray(raw)) {
+    throw badRequest('Tick the people this bill is split between — the ticked list has to be whole numbers.');
+  }
+  if (raw.length === 0) throw badRequest('Tick at least one person for this bill.');
+
+  const picked = [];
+  for (const value of raw) {
+    if (typeof value !== 'number' || !Number.isInteger(value)) {
+      throw badRequest('Tick the people this bill is split between — the ticked list has to be whole numbers.');
+    }
+    if (value < 0 || value >= group.members.length) {
+      throw badRequest('One of the ticked people is not in this group.');
+    }
+    if (picked.includes(value)) throw badRequest('Each person can only be ticked once for a bill.');
+    picked.push(value);
+  }
+  return picked.sort((a, b) => a - b);
+}
+
+/**
  * Turn a request into whole cents. Returns both halves of the answer: the
  * stored `shares` (what was asked for) and the stored `split` (what each
  * person actually pays).
+ *
+ * `positions` is the list of REAL member positions this bill covers, and every
+ * line that comes back carries the position it belongs to. The maths itself did
+ * not change: it still works over a short list of weights, so a bill between
+ * three of five people is the same calculation as a bill between everyone —
+ * and somebody who was not ticked simply has no line, which is exactly how the
+ * balance board leaves them out (it sums `split`, nothing else).
  */
-function resolveSplit(splitType, totalCents, memberCount, rawShares) {
+function resolveSplit(splitType, totalCents, positions, rawShares) {
   if (splitType === 'exact') {
-    const cents = exactCents(totalCents, memberCount, rawShares);
+    const cents = exactCents(totalCents, positions, rawShares);
     return {
-      split: cents.map((value, memberIndex) => ({ memberIndex, cents: value })),
+      split: cents.map((value, seat) => ({ memberIndex: positions[seat], cents: value })),
       shares: cents
-        .map((value, memberIndex) => ({ memberIndex, value: value / 100 }))
+        .map((value, seat) => ({ memberIndex: positions[seat], value: value / 100 }))
         .filter((row) => row.value > 0),
     };
   }
 
   const weights =
-    splitType === 'shares' ? shareWeights(memberCount, rawShares) : new Array(memberCount).fill(1);
+    splitType === 'shares' ? shareWeights(positions, rawShares) : new Array(positions.length).fill(1);
   const cents = distributeCents(totalCents, weights);
 
   return {
-    split: cents.map((value, memberIndex) => ({ memberIndex, cents: value })),
+    split: cents.map((value, seat) => ({ memberIndex: positions[seat], cents: value })),
     shares:
       splitType === 'shares'
         ? weights
-            .map((value, memberIndex) => ({ memberIndex, value }))
+            .map((value, seat) => ({ memberIndex: positions[seat], value }))
             .filter((row) => row.value > 0)
         : [],
   };
@@ -418,6 +513,12 @@ function resolveSplit(splitType, totalCents, memberCount, rawShares) {
  * lost the most to that floor — biggest cut-off fraction first, earlier member
  * first on a tie. With equal weights every fraction is the same, so the odd
  * cent always lands on the first member (index 0, the owner).
+ *
+ * It takes a list of WEIGHTS, never a member count, which is what lets a subset
+ * split reuse this rule unchanged instead of growing a second copy of it: a
+ * three-of-five bill is the same call with three weights instead of five. The
+ * weights arrive in member order (`includedPositions` sorts them), so "earlier
+ * member first" still means the same thing when only a few people are in.
  */
 function distributeCents(totalCents, weights) {
   const weightSum = weights.reduce((sum, weight) => sum + weight, 0);
@@ -435,40 +536,45 @@ function distributeCents(totalCents, weights) {
   return cents;
 }
 
-function shareWeights(memberCount, rawShares) {
+/** Weights are laid out over the people who are IN the bill, and only those. */
+function shareWeights(positions, rawShares) {
   const rows = Array.isArray(rawShares) ? rawShares : [];
   if (rows.length === 0) {
     throw badRequest('Give each person a share — 1 is a normal share, 2 is double.');
   }
 
-  const weights = new Array(memberCount).fill(0);
+  const weights = new Array(positions.length).fill(0);
   for (const row of rows) {
     const index = memberIndex(row?.memberIndex);
-    if (index === null || index >= memberCount) {
-      throw badRequest('One of the share lines points at somebody who is not in this group.');
+    // A share line for somebody who was not ticked is an error, never a silent
+    // drop: the owner would see a bill split among three people while the
+    // numbers quietly came from four.
+    if (index === null || !positions.includes(index)) {
+      throw badRequest('One of the share lines points at somebody who is not in this bill.');
     }
-    if (weights[index] > 0) throw badRequest('Each person can only appear once in the split.');
+    const seat = positions.indexOf(index);
+    if (weights[seat] > 0) throw badRequest('Each person can only appear once in the split.');
 
     const value = Number(row?.value);
     if (!Number.isFinite(value) || value <= 0) {
       throw badRequest('Shares must be more than 0 — use 1 for a normal share.');
     }
-    weights[index] = value;
+    weights[seat] = value;
   }
   return weights;
 }
 
 /** 'exact' is the one split the client is allowed to spell out in money. */
-function exactCents(totalCents, memberCount, rawShares) {
+function exactCents(totalCents, positions, rawShares) {
   const rows = Array.isArray(rawShares) ? rawShares : [];
   if (rows.length === 0) throw badRequest('Enter an amount for each person.');
 
-  const cents = new Array(memberCount).fill(0);
+  const cents = new Array(positions.length).fill(0);
   const seen = new Set();
   for (const row of rows) {
     const index = memberIndex(row?.memberIndex);
-    if (index === null || index >= memberCount) {
-      throw badRequest('One of the split lines points at somebody who is not in this group.');
+    if (index === null || !positions.includes(index)) {
+      throw badRequest('One of the split lines points at somebody who is not in this bill.');
     }
     if (seen.has(index)) throw badRequest('Each person can only appear once in the split.');
     seen.add(index);
@@ -477,7 +583,7 @@ function exactCents(totalCents, memberCount, rawShares) {
     if (value === null) {
       throw badRequest('Every exact amount must be 0 or more with at most 2 decimals.');
     }
-    cents[index] = value;
+    cents[positions.indexOf(index)] = value;
   }
 
   const sum = cents.reduce((a, b) => a + b, 0);
@@ -491,8 +597,13 @@ function exactCents(totalCents, memberCount, rawShares) {
 
 /* -------------------------------- membership ------------------------------- */
 
-/** The only group read that exists: yours, or a group you are a member of. */
-async function loadGroupFor(user, groupId) {
+/**
+ * The only group read that exists: yours, or a group you are a member of.
+ * Exported so the chat service (GRP-4) asks the same question through the same
+ * query, rather than growing a second definition of "a group you may see" that
+ * could drift away from this one.
+ */
+export async function loadGroupFor(user, groupId) {
   if (!mongoose.isValidObjectId(groupId)) throw notFound();
   const group = await Group.findOne({
     _id: groupId,
@@ -612,11 +723,31 @@ function toPublicExpense(expense, group) {
       memberIndex: row.memberIndex,
       amount: toNum(row.amount),
     })),
+    includedIndexes: includedOn(expense, group),
     category: publicCategory(expense.category),
     date: new Date(expense.date).toISOString(),
     note: expense.note || '',
     createdBy: expense.createdBy ? expense.createdBy.toString() : null,
   };
+}
+
+/**
+ * Who a bill was split between, as the client will read it.
+ *
+ * A bill written BEFORE this feature has no `includedIndexes` at all: the field
+ * did not exist, so that bill was split between everybody, and that is the only
+ * thing it can have meant — reading it back as the full member list is
+ * therefore reading it truthfully, not guessing. Nothing is recomputed from the
+ * set either way: `split` stays the answer of record, so an old bill's money
+ * cannot move and the balance board is identical before and after this field
+ * was added.
+ */
+function includedOn(expense, group) {
+  const stored = expense.includedIndexes;
+  if (!Array.isArray(stored) || stored.length === 0) {
+    return group.members.map((_, index) => index);
+  }
+  return stored.map(Number).sort((a, b) => a - b);
 }
 
 /** A bill's category, whether it came back populated or as a bare id. */

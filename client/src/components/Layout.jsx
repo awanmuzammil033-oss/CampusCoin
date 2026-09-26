@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { NavLink, Link, useLocation, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAuth } from '../auth.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
 import { useLocale } from '../locale.jsx';
 import LocalePickers from './LocalePickers.jsx';
 import Icon from './Icon.jsx';
-import CurrencyConverter from './CurrencyConverter.jsx';
 import { NotificationBell } from './NotificationPanel.jsx';
 
 const NAV = [
@@ -48,6 +47,9 @@ const BOTTOM = [
  * the language picked in the topbar.
  */
 export default function Layout({ children }) {
+  // the group chat is a conversation, not a list of things to file
+  const { pathname } = useLocation();
+  const inConversation = /\/groups\/[^/]+\/chat/.test(pathname);
   const { user, logout, updatePreferences } = useAuth();
   const { t } = useLocale();
   const navigate = useNavigate();
@@ -89,13 +91,10 @@ export default function Layout({ children }) {
         </Link>
         <div className="topbar-spacer" />
 
-        {/* Utility row: the converter and the two pickers, grouped so the bar
-            stays on ONE line on a phone. The text-size pair lives in the
-            all-pages sheet instead of here: nine controls do not fit across a
-            360px screen, and a control that has been squeezed off the edge is
-            a control nobody can find. */}
+        {/* Utility row: the two pickers. The converter is not here - it lives on
+            the dashboard's balance card, where the number it works on is already
+            on screen, and a phone bar cannot afford nine controls. */}
         <div className="topbar-utility">
-          <CurrencyConverter compact />
           <LocalePickers onOpen={() => { setAccountOpen(false); setMenuOpen(false); }} />
         </div>
 
@@ -220,7 +219,14 @@ export default function Layout({ children }) {
         </main>
       </div>
 
-      <Link to="/transactions/new" className="fab" aria-label={t('a11y.addTransaction')}><Icon name="plus" /></Link>
+      {/* the floating add button is the fastest way into the app on every
+          screen - except a conversation, where it would sit on top of the
+          last message and point at a form nobody asked for. */}
+      {!inConversation && (
+        <Link to="/transactions/new" className="fab" aria-label={t('a11y.addTransaction')}>
+          <Icon name="plus" />
+        </Link>
+      )}
 
       <nav className="bottom-tabs" aria-label={t('a11y.quickNav')}>
         {BOTTOM.map((item) => (

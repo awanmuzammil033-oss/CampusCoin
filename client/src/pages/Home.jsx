@@ -4,7 +4,6 @@ import { useAuth } from '../auth.jsx';
 import { useLocale } from '../locale.jsx';
 import LocalePickers from '../components/LocalePickers.jsx';
 import ThemeToggle from '../components/ThemeToggle.jsx';
-import CurrencyConverter from '../components/CurrencyConverter.jsx';
 import Icon from '../components/Icon.jsx';
 import HeroWaves from '../components/art/HeroWaves.jsx';
 import FaqArt from '../components/art/FaqArt.jsx';
@@ -125,9 +124,6 @@ export default function Home() {
         </nav>
 
         <div className="lp-nav-right">
-          {/* the site-wide converter sits in the public navbar too, so it works
-              before anyone signs in (ADV-1) */}
-          <CurrencyConverter compact />
           <ThemeToggle className="icon-btn lp-nav-icon" />
           <LocalePickers variant="nav" />
           {loading ? null : user ? (

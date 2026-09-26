@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import Page from '../components/Page.jsx';
 import Modal from '../components/Modal.jsx';
@@ -38,7 +39,11 @@ function todayISO() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-const BLANK_BILL = { title: '', amount: '', date: todayISO(), categoryId: '', paidByIndex: '0', note: '' };
+// `included` is the set of member positions this bill is split between, as an
+// array of strings because that is what a checkbox gives us. It starts as
+// null - "nobody has chosen yet" reads as everybody - and an explicit empty
+// set is refused by the server: a bill nobody is in is a bill nobody owes.
+const BLANK_BILL = { title: '', amount: '', date: todayISO(), categoryId: '', paidByIndex: '0', note: '', included: null };
 
 /**
  * A group keeps its own currency, which is usually the student's ledger
@@ -64,10 +69,25 @@ function amount(value, currency) {
 }
 
 export default function GroupsPage() {
-  const [openId, setOpenId] = useState(null);
+  // The group in the URL, if there is one. A detail you cannot link to, cannot
+  // survive a refresh and cannot be reached with the back button, so the id
+  // lives in the route and the picker below is only the list's own shortcut.
+  const { groupId } = useParams();
+  const navigate = useNavigate();
+  const [openId, setOpenId] = useState(groupId || null);
 
-  if (openId) return <GroupDetail groupId={openId} onBack={() => setOpenId(null)} />;
-  return <GroupList onOpen={setOpenId} />;
+  function open(id) {
+    setOpenId(id);
+    navigate(`/groups/${id}`);
+  }
+
+  function close() {
+    setOpenId(null);
+    navigate('/groups', { replace: true });
+  }
+
+  if (openId) return <GroupDetail groupId={openId} onBack={close} />;
+  return <GroupList onOpen={open} />;
 }
 
 /* --------------------------------- the list -------------------------------- */
@@ -392,6 +412,10 @@ function GroupDetail({ groupId, onBack }) {
   }, [groupId]);
 
   const members = data?.members || [];
+
+  // Who this bill is between. `null` means nobody has chosen yet, which is
+  // everybody - the usual answer, and one tap away from any other.
+  const included = bill.included ?? members.map((m) => String(m.index));
   const currency = data?.group?.currency || getLedgerCurrency();
   const myIndex = members.findIndex((member) => member.user && member.user === user?.id);
 
@@ -410,7 +434,16 @@ function GroupDetail({ groupId, onBack }) {
       setBillError(t('groups.needAmount'));
       return;
     }
-    if (bill.paidByIndex === '' || bill.paidByIndex === null) {
+    // the payer has to be in the split, and somebody has to be in the split
+  if (included.length === 0) {
+    push(t('groups.pickMembersFirst'), 'error');
+    return;
+  }
+  if (!included.includes(String(bill.paidByIndex))) {
+    push(t('groups.payerNotInBill'), 'error');
+    return;
+  }
+  if (bill.paidByIndex === '' || bill.paidByIndex === null) {
       setBillError(t('groups.needPayer'));
       return;
     }
@@ -423,6 +456,7 @@ function GroupDetail({ groupId, onBack }) {
       paidByIndex: bill.paidByIndex,
       splitType,
       note: bill.note.trim(),
+      includedIndexes: included.map(Number),
     };
 
     if (splitType === 'shares') {
@@ -593,6 +627,16 @@ function GroupDetail({ groupId, onBack }) {
           >
             <Icon name="arrowLeft" />
           </button>
+          {/* the chat belongs to every member, and it sits to the LEFT of the
+              owner-only buttons: talking about the group is what you do with
+              it, closing it is what you do to it. */}
+          <Link
+            to={`/groups/${data.group.id}/chat`}
+            className="btn btn-secondary btn-sm"
+          >
+            <Icon name="send" size={15} /> {t('groups.chatBtn')}
+          </Link>
+
           {isOwner && (
             <>
               <button type="button" className="btn btn-secondary btn-sm" onClick={() => setConfirming('archive')}>
@@ -758,31 +802,81 @@ function GroupDetail({ groupId, onBack }) {
                   onChange={(e) => setBillField('paidByIndex', e.target.value)}
                   {...a}
                 >
-                  {members.map((member) => (
-                    <option key={member.index} value={member.index}>
-                      {member.name}
-                    </option>
-                  ))}
+                  {/* only the people this bill is between - a payer who is
+                      not in the split is a bill nobody can settle */}
+                  {members
+                    .filter((member) => included.includes(String(member.index)))
+                    .map((member) => (
+                      <option key={member.index} value={member.index}>
+                        {member.name}
+                      </option>
+                    ))}
+                  {included.length === 0 && (
+                    <option value="">{t('groups.pickMembersFirst')}</option>
+                  )}
                 </select>
               )}
             </FormField>
           </div>
-          <div style={{ flex: '2 1 220px' }}>
-            <FormField label={t('ui.note')} htmlFor="bill-note">
-              {(a) => (
-                <input
-                  id="bill-note"
-                  className="input"
-                  type="text"
-                  maxLength={200}
-                  autoComplete="off"
-                  value={bill.note}
-                  onChange={(e) => setBillField('note', e.target.value)}
-                  {...a}
-                />
-              )}
-            </FormField>
-          </div>
+          {/* WHO IS IN THIS BILL. This is what a shared bill is actually
+              about, and it used to be hidden behind a free-text note. */}
+          <fieldset className="cc-include" style={{ flexBasis: '100%' }}>
+            <legend className="cc-include-legend">
+              <span>{t('groups.included')}</span>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() =>
+                  setBillField(
+                    'included',
+                    included.length === members.length
+                      ? []
+                      : members.map((m) => String(m.index))
+                  )
+                }
+              >
+                {included.length === members.length ? t('groups.includedNone') : t('groups.includedAll')}
+              </button>
+            </legend>
+
+            <div className="cc-include-grid">
+              {members.map((member) => {
+                const on = included.includes(String(member.index));
+                return (
+                  <label
+                    key={member.index}
+                    className={`cc-include-row ${on ? 'cc-include-row-on' : ''}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={on}
+                      onChange={() =>
+                        setBillField(
+                          'included',
+                          on
+                            ? included.filter((i) => i !== String(member.index))
+                            : [...included, String(member.index)].sort((a, b) => Number(a) - Number(b))
+                        )
+                      }
+                    />
+                    <span className="cc-include-name">{member.name}</span>
+                    {member.user ? null : (
+                      <span className="cc-include-tag" title={t('groups.notSignedUp')}>
+                        {t('groups.invited')}
+                      </span>
+                    )}
+                  </label>
+                );
+              })}
+            </div>
+
+            <p className="cc-include-hint smallish muted">
+              {included.length === 0
+                ? t('groups.includedPick')
+                : plural('groups.includedCount', included.length, { n: included.length })}
+            </p>
+          </fieldset>
+
         </div>
 
         <div className="field">

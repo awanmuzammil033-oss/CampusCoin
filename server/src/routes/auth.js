@@ -11,6 +11,7 @@ import {
   applyResetCode,
   sendMail,
 } from '../services/accounts.js';
+import { linkGroupsForEmail } from '../services/groups.js';
 import env from '../config/env.js';
 
 const router = Router();
@@ -61,6 +62,14 @@ router.post('/register', accountLimiter, async (req, res, next) => {
       ...(currency ? { currency, ledgerCurrency: currency } : {}),
     });
 
+    // GRP-1: a roommate is added to a group by email long before they have an
+    // account, and the sign-up address is the only thing that can connect the
+    // two. The group a student was invited to is linked to their new account
+    // here, so it is waiting in their list from the first load. The groups list
+    // runs the same repair for accounts that predate it, so a group can never
+    // stay unlinked (see services/groups.js → linkGroupsForEmail).
+    await linkGroupsForEmail(user);
+
     startSession(req, user);
     res.status(201).json({ user: user.toPublic() });
   } catch (err) {
@@ -92,7 +101,14 @@ router.post('/login', loginLimiter, async (req, res, next) => {
       return res.status(401).json(badCredentials);
     }
 
-    regenerateSession(req);
+    // GRP-1: the group this student was invited to before they had an account is
+    // linked here, so it is waiting in their list the moment they sign in. It is
+    // a plain database repair that needs nothing from the session, and it goes
+    // BEFORE the session is written so the sign-in flow below is left exactly as
+    // it was (see services/groups.js → linkGroupsForEmail).
+    await linkGroupsForEmail(user);
+
+    await regenerateSession(req);
     startSession(req, user);
     res.json({ user: user.toPublic() });
   } catch (err) {
@@ -119,7 +135,7 @@ router.post('/control-login', loginLimiter, async (req, res, next) => {
       return res.status(403).json({ error: 'This door is for administrators only.' });
     }
 
-    regenerateSession(req);
+    await regenerateSession(req);
     startSession(req, user);
     res.json({ user: user.toPublic() });
   } catch (err) {

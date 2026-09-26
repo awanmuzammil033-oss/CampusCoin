@@ -6,13 +6,18 @@ set category budgets, read monthly insights and saving tips; administrators
 manage the shared categories, tip templates, announcements and accounts.
 
 **Five tools that make it more than a ledger:** roommate groups that split a
-mess bill and settle it back to zero, a one-sentence expense logger, a
+mess bill between exactly the people it was for, settle it back to zero, and
+talk about it in a group chat where anyone can post a poll card — "chai at 4pm,
+350 a head?" — and tick themselves in as the total moves; a one-sentence
+expense logger, a
 "survival mode" daily allowance for the end of the month, a private wishlist fed
 by a micro-savings jar, and a subscription vault that names the payments you
 are still making for things you stopped using.
 
-**Four utility rooms on top of that:** a currency converter in the navbar,
-a reference table of savings and Fixed Deposit rates, an educational guide to
+**Four utility rooms on top of that:** a currency drawer that opens from the
+dashboard's balance card — pre-filled with your own balance, and one button
+to show the whole site in another currency — a reference table of savings and
+Fixed Deposit rates, an educational guide to
 saving and investing with the risk level of every option written down, and a
 curated library of ways to earn on the side — each with a trending badge and a
 source where the claim has one.
@@ -114,6 +119,7 @@ npm test          # every suite, one in-memory MongoDB each:
                   #   side-income library (the citation rule)
                   #   growth guide (the nudge is a key, never a sentence)
                   #   currency converter (cache, fallback, refusal)
+                  #   group chat, poll cards & a bill's own member set
 ```
 
 Each test file gets its own in-memory MongoDB, so tests never touch real data
@@ -172,13 +178,35 @@ CampusCoin/
   from the ledger on every read, so it can never go stale.
 - **The vault explains itself** — every threshold it uses is in one exported
   object, and each verdict ships the reason in the language the student picked.
-- **The converter never invents a rate** — the navbar 💱 button asks the server,
-  which answers from a six-hour cache of the free Frankfurter feed. Currencies
-  that feed does not carry (PKR, BDT, NPR, NGN …) come from a dated table
-  shipped with the app and are labelled as a snapshot in the currency list, so
-  the popover always says which figures are live and which are not. A pair the
+- **The converter never invents a rate** — the 💱 button on the dashboard’s
+  balance card opens a drawer that starts from the balance already on screen,
+  and every figure in it is the server’s answer from a six-hour cache of the
+  free Frankfurter feed. Currencies that feed does not carry (PKR, BDT, NPR,
+  NGN …) come from a dated table shipped with the app and are labelled as a
+  snapshot in the currency list, so the drawer always says which figures are
+  live and which are not. "Apply to Entire Website" changes the display
+  currency the whole app reads — the stored amounts never move, and the
+  drawer refuses to apply a currency you are already in. A pair the
   table cannot answer is refused, never guessed, and no rate is ever written to
   a record.
+- **A bill names its own people** — the group screen asks who a bill is between
+  before it asks how much, and the payer has to be one of them, because a bill
+  split between two people and paid by a third is a question nobody can answer
+  a month later. The split is computed over the ticked members only, and the
+  rule for the odd cent is the same one the whole module has always used: whole
+  cents, and the leftover to whoever lost the most to the floor.
+- **A roommate’s email is a promise the app keeps** — add somebody by email
+  before they have an account and the group waits for them. The moment they
+  register or sign in, that membership is filled in and the group appears on
+  their dashboard with no action from them.
+- **The group chat is a real screen** — `/groups/:groupId/chat`, addressable and
+  linkable, with a member avatar and name on every message. The + button posts
+  one of six poll cards; each member has their own row to tick, the running
+  total is the server’s number, and tapping the same tick again takes the
+  answer back.
+- **"Home" means your dashboard** — inside the app the breadcrumb goes to the
+  place you work, not to the marketing page; signed out it is still the landing
+  page, which is the only home there is.
 - **The rate and idea libraries are reference, never advice** — the savings
   table carries a non-dismissible disclaimer, the growth guide is definitions
   and risk levels with no product named, and its nudge is a translation key plus

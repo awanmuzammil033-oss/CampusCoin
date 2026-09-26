@@ -364,6 +364,7 @@ just a name and email, which is what lets a bill be split before they register.
 |---|---|
 | `owner`, `archived` | |
 | `members.user`, `archived` | every read starts with "which groups am I in?" |
+| `members.email` | finding the groups a roommate was invited to, on sign-in |
 
 ## 15. `groupexpenses`
 
@@ -374,12 +375,20 @@ the person asked for (a weight for `shares`, an amount for `exact`); it is the
 request, not the answer. Uneven equal splits give the remainder cents to the
 earliest members in order, so 100.00 split three ways is 33.34 + 33.33 + 33.33.
 
+A bill is not always the whole group’ `includedIndexes` names the members it
+is for, and the same remainder rule is applied over that set only, so the odd
+cent still goes to the earliest person who was ticked. A bill written before
+this field existed has none, and "no set" is read as everybody — that is the only
+thing it could have meant, and nothing is recomputed from it either way:
+`split` stays the answer of record.
+
 | Field | Type | R | U | Notes / enum |
 |---|---|---|---|---|
 | `group` | ObjectId | ✔ | | refs `groups` |
 | `title` | String | ✔ | | maxlength 80 |
 | `amount` | Decimal128 | ✔ | | |
-| `paidByIndex` | Number | ✔ | | position in `group.members` |
+| `paidByIndex` | Number | ✔ | | position in `group.members`, always inside `includedIndexes` |
+| `includedIndexes` | Array | | | the members this bill is between; **absent on a bill written before the field existed**, which reads back as everybody |
 | `splitType` | String | | | enum `equal` \| `shares` \| `exact` |
 | `shares` | Array | | | `{ memberIndex, value }` — the request |
 | `split` | Array | | | `{ memberIndex, amount }` Decimal128 — the answer |
@@ -417,7 +426,43 @@ history stays readable.
 |---|---|
 | `group`, `date` | descending on `date` |
 
-## 17. `wishitems`
+## 17. `groupmessages`
+
+A line in a group’s chat (GRP-4), in two kinds. A `text` message is a sentence; a `poll`
+card is a question ("chai at 4pm, 350 a head?") that every member answers on
+their own row. `senderIndex` is a **position** rather than a user id, because a
+member may not have an account — the group chat is reachable by everybody in the
+group, signed up or not.
+
+The card is a snapshot of who was asked: `responses` is seeded with one row per
+member at the moment it is posted, and a member who joins later does not grow
+old cards — they can answer the cards posted after they arrived. `yes: null` is
+a real state, not an absent row, because "has not answered" is exactly what a
+card needs to be able to show. The running total is never stored: it is
+`rate × yesCount` in whole cents, worked out on read, so it can never
+drift from the answers.
+
+| Field | Type | R | U | Notes / enum |
+|---|---|---|---|---|
+| `group` | ObjectId | ✔ | | refs `groups` |
+| `kind` | String | ✔ | | enum `text` \| `poll` |
+| `text` | String | | | maxlength 1000, empty for a card |
+| `senderIndex` | Number | ✔ | | position in `group.members` |
+| `poll.category` | String | | | enum `chai` \| `transport` \| `food` \| `outing` \| `shopping` \| `other` — a **key**, never prose |
+| `poll.location` | String | | | maxlength 120 |
+| `poll.purpose` | String | | | maxlength 120 |
+| `poll.date` | String | | | `YYYY-MM-DD` |
+| `poll.time` | String | | | `HH:MM` |
+| `poll.rate` | Decimal128 | | | per person, in the group’s currency |
+| `poll.note` | String | | | maxlength 200 |
+| `poll.responses` | Array | | | `{ memberIndex, yes, at }`, `yes` nullable, one row per member at post time |
+
+**Indexes**
+
+| Keys | Options |
+|---|---|
+| `group`, `createdAt` | the room is read in order |
+## 18. `wishitems`
 
 One thing on the secret wishlist (WISH-1). The money that fills it is **not a
 transaction** — it sits in the micro-savings jar on the account
@@ -443,7 +488,7 @@ by the client.
 |---|---|
 | `user`, `status`, `createdAt` | descending on `createdAt` |
 
-## 18. `jarmovements`
+## 19. `jarmovements`
 
 Every rupee into and out of the jar (WISH-2): the audit trail behind
 `users.jarBalance` and `wishitems.savedAmount`. A withdrawal is guarded inside
@@ -465,7 +510,7 @@ cannot both take the last coin and the jar can never go negative.
 |---|---|
 | `user`, `date` | descending on `date` |
 
-## 19. `bankrates`
+## 20. `bankrates`
 
 A reference row on the public "Compare savings options" page (ADV-3): what one
 bank published for one product, on one date. It is **shared reference data, not a
@@ -494,7 +539,7 @@ came from rather than floating free.
 | `accountType`, `ratePercent` | descending on `ratePercent` — the page sorts by rate |
 | `isActive` | the public read filters on it |
 
-## 20. `incomeideas`
+## 21. `incomeideas`
 
 One entry in the side-income library (ADV-5): a way students earn on the side,
 with what it costs to start and where the claim came from. Like `bankrates` this
@@ -525,7 +570,7 @@ source (`sourceUrl` or `sourceNote`), so a badge can never point at nothing.
 
 ---
 
-## 21. Relationships
+## 22. Relationships
 
 | From | Field | To | Meaning |
 |---|---|---|---|
@@ -550,6 +595,7 @@ source (`sourceUrl` or `sourceNote`), so a badge can never point at nothing.
 | `groupexpenses` | `createdBy` / `category` | `users` / `categories` | who logged it, what it was for |
 | `groupsettlements` | `group` | `groups` | a payment between two member positions |
 | `groupsettlements` | `by` | `users` | who recorded the settlement |
+| `groupmessages` | `group` | `groups` | one line in a group’s chat |
 | `wishitems` | `user` | `users` | the owner of the wish |
 | `jarmovements` | `user` / `wishItem` | `users` / `wishitems` | one movement, optionally for one wish |
 

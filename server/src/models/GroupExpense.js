@@ -18,6 +18,13 @@ import mongoose from 'mongoose';
  * then sums those inside MongoDB (`$unwind` + `$group` + `$sum`) and gets
  * figures that always add up to the bill — recomputing a split later from
  * weights and floats would not.
+ *
+ * `includedIndexes` is WHO the bill was split between — the positions the owner
+ * ticked, sorted. It is a record of the question, not of the answer: `split`
+ * still holds the money, so the board is unchanged by a subset split. A bill
+ * written before this field existed has none, which means "between everybody" —
+ * that is the only thing it could have meant, so the reader resolves it to the
+ * full member list rather than guessing (see `includedOn` in services/groups.js).
  */
 
 const shareSchema = new mongoose.Schema(
@@ -45,6 +52,11 @@ const groupExpenseSchema = new mongoose.Schema(
     splitType: { type: String, enum: ['equal', 'shares', 'exact'], default: 'equal' },
     shares: { type: [shareSchema], default: [] },
     split: { type: [splitLineSchema], default: [] },
+    // The positions this bill is split between. `default: undefined` is
+    // deliberate: a bill saved before this field existed must have NO value
+    // here, because "undefined" is what the reader reads as everybody, and a
+    // default of "all members" would quietly rewrite what old rows said.
+    includedIndexes: { type: [Number], default: undefined },
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', default: null },
     date: { type: Date, required: true, default: () => new Date() },
     note: { type: String, trim: true, maxlength: 200, default: '' },

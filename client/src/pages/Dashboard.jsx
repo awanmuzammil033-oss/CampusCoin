@@ -7,6 +7,7 @@ import Progress from '../components/Progress.jsx';
 import ChartCard from '../components/ChartCard.jsx';
 import QuickTextCard from '../components/QuickTextCard.jsx';
 import SurvivalCard from '../components/SurvivalCard.jsx';
+import CurrencyDrawer, { CurrencyTrigger } from '../components/CurrencyDrawer.jsx';
 import Icon from '../components/Icon.jsx';
 import CategoryIcon from '../components/CategoryIcon.jsx';
 import { categoryColor } from '../chartColors.js';
@@ -21,7 +22,7 @@ import { useLocale } from '../locale.jsx';
  * widgets from the brief, the charts, and a way back into logging an entry.
  */
 export default function Dashboard() {
-  const { t, language, plural } = useLocale();
+  const { t, language, plural, currency } = useLocale();
   const { user } = useAuth();
   // Month/day names follow the active language ('September 2026' in en, 'Eylül 2026' in tr).
   const monthLabel = () => new Date().toLocaleDateString(language || 'en', { month: 'long', year: 'numeric' });
@@ -32,6 +33,8 @@ export default function Dashboard() {
   };
   const { push } = useToast();
   const [summary, setSummary] = useState(null);
+  // the currency drawer is opened from the balance card
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [charts, setCharts] = useState(null);
   const [error, setError] = useState('');
 
@@ -119,14 +122,30 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* mounted once, outside the summary block: it is closed until the
+          balance card asks for it, and the amount it opens with is a prop */}
+      <CurrencyDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} balance={summary?.balance ?? 0} />
+
       {summary && (
         <div className="dash-stack">
           {/* 1 - where the money stands */}
-          <div className="card">
+          <div className="card dash-balance">
             <div className="card-title">
               <span>{t('dash.balanceMonth', { month: monthLabel() })}</span>
             </div>
-            <div className="balance-display">{money(summary.balance)}</div>
+
+            <div className="dash-balance-main">
+              <div>
+                <div className="balance-display">{money(summary.balance)}</div>
+              </div>
+              {/* the converter lives here, in the space the card already had */}
+              <CurrencyTrigger
+                balance={money(summary.balance)}
+                currency={currency}
+                onOpen={() => setDrawerOpen(true)}
+              />
+            </div>
+
             <div className="d-flex gap-4 mt-2 flex-wrap">
               <div>
                 <div className="amount-income num">+ <Icon name="trendUp" /> {money(summary.income)}</div>

@@ -27,6 +27,7 @@ import bookmarkRoutes from './routes/bookmarks.js';
 import quickTextRoutes from './routes/quickText.js';
 import survivalRoutes from './routes/survival.js';
 import groupsRoutes from './routes/groups.js';
+import groupChatRoutes from './routes/groupChat.js';
 import wishlistRoutes from './routes/wishlist.js';
 import vaultRoutes from './routes/vault.js';
 import fxRoutes from './routes/fx.js';
@@ -78,6 +79,8 @@ app.use('/api/quick-text', quickTextRoutes);
 app.use('/api/survival', survivalRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/groups', groupsRoutes);
+// the chat hangs off the group, so it inherits the group isolation
+app.use('/api/groups/:id/chat', groupChatRoutes);
 app.use('/api/vault', vaultRoutes);
 app.use('/api/fx', fxRoutes);
 app.use('/api/grow-money', growMoneyRoutes);
