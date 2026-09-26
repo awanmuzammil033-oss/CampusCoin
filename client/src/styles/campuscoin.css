@@ -5261,3 +5261,47 @@ textarea.input:focus {
   .cc-include-legend { font-size: 0.74rem; }
 }
 
+
+/* ==========================================================================
+   Scrolling between the sections of a page, and landing on one of them.
+
+   A navbar link that teleports the window is technically correct and still
+   feels broken: the page moves in a single frame, so the eye never arrives with
+   it, and the heading you clicked for ends up UNDER the fixed header - not
+   hidden behind it, simply not on screen.
+
+   The smooth behaviour is set on the root so the browser runs it, which means a
+   wheel, a touch or a second click interrupts the glide instead of the page
+   fighting for the scroll position. prefers-reduced-motion turns it back off:
+   a long animated glide is the first thing that preference is asking us not to
+   do.
+
+   The offset is the other half. scroll-margin-top is how a target asks for room
+   above itself, and it applies to the anchor, the keyboard and the wheel alike,
+   so every way of arriving at a section lands the same way. The landing header
+   is fixed and the app bar is sticky, and both are 64px, so one number serves
+   the lot with a little air on top.
+   ========================================================================== */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* the landing page sections, the privacy band, and the skip-link target */
+.lp2-section,
+.lp2-privacy,
+#main-content {
+  scroll-margin-top: calc(var(--cc-topbar-h) + 16px);
+}
+
+/* #top is the span at the very top of the document, and "Home" means the very
+   top: an offset here would open the page with a band of sky above the header. */
+#top {
+  scroll-margin-top: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
