@@ -4,6 +4,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './auth.jsx';
 import { useLocale } from './locale.jsx';
 import { ToastProvider } from './components/Toast.jsx';
+import PublicShell from './components/PublicShell.jsx';
 import Layout from './components/Layout.jsx';
 import Icon from './components/Icon.jsx';
 
@@ -95,10 +96,26 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/control/login" element={<AdminLogin />} />
-        {/* reference libraries: readable before signing in, because a student
-            comparing a rate should not have to make an account first */}
-        <Route path="/savings-options" element={<Screen><SavingsOptionsPage /></Screen>} />
-        <Route path="/side-income" element={<Screen><SideIncomePage /></Screen>} />
+        {/* Reference libraries: readable before signing in, because a student
+            comparing a rate should not have to make an account first. They sit
+            outside the signed-in shell, so PublicShell supplies the header and
+            the page container that shell would otherwise provide. */}
+        <Route
+          path="/savings-options"
+          element={
+            <Screen>
+              <PublicShell><SavingsOptionsPage /></PublicShell>
+            </Screen>
+          }
+        />
+        <Route
+          path="/side-income"
+          element={
+            <Screen>
+              <PublicShell><SideIncomePage /></PublicShell>
+            </Screen>
+          }
+        />
 
         {/* administrator panel â€” separate area, separate guard */}
         <Route

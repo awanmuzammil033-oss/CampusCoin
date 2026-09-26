@@ -4715,3 +4715,153 @@ textarea.input:focus {
 .cc-noti-foot .btn:hover {
   background: var(--cc-primary-soft);
 }
+
+/* ==========================================================================
+   The frame for the two rooms that are readable signed out.
+
+   They live outside the signed-in shell, so nothing was giving them a header
+   or a page container: the content ran into the edges of the screen and the
+   page read as broken on a wide monitor. This is the same chrome the app has,
+   minus the parts that need an account.
+   ========================================================================== */
+
+.cc-public {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--cc-bg);
+  color: var(--cc-text);
+}
+
+.cc-public-bar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px;
+  background: color-mix(in srgb, var(--cc-surface) 92%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--cc-border);
+}
+.cc-public-bar .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  font-weight: 700;
+}
+.cc-public-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+/* the page container the shell would have given these pages */
+.cc-public-main {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 26px 20px 56px;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+/* the room's own heading block sits inside the container with room to breathe */
+.cc-public-main > * { min-width: 0; }
+.cc-public-main .page-head { margin-bottom: 4px; }
+.cc-public-main .breadcrumbs,
+.cc-public-main .breadcrumb { padding-inline: 0; }
+
+.cc-public-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  max-width: 1120px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 18px 20px 30px;
+  border-top: 1px solid var(--cc-border);
+  color: var(--cc-muted);
+  font-size: 0.85rem;
+}
+.cc-public-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--cc-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+.cc-public-back:hover { text-decoration: underline; }
+.cc-public-foot-links {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.cc-public-foot-links a { color: var(--cc-muted); text-decoration: none; }
+.cc-public-foot-links a:hover { color: var(--cc-primary); }
+
+/* a bare room page has no page shell behind it, so the surface behind the
+   content needs to be the card colour rather than the page colour */
+.cc-public-main > .card,
+.cc-public-main > section { width: 100%; }
+
+@media (max-width: 640px) {
+  .cc-public-bar { padding: 10px 12px; gap: 8px; }
+  .cc-public-bar .brand-name { display: none; }
+  .cc-public-main { padding: 18px 12px 44px; gap: 14px; }
+  .cc-public-signin { display: none; }
+  .cc-public-foot { padding: 16px 12px 26px; }
+  .cc-public-foot-links { gap: 12px; }
+}
+
+/* On a phone the bar has the two pickers, the theme and one action. Two
+   actions do not fit across 360px, and "Get Started" is the one to go: the
+   landing page and the footer both offer it, while somebody reading a rate
+   table usually wants to sign in. */
+@media (max-width: 640px) {
+  .cc-public-actions { gap: 6px; }
+  .cc-public-actions .btn-primary { display: none; }
+  .cc-public-signin { display: inline-flex; }
+  .cc-public-bar { gap: 8px; }
+}
+
+/* Prose on these two pages was set as small grey hints - right for a line under
+   a field, wrong for a three-line paragraph under a big heading. Give the
+   paragraphs a comfortable measure and line height instead of a smaller size,
+   and let the hint-sized ones stay hints. */
+.cc-public-main p.smallish.muted,
+.cc-public-main p.muted {
+  max-width: 72ch;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+/* the count line above a list is a hint, not a paragraph */
+.cc-public-main .smallish.muted:only-child {
+  font-size: 0.82rem;
+}
+
+/* The public bar's pickers keep their full label on a desktop ("$ USD",
+   "English") and drop to the symbol and the globe on a phone, exactly as the
+   signed-in topbar does. Two labelled pills plus two buttons and a link do not
+   fit across 360px, and a header that scrolls sideways is worse than a header
+   that says less. */
+@media (max-width: 640px) {
+  .cc-public-bar .picker-code { display: none; }
+  .cc-public-bar .icon-btn {
+    min-width: 38px;
+    min-height: 38px;
+    padding: 0 6px;
+  }
+  .cc-public-signin { padding: 6px 10px; }
+}
