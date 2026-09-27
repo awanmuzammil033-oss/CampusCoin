@@ -397,10 +397,10 @@ export default function GroupReconcilePage() {
           <div className="card cc-ledger-session">
             <div className="cc-ledger-session-head">
               <div>
-                <strong>
+                <strong className="cc-ledger-session-account">
                   {account ? `${account.code} — ${account.name}` : data.accountCode}
                 </strong>
-                <span className="smallish muted">
+                <span className="smallish muted cc-ledger-session-when">
                   {t('ledger.recon.statementDate')}: {dayLabel(data.statement.date)} ·{' '}
                   {t('ledger.recon.statementBalance')}:{' '}
                   <strong className="num">{ledgerAmount(data.statement.balance, currency)}</strong>

@@ -5893,6 +5893,11 @@ html {
   flex-wrap: wrap;
   margin-bottom: 6px;
 }
+/* the account and the statement's own figures are two lines of one block, and
+   without this they read as one run-on sentence: "1010 - Bank accountDay the
+   statement is dated:" */
+.cc-ledger-session-account { display: block; }
+.cc-ledger-session-when { display: block; margin-top: 2px; }
 
 /* the two columns, and the paste box beside the one-line form: one rule serves
    both, because they are the same "two things side by side" question */
