@@ -120,7 +120,27 @@ npm test          # every suite, one in-memory MongoDB each:
                   #   growth guide (the nudge is a key, never a sentence)
                   #   currency converter (cache, fallback, refusal)
                   #   group chat, poll cards & a bill's own member set
+                  #   group roles and the four capabilities
+                  #   the group's books: journal, trial balance, reconciliation
+                  #   the spending card and the scanned payment
 ```
+
+```powershell
+cd client
+node scripts/check-css-hooks.mjs   # every class hook the app asks for has a rule
+```
+
+**That last one is not a test suite, and it exists because a test could not have
+caught the bug it was written for.** Three sections of the landing page shipped
+with no CSS at all for any of their thirty class hooks, so they rendered as
+run-on text - "How this month readsThree words, and the rule behind each" - in
+the middle of a section that is supposed to be a card. The build was green, every
+key existed, the text was on the page and the browser checks passed: all of them
+are perfectly happy with text that exists. Only a person looking at the screen saw
+it. The check reads every `className` in the client and asks the stylesheet
+whether it knows the name; anything with no rule has to be on the allow-list with
+a reason next to it, so the list cannot grow quietly into a list that checks
+nothing.
 
 Each test file gets its own in-memory MongoDB, so tests never touch real data
 and need no setup. The converter suite never reaches the network: the upstream
@@ -157,7 +177,8 @@ CampusCoin/
 │       │                       GroupJournalPage, GroupTrialBalancePage,
 │       │                       GroupReconcilePage
 │       ├── i18n/               14 dictionaries + pending/ (English sources)
-│       └── styles/             design tokens & components (campuscoin.css)
+│       ├── styles/             design tokens & components (campuscoin.css)
+│       └── scripts/            check-css-hooks: every hook has a rule
 ├── db/schema.md                collections, fields, indexes, relationships
 └── docs/                       PRD, architecture, design, phases (spec pack)
 ```

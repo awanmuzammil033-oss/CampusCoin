@@ -6449,3 +6449,454 @@ html {
   transform: rotate(180deg);
 }
 
+
+/* ==========================================================================
+   Money Weather, Your money in order, and What if you changed one thing?
+
+   These three were written as components and shipped with NO rules for any of
+   their thirty class hooks, so the page rendered them as run-on text - "How this
+   month readsThree words, and the rule behind each" - in a section that is
+   supposed to be a card. They are written here in the landing's own tokens
+   (`--lp-*`), so they follow the visitor's light/dark choice like every other
+   section, and with the same card recipe the standout and feature grids use.
+
+   What each one is:
+
+   - WEATHER is one card on a band that drifts, holding three STATES. It has no
+     percentages and no scores on purpose, so nothing here may introduce a
+     figure; the three tones are a colour and a word, never a colour alone.
+   - THE JOURNEY is the dark strip: five stages with an arrow between each, and a
+     dot that travels along the arrow. The arrows are the whole idea - five things
+     side by side say "these are five things", five things with arrows between
+     them say "this is the order it happens in".
+   - THE LAB is a two-column panel: three questions on the left, each naming the
+     screen that really answers it, and the two standing offers on the right.
+   ========================================================================== */
+
+
+/* ------------------------- the three section heads ------------------------ */
+
+/* Money Weather, Your money in order and What if each carry their head inside
+   the <section>, so they need the same block shape the other sections get from
+   .lp2-standout-head: eyebrow above, title, one line, and a width a sentence can
+   be read in. */
+.lp2-weather-section > .lp2-weather-head,
+.lp2-journey-section > .lp2-journey-head,
+.lp2-lab-section > .lp2-lab-head {
+  max-width: 68ch;
+  margin-bottom: 22px;
+}
+.lp2-weather-section > .lp2-weather-head h2,
+.lp2-journey-section > .lp2-journey-head h2,
+.lp2-lab-section > .lp2-lab-head h2 {
+  margin: 6px 0 10px;
+}
+.lp2-weather-section > .lp2-weather-head p,
+.lp2-journey-section > .lp2-journey-head p,
+.lp2-lab-section > .lp2-lab-head p {
+  margin: 0;
+  color: var(--lp-muted);
+}
+
+/* These three sections are the only ones on the page that spell the eyebrow
+   without the "2", so the label was carrying no style at all and sat inline in
+   front of the heading. It shares the rule rather than repeating it. */
+.lp-eyebrow {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cc-primary);
+  margin-bottom: 10px;
+}
+
+/* ------------------------------ money weather ----------------------------- */
+
+.lp2-weather-section { padding-bottom: 40px; }
+
+.lp2-weather {
+  position: relative;
+  isolation: isolate;
+}
+
+/* the band: a wide, soft gradient that drifts slowly, so the strip reads as
+   weather rather than as a swatch. Transform only - nothing repaints. */
+.lp2-weather-band {
+  position: absolute;
+  inset: -18px -12px;
+  z-index: -1;
+  border-radius: 26px;
+  background: linear-gradient(120deg, var(--cc-primary-soft), var(--lp-surface-2) 58%, var(--cc-accent-soft));
+  overflow: hidden;
+  animation: lp2-weather-drift 18s ease-in-out infinite alternate;
+}
+.lp2-weather-glow {
+  position: absolute;
+  inset: -30% -10%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--cc-primary) 26%, transparent), transparent 70%);
+  animation: lp2-weather-glow 24s ease-in-out infinite alternate;
+}
+
+@keyframes lp2-weather-drift {
+  from { transform: translate3d(-1.5%, 0, 0) scale(1.02); }
+  to { transform: translate3d(1.5%, -1%, 0) scale(1.06); }
+}
+@keyframes lp2-weather-glow {
+  from { transform: translate3d(-4%, 2%, 0); }
+  to { transform: translate3d(5%, -3%, 0); }
+}
+
+.lp2-weather-card {
+  /* full width: the band behind it is full width, and a 760px card inside a
+     1100px band leaves a third of it empty */
+  background: var(--lp-card);
+  border: 1px solid var(--lp-border);
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: var(--lp-card-shadow);
+}
+/* Scoped to the card on purpose: Home.jsx uses the SAME class for this
+   section's own head (eyebrow, title, one line), and a rule written for the card
+   landed on both - which put an empty icon box in front of the section heading. */
+.lp2-weather-card .lp2-weather-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.lp2-weather-card .lp2-weather-head > div { display: grid; gap: 2px; min-width: 0; }
+.lp2-weather-card .lp2-weather-head strong { font-size: 1.02rem; }
+.lp2-weather-card .lp2-weather-head .smallish { color: var(--lp-muted); }
+.lp2-weather-ico {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  background: var(--cc-accent-soft);
+}
+
+.lp2-weather-states {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lp2-weather-state {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 13px;
+  border: 1px solid var(--lp-border);
+  border-radius: 14px;
+  background: var(--lp-surface-2);
+}
+.lp2-weather-state > div { display: grid; gap: 3px; min-width: 0; }
+.lp2-weather-state strong { font-size: 0.95rem; }
+.lp2-weather-state .smallish { color: var(--lp-muted); line-height: 1.45; }
+.lp2-weather-state-ico {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 0.95rem;
+  background: var(--lp-card);
+}
+/* three states, three colours - and each one also carries its word, so the
+   colour is never the only thing that says which state this is */
+.lp2-weather-state.calm .lp2-weather-state-ico { background: #dcfce7; }
+.lp2-weather-state.watch .lp2-weather-state-ico { background: #fef3c7; }
+.lp2-weather-state.act .lp2-weather-state-ico { background: #fee2e2; }
+.lp2-weather-state.calm { border-color: color-mix(in srgb, #16a34a 26%, var(--lp-border)); }
+.lp2-weather-state.watch { border-color: color-mix(in srgb, #d97706 26%, var(--lp-border)); }
+.lp2-weather-state.act { border-color: color-mix(in srgb, #dc2626 26%, var(--lp-border)); }
+
+.lp2-weather-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 14px 0 0;
+  font-size: 0.84rem;
+  color: var(--lp-muted);
+}
+
+/* --------------------------- your money, in order ------------------------- */
+
+.lp2-journey-section { padding-bottom: 40px; }
+
+.lp2-journey {
+  border-radius: 24px;
+  padding: 26px 22px;
+  background:
+    radial-gradient(120% 140% at 12% 0%, rgba(52, 211, 153, 0.20), transparent 58%),
+    linear-gradient(140deg, #0b2a22, #071c18 70%);
+  box-shadow: var(--lp-band-shadow);
+  overflow: hidden;
+}
+.lp2-journey-track {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lp2-journey-step {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+}
+.lp2-journey-card {
+  display: grid;
+  gap: 7px;
+  align-content: start;
+  width: 100%;
+  padding: 15px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: #eafff5;
+  transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+}
+.lp2-journey-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+.lp2-journey-card strong { font-size: 0.95rem; color: #ffffff; }
+.lp2-journey-ico {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.05rem;
+  background: rgba(255, 255, 255, 0.12);
+}
+.lp2-journey-ico.s1 { background: rgba(52, 211, 153, 0.22); }
+.lp2-journey-ico.s2 { background: rgba(251, 146, 60, 0.22); }
+.lp2-journey-ico.s3 { background: rgba(96, 165, 250, 0.22); }
+.lp2-journey-ico.s4 { background: rgba(167, 139, 250, 0.22); }
+.lp2-journey-ico.s5 { background: rgba(250, 204, 21, 0.22); }
+.lp2-journey-body {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: rgba(234, 255, 245, 0.78);
+}
+
+/* the arrow between two stages, with a dot that travels along it */
+.lp2-journey-arrow {
+  position: relative;
+  flex: none;
+  width: 26px;
+  align-self: center;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(52, 211, 153, 0.15), rgba(52, 211, 153, 0.55));
+}
+.lp2-journey-arrow::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-top: 2px solid rgba(52, 211, 153, 0.75);
+  border-right: 2px solid rgba(52, 211, 153, 0.75);
+  transform: translateY(-50%) rotate(45deg);
+}
+.lp2-journey-dot {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin-top: -2.5px;
+  border-radius: 50%;
+  background: #7ddfb4;
+  box-shadow: 0 0 8px rgba(125, 223, 180, 0.8);
+  animation: lp2-journey-dot 3.4s linear infinite;
+}
+/* each arrow's dot starts at a different place, so five of them never pulse
+   together */
+.lp2-journey-step:nth-child(2) .lp2-journey-dot { animation-delay: -0.7s; }
+.lp2-journey-step:nth-child(3) .lp2-journey-dot { animation-delay: -1.4s; }
+.lp2-journey-step:nth-child(4) .lp2-journey-dot { animation-delay: -2.1s; }
+.lp2-journey-step:nth-child(5) .lp2-journey-dot { animation-delay: -2.8s; }
+
+@keyframes lp2-journey-dot {
+  from { transform: translateX(0); opacity: 0; }
+  18% { opacity: 1; }
+  82% { opacity: 1; }
+  to { transform: translateX(21px); opacity: 0; }
+}
+
+/* --------------------------- what if you changed -------------------------- */
+
+.lp2-lab-section { padding-bottom: 40px; }
+
+.lp2-lab {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+.lp2-lab-questions {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.lp2-lab-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 15px 16px;
+  border: 1px solid var(--lp-border);
+  border-radius: 16px;
+  background: var(--lp-card);
+  box-shadow: var(--lp-card-shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.lp2-lab-row:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--lp-card-shadow-hover);
+  border-color: color-mix(in srgb, var(--cc-primary) 40%, var(--lp-border));
+}
+.lp2-lab-row > div { flex: 1 1 200px; min-width: 0; display: grid; gap: 3px; }
+.lp2-lab-row strong { font-size: 0.97rem; }
+.lp2-lab-row .smallish { color: var(--lp-muted); line-height: 1.45; }
+.lp2-lab-ico {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.05rem;
+}
+.lp2-lab-ico.s1 { background: var(--cc-primary-soft); }
+.lp2-lab-ico.s2 { background: var(--cc-accent-soft); }
+.lp2-lab-ico.s3 { background: #e0e7ff; }
+.lp2-lab-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--cc-primary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.lp2-lab-go:hover { text-decoration: underline; }
+
+.lp2-lab-side {
+  display: grid;
+  gap: 14px;
+}
+.lp2-lab-savings,
+.lp2-lab-growth {
+  display: grid;
+  gap: 7px;
+  padding: 18px;
+  border: 1px solid var(--lp-border);
+  border-radius: 18px;
+  background: var(--lp-card);
+  box-shadow: var(--lp-card-shadow);
+}
+.lp2-lab-savings {
+  background:
+    radial-gradient(120% 120% at 100% 0%, var(--cc-primary-soft), transparent 62%),
+    var(--lp-card);
+}
+.lp2-lab-savings > strong { font-size: 1.08rem; line-height: 1.3; }
+.lp2-lab-savings .smallish,
+.lp2-lab-growth .smallish { color: var(--lp-muted); line-height: 1.5; }
+.lp2-lab-savings .smallish.muted { color: var(--lp-muted); }
+.lp2-lab-savings .btn { justify-self: start; margin-top: 4px; }
+.lp2-lab-growth {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  column-gap: 11px;
+}
+.lp2-lab-growth-ico {
+  grid-row: 1;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.05rem;
+  background: var(--cc-accent-soft);
+}
+.lp2-lab-growth > div { grid-row: 1; display: grid; gap: 3px; min-width: 0; }
+.lp2-lab-growth strong { font-size: 0.95rem; }
+.lp2-lab-growth .lp2-lab-go { grid-column: 1 / -1; margin-top: 4px; }
+
+/* --------------------------------- a phone -------------------------------- */
+
+@media (max-width: 900px) {
+  .lp2-lab { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 760px) {
+  /* the five stages cannot stay in five columns on a phone: the strip becomes a
+     vertical run and the arrows point down instead of across */
+  .lp2-journey { padding: 20px 16px; }
+  .lp2-journey-track { grid-template-columns: 1fr; }
+  .lp2-journey-step { flex-direction: column; }
+  .lp2-journey-arrow {
+    width: 2px;
+    height: 18px;
+    margin-left: 27px;
+    background: linear-gradient(180deg, rgba(52, 211, 153, 0.15), rgba(52, 211, 153, 0.55));
+  }
+  .lp2-journey-arrow::after {
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: 0;
+    transform: translateX(-50%) rotate(135deg);
+  }
+  .lp2-journey-dot { display: none; }
+  .lp2-journey-card { width: 100%; }
+
+  .lp2-weather-card { padding: 16px; border-radius: 16px; }
+  .lp2-lab-row { padding: 13px 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp2-weather-band,
+  .lp2-weather-glow,
+  .lp2-journey-dot {
+    animation: none;
+  }
+}
+
+/* ------------------------- the role chip on the roster ---------------------- */
+
+/* The word on a roommate's row who has not signed up yet. A dropdown there would
+   be refused by the server - a role has no account to attach to - so the row says
+   when it becomes possible instead of offering something that errors. Dashed,
+   because it is a note rather than a state. */
+.cc-role-pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border: 1px dashed var(--cc-border);
+  border-radius: 999px;
+  font-size: 0.74rem;
+  color: var(--cc-muted);
+  white-space: nowrap;
+}
