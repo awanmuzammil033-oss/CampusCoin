@@ -9,6 +9,10 @@ import LocalePickers from '../components/LocalePickers.jsx';
 import ThemeToggle from '../components/ThemeToggle.jsx';
 import Icon from '../components/Icon.jsx';
 import HeroWaves from '../components/art/HeroWaves.jsx';
+import HeroOrbs from '../components/art/HeroOrbs.jsx';
+import MoneyJourney from '../components/landing/MoneyJourney.jsx';
+import FinancialWeather from '../components/landing/FinancialWeather.jsx';
+import WhatIfLab from '../components/landing/WhatIfLab.jsx';
 import HeroShowcase from '../components/art/HeroShowcase.jsx';
 import FaqArt from '../components/art/FaqArt.jsx';
 import CatsArt from '../components/art/CatsArt.jsx';
@@ -32,10 +36,16 @@ import CatsArt from '../components/art/CatsArt.jsx';
  * cards bob gently. prefers-reduced-motion switches all of it off in CSS.
  */
 /**
- * The links, in the order the page actually reads: home, what it does, the rooms
- * money lives in, insights, how it works, questions. Insights comes before
- * How-it-works because that is the order the sections are in - when the two
- * disagreed, the highlight followed the list and lit up the wrong link.
+ * The links, in the order the page actually reads: home, the tools the rooms
+ * money lives in, what it does, insights, how it works, questions. Two rules
+ * keep this list honest, and both were learned the hard way:
+ *
+ *  - INSIGHTS COMES BEFORE HOW-IT-WORKS, because that is the order the sections
+ *    are in. When the two disagreed, the highlight followed the list and lit up
+ *    the wrong link.
+ *  - TOOLS COMES BEFORE FEATURES, because the standout tools and the rooms were
+ *    moved up above "manage your money like a pro". The list is not a preference;
+ *    it is a reading of the page.
  */
 /**
  * How far below the top of the page a section should land when its link is
@@ -48,8 +58,8 @@ const HEADER_OFFSET = 96;
 
 const NAV = [
   { id: 'top', label: 'home.nav.home' },
-  { id: 'features', label: 'home.nav.features' },
   { id: 'rooms', label: 'home.nav.rooms' },
+  { id: 'features', label: 'home.nav.features' },
   { id: 'overview', label: 'home.nav.insights' },
   { id: 'how', label: 'home.nav.how' },
   { id: 'faq', label: 'home.nav.faq' },
@@ -116,14 +126,29 @@ export default function Home() {
   const [showTop, setShowTop] = useState(false);
   const [stuck, setStuck] = useState(false);
 
-  /* Scroll reveal: everything marked .lp-reveal rises in the first time it
-     enters the viewport; no observer support = show immediately. */
+  /* Scroll reveal: everything marked .lp-reveal rises the first time it enters
+     the viewport. This RE-RUNS when a form is opened or closed, because the
+     landing sections are unmounted while a form is up and a fresh set of them is
+     mounted after - a watcher created once at mount was watching elements that no
+     longer existed, and every section came back at opacity 0 with the page blank.
+     It also shows whatever is already on screen at once, so no section can be left
+     invisible waiting for a callback that has not fired yet. */
   useEffect(() => {
     const els = Array.from(document.querySelectorAll('.lp-reveal'));
     if (typeof IntersectionObserver === 'undefined') {
       els.forEach((el) => el.classList.add('is-in'));
       return undefined;
     }
+
+    // what the reader can already see, before any observer has spoken
+    const onScreen = () => {
+      for (const el of els) {
+        const box = el.getBoundingClientRect();
+        if (box.top < window.innerHeight && box.bottom > 0) el.classList.add('is-in');
+      }
+    };
+    onScreen();
+
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -135,9 +160,19 @@ export default function Home() {
       },
       { threshold: 0.1, rootMargin: '0px 0px -36px 0px' }
     );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
+    els.forEach((el) => {
+      if (!el.classList.contains('is-in')) io.observe(el);
+    });
+
+    // a section can be mounted already inside the viewport, and a resize can move
+    // one there without any scroll event
+    window.addEventListener('resize', onScreen);
+    return () => {
+      io.disconnect();
+      window.removeEventListener('resize', onScreen);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [panel]);
 
   /* Nav highlight + back-to-top visibility (+ header glass when scrolled). */
   useEffect(() => {
@@ -181,9 +216,11 @@ export default function Home() {
       <span id="top" aria-hidden="true" />
 
       {/* ------------------------- sticky glass header ------------------------ */}
-      {/* A panel is a white page, and this header is drawn for a dark hero:
-          without `is-panel` every word in it would be mint on white. */}
-      <header className={`lp-nav${stuck ? ' is-stuck' : ''}${panel ? ' is-panel' : ''}`}>
+      {/* The header does not change when a form opens. The form is a white
+          page and the header is mint on dark green, which stays readable over
+          white - and a reader who has not gone anywhere should not watch the
+          frame around them repaint itself. */}
+      <header className={`lp-nav${stuck ? ' is-stuck' : ''}`}>
         <Link to="/" className="brand lp-brand">
           <span className="brand-mark" aria-hidden="true">C</span>
           <span className="brand-name">{t('app.name')}</span>
@@ -282,6 +319,10 @@ export default function Home() {
           <>
         {/* ------------------------------ hero ------------------------------- */}
         <section className="lp2-hero" aria-label={t('home.previewAria')}>
+          {/* Lit spheres first, then the wave lines over them, then the picture:
+              a line is nearer than a sphere, and depth is the whole difference
+              between a background and a photograph. */}
+          <HeroOrbs />
           <HeroWaves />
 
           <div className="lp2-hero-copy lp-reveal">
@@ -334,49 +375,6 @@ export default function Home() {
           <div className="lp2-stat">
             <span className="lp2-stat-ico s4"><Icon name="shield" /></span>
             <div><strong>{t('home.stat4a')}</strong><span>{t('home.stat4b')}</span></div>
-          </div>
-        </section>
-
-        {/* ---------------------------- features ----------------------------- */}
-        <section id="features" className="lp2-section lp2-features" aria-label={t('home.featuresAria')}>
-          <div className="lp2-feat-head lp-reveal">
-            <span className="lp2-eyebrow">{t('home.featEyebrow')}</span>
-            <h2>{t('home.featTitle')}</h2>
-            <p>{t('home.featSub')}</p>
-            <Link className="btn btn-dark" to="/register">
-              {t('home.exploreFeatures')} <Icon name="arrowRight" />
-            </Link>
-          </div>
-
-          <div className="lp2-feat-grid">
-            <article className="lp2-fcard lp-reveal" style={{ transitionDelay: '60ms' }}>
-              <span className="lp2-f-ico t1"><Icon name="card" /></span>
-              <h3>{t('home.f1t')}</h3>
-              <p>{t('home.f1b')}</p>
-            </article>
-            <article className="lp2-fcard lp-reveal" style={{ transitionDelay: '120ms' }}>
-              <span className="lp2-f-ico t2"><Icon name="target" /></span>
-              <h3>{t('home.f2t')}</h3>
-              <p>{t('home.f2b')}</p>
-            </article>
-            <article className="lp2-fcard lp-reveal" style={{ transitionDelay: '180ms' }}>
-              <span className="lp2-f-ico t3"><Icon name="chart" /></span>
-              <h3>{t('home.f3t')}</h3>
-              <p>{t('home.f3b')}</p>
-            </article>
-            <article className="lp2-fcard lp-reveal" style={{ transitionDelay: '240ms' }}>
-              <span className="lp2-f-ico t4"><Icon name="bulb" /></span>
-              <h3>{t('home.f4t')}</h3>
-              <p>{t('home.f4b')}</p>
-            </article>
-            <article className="lp2-fcard lp-reveal" style={{ transitionDelay: '300ms' }}>
-              <span className="lp2-f-ico t5"><Icon name="sparkles" /></span>
-              <h3>
-                {t('home.f5t')} <em className="lp2-optional">{t('home.optionalTag')}</em>
-              </h3>
-              <p>{t('home.f5b')}</p>
-              <span className="lp2-fcard-arrow"><Icon name="arrowRight" /></span>
-            </article>
           </div>
         </section>
 
@@ -452,7 +450,54 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ---------------------------- features ----------------------------- */}
+        <section id="features" className="lp2-section lp2-features" aria-label={t('home.featuresAria')}>
+          <div className="lp2-feat-head lp-reveal">
+            <span className="lp2-eyebrow">{t('home.featEyebrow')}</span>
+            <h2>{t('home.featTitle')}</h2>
+            <p>{t('home.featSub')}</p>
+            <Link className="btn btn-dark" to="/register">
+              {t('home.exploreFeatures')} <Icon name="arrowRight" />
+            </Link>
+          </div>
+
+          <div className="lp2-feat-grid">
+            <article className="lp2-fcard lp-reveal" style={{ transitionDelay: '60ms' }}>
+              <span className="lp2-f-ico t1"><Icon name="card" /></span>
+              <h3>{t('home.f1t')}</h3>
+              <p>{t('home.f1b')}</p>
+            </article>
+            <article className="lp2-fcard lp-reveal" style={{ transitionDelay: '120ms' }}>
+              <span className="lp2-f-ico t2"><Icon name="target" /></span>
+              <h3>{t('home.f2t')}</h3>
+              <p>{t('home.f2b')}</p>
+            </article>
+            <article className="lp2-fcard lp-reveal" style={{ transitionDelay: '180ms' }}>
+              <span className="lp2-f-ico t3"><Icon name="chart" /></span>
+              <h3>{t('home.f3t')}</h3>
+              <p>{t('home.f3b')}</p>
+            </article>
+            <article className="lp2-fcard lp-reveal" style={{ transitionDelay: '240ms' }}>
+              <span className="lp2-f-ico t4"><Icon name="bulb" /></span>
+              <h3>{t('home.f4t')}</h3>
+              <p>{t('home.f4b')}</p>
+            </article>
+            <article className="lp2-fcard lp-reveal" style={{ transitionDelay: '300ms' }}>
+              <span className="lp2-f-ico t5"><Icon name="sparkles" /></span>
+              <h3>
+                {t('home.f5t')} <em className="lp2-optional">{t('home.optionalTag')}</em>
+              </h3>
+              <p>{t('home.f5b')}</p>
+              <span className="lp2-fcard-arrow"><Icon name="arrowRight" /></span>
+            </article>
+          </div>
+        </section>
+
         {/* ------------------------ financial overview ----------------------- */}
+        {/* ---------------------------- money journey ----------------------- */}
+        {/* The shape of a month, in the order the money moves in it. */}
+        
+
         <section id="overview" className="lp2-section lp2-overview">
           <div className="lp2-ov-copy lp-reveal">
             <span className="lp2-eyebrow">{t('home.ovEyebrow')}</span>
@@ -586,130 +631,43 @@ export default function Home() {
         </section>
 
         {/* -------------------------- smart features ------------------------- */}
-        <section className="lp2-section lp2-smart">
-          <div className="lp2-smart-head lp-reveal">
-            <span className="lp2-eyebrow">{t('home.smartEyebrow')}</span>
-            <h2>{t('home.smartTitle')}</h2>
-          </div>
-
-          <div className="lp2-smart-grid">
-            {/* suggestion demo */}
-            <div className="lp2-sugcard lp-reveal" style={{ transitionDelay: '60ms' }}>
-              <div className="lp2-receipt">
-                <Icon name="receipt" size={20} />
-                <div>
-                  <strong>{t('home.sugShop')}</strong>
-                  <small>2 Sep · 1:40 PM</small>
-                </div>
-              </div>
-              <div className="lp2-sugbox">
-                <span className="lp2-suglabel"><Icon name="sparkles" /> {t('home.sugLabel')}</span>
-                <div className="lp2-sugrow">
-                  <span className="mp-ico t4"><Icon name="burger" /></span>
-                  <div>
-                    <strong>{t('home.catFood')}</strong>
-                    <small>{t('home.sugConf')}</small>
-                  </div>
-                </div>
-                <div className="lp2-sugbtns">
-                  <span className="lp2-mini-btn solid">{t('home.sugAccept')}</span>
-                  <span className="lp2-mini-btn">{t('home.sugChange')}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="lp2-smart-text lp-reveal" style={{ transitionDelay: '120ms' }}>
-              <h3>{t('home.sugTitle')}</h3>
-              <p>{t('home.sugBody')}</p>
-              <Link className="lp2-inline-link" to="/register">
-                {t('home.sugHow')} <Icon name="arrowRight" />
-              </Link>
-            </div>
-
-            {/* saving tips */}
-            <article className="lp2-tipcard lp-reveal" style={{ transitionDelay: '180ms' }}>
-              <span className="lp2-f-ico t4"><Icon name="bulb" /></span>
-              <h3>{t('home.tipCardT')}</h3>
-              <p>{t('home.tipDemo')}</p>
-              <strong className="lp2-saving">{t('home.tipPotential')}</strong>
-              <div className="lp2-sugbtns">
-                <span className="lp2-mini-btn solid">{t('home.tipSave')}</span>
-                <span className="lp2-mini-btn">{t('home.tipDismiss')}</span>
-              </div>
-            </article>
-
-            {/* reports */}
-            <article className="lp2-repcard lp-reveal" style={{ transitionDelay: '240ms' }}>
-              <span className="lp2-f-ico t3"><Icon name="chartUp" /></span>
-              <h3>{t('home.repCardT')}</h3>
-              <div className="lp2-minicharts" aria-hidden="true">
-                <div className="lp2-mbars">
-                  <span style={{ height: '46%' }} /><span style={{ height: '74%' }} />
-                  <span style={{ height: '56%' }} /><span style={{ height: '88%' }} />
-                  <span style={{ height: '64%' }} />
-                </div>
-                <span className="lp2-mdonut" />
-              </div>
-              <strong>{t('home.repTitle')}</strong>
-              <p>{t('home.repBody')}</p>
-              <Link className="lp2-inline-link" to="/register">
-                {t('home.repBtn')} <Icon name="arrowRight" />
-              </Link>
-            </article>
-          </div>
-        </section>
+        
 
         {/* --------------------------- categories ---------------------------- */}
-        <section className="lp2-section lp2-cats">
-          <div className="lp2-cats-copy lp-reveal">
-            <span className="lp2-eyebrow">{t('home.catsEyebrow')}</span>
-            <h2>{t('home.catsTitle')}</h2>
-            <p>{t('home.catsSub')}</p>
-            <div className="lp2-catpills">
-              {[
-                { icon: 'burger', key: 'home.catFood', cls: 't4' },
-                { icon: 'bus', key: 'home.catTransport', cls: 't3' },
-                { icon: 'house', key: 'home.catHostel', cls: 't5' },
-                { icon: 'books', key: 'home.catAcademics', cls: 't1' },
-                { icon: 'gamepad', key: 'home.catEntertainment', cls: 't2' },
-                { icon: 'card', key: 'home.catSubs', cls: 't3' },
-              ].map((c) => (
-                <span key={c.key} className="lp2-catpill">
-                  <span className={`lp2-f-ico ${c.cls}`}><Icon name={c.icon} /></span>
-                  {t(c.key)}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="lp2-cats-photo lp-reveal" role="img" aria-label={t('home.handDreams')}>
-            {/* flat SVG scene: a campus day — food cart, bus, hostel, books,
-                a game and a subscription, with three students living it */}
-            <CatsArt />
-            <div className="lp2-hand hp3" aria-hidden="true">{t('home.handDreams')}</div>
-          </div>
-        </section>
+        
 
         {/* ----------------------------- privacy ----------------------------- */}
-        <section className="lp2-privacy lp-reveal" id="privacy">
-          <div className="lp2-priv-left">
-            <span className="lp2-shield"><Icon name="shield" size={30} /></span>
-            <div>
-              <span className="lp2-eyebrow">{t('home.privEyebrow')}</span>
-              <h2>{t('home.privTitle')}</h2>
-              <p>{t('home.privBody')}</p>
-            </div>
-          </div>
-          <ul className="lp2-priv-list">
-            <li><Icon name="check" /> {t('home.privC1')}</li>
-            <li><Icon name="check" /> {t('home.privC2')}</li>
-            <li><Icon name="check" /> {t('home.privC3')}</li>
-            <li><Icon name="check" /> {t('home.privC4')}</li>
-            <li><Icon name="check" /> {t('home.privC5')}</li>
-          </ul>
-        </section>
+        
 
         {/* -------------------------- how it works --------------------------- */}
+        {/* ------------------------- financial weather --------------------- */}
+        <section id="weather" className="lp2-section lp2-weather-section lp-reveal" aria-labelledby="weather-heading">
+          <div className="lp2-weather-head">
+            <span className="lp-eyebrow">{t('home.weather.eyebrow')}</span>
+            <h2 id="weather-heading">{t('home.weather.title')}</h2>
+            <p>{t('home.weather.sub')}</p>
+          </div>
+          <FinancialWeather />
+        </section>
+<section id="journey" className="lp2-section lp2-journey-section lp-reveal" aria-labelledby="journey-heading">
+          <div className="lp2-journey-head">
+            <span className="lp-eyebrow">{t('home.journey.eyebrow')}</span>
+            <h2 id="journey-heading">{t('home.journey.title')}</h2>
+            <p>{t('home.journey.sub')}</p>
+          </div>
+          <MoneyJourney />
+        </section>
+<section id="lab" className="lp2-section lp2-lab-section lp-reveal" aria-labelledby="lab-heading">
+          <div className="lp2-lab-head">
+            <span className="lp-eyebrow">{t('home.lab.eyebrow')}</span>
+            <h2 id="lab-heading">{t('home.lab.title')}</h2>
+            <p>{t('home.lab.sub')}</p>
+          </div>
+          <WhatIfLab />
+        </section>
+{/* The month in three words, and the rule behind each. */}
+        
+
         <section id="how" className="lp-how lp2-section" aria-labelledby="how-heading">
           <span className="lp2-eyebrow">{t('home.nav.how')}</span>
           <h2 id="how-heading">{t('home.howTitle')}</h2>
@@ -736,6 +694,10 @@ export default function Home() {
         {/* The picture on the left and the questions on the right: the questions
             are the point of a FAQ, and a narrow column of long sentences is the
             wrong shape for them. */}
+        {/* --------------------------- what if lab -------------------------- */}
+        {/* Three questions about a month that has not happened yet. */}
+        
+
         <section id="faq" className="lp2-section lp2-faq" aria-labelledby="faq-heading">
           <FaqArt />
           <div className="lp2-faq-copy">

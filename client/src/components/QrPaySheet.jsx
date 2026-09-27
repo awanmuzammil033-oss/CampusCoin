@@ -6,7 +6,7 @@ import Modal from './Modal.jsx';
 import FormField from './FormField.jsx';
 import Icon from './Icon.jsx';
 import { api } from '../api.js';
-import { money, getLedgerCurrency } from '../money.js';
+import { money, moneyInLedger, getDisplayCurrency, getLedgerCurrency } from '../money.js';
 import { useLocale } from '../locale.jsx';
 import { dayLabel } from '../dates.js';
 
@@ -358,7 +358,14 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
 
   const quote = scanned?.quote || paid?.quote || null;
   const converted = Boolean(quote?.converted);
-  const payable = quote ? money(quote.amount) : '';
+  // The amount that will actually be recorded, in the currency it is denominated
+  // in. NOT money(): that converts into the display currency, and a payment screen
+  // that quotes a converted figure is asking for consent to a number the person is
+  // not going to be charged. When the display currency is something else, the
+  // converted figure goes underneath rather than instead.
+  const payable = quote ? moneyInLedger(quote.amount) : '';
+  const inDisplay =
+    quote && getDisplayCurrency() !== quote.to ? money(quote.amount) : '';
   const categoryName = paid
     ? paid.category?.id
       ? categoryNames.get(paid.category.id) || '—'
@@ -525,6 +532,15 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
               </div>
             )}
 
+            {inDisplay && (
+              <div className="cc-qr-row" style={ROW_STYLE}>
+                <dt className="smallish muted">{t('qr.inDisplay')}</dt>
+                <dd className="num mb-0" style={{ minWidth: 0 }}>
+                  {inDisplay}
+                </dd>
+              </div>
+            )}
+
             {scanned.code.note && (
               <div className="cc-qr-row" style={ROW_STYLE}>
                 <dt className="smallish muted">{t('ui.note')}</dt>
@@ -586,7 +602,8 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
             <div className="cc-qr-row" style={ROW_STYLE}>
               <dt className="smallish muted">{t('ui.amount')}</dt>
               <dd className="num mb-0" style={{ minWidth: 0 }}>
-                {money(paid.transaction?.amount ?? paid.quote?.amount)}
+                {/* the recorded figure, in the currency it was recorded in */}
+                {moneyInLedger(paid.transaction?.amount ?? paid.quote?.amount)}
               </dd>
             </div>
             <div className="cc-qr-row" style={ROW_STYLE}>

@@ -279,5 +279,33 @@ CampusCoin/
   the balance is never a stored number: recording the expense *is* the
   deduction, and the balance that comes back is the same arithmetic the
   dashboard does.
+- **Sign in, register and the staff door open on this page, never on a page of
+  their own** — the three forms are a state of the landing page (held in the URL,
+  so Back and a refresh both behave), and the navbar and the footer stay exactly
+  where they were. Nothing is re-rendered behind them, and **the header keeps its
+  own dark glass in every state**: it used to be transparent until you scrolled,
+  which looked good over the dark hero and made every word in the bar invisible
+  the moment a white form appeared underneath it. A navbar that has to repaint
+  itself when the content changes is exactly what this one must not do, so it
+  carries its backing always and scrolling only adds a shadow. The cross-links
+  inside the forms ("create an account", the staff door) swap the panel rather
+  than navigating, and typing `/login` still works for anybody who wants a page
+  of its own.
+- **A section that is revealed on scroll is revealed by a watcher that is still
+  watching** — the landing sections fade in through an `.lp-reveal` observer. That
+  observer used to be created once, on mount, and opening a form unmounts the
+  whole landing subtree; when it came back it was a page full of sections at
+  opacity 0 — present, scrollable, blank. The observer now re-runs whenever a
+  panel opens or closes, and anything already on screen is shown at once rather
+  than waiting for a callback.
+- **The nav reads the page, it is not a menu of its own** — the link list is
+  written in the order the sections are in, because when the two disagreed the
+  highlight followed the list and lit up the wrong link. That is why **Insights
+  comes before How It Works**, and why **Tools comes before Features**: the
+  standout tools and the three rooms were moved up above "manage your money like
+  a pro", and the header was left to match rather than left to disagree. A link
+  also lands on its own section and not the next one, measured from the header
+  rather than from the top of the document.
+
 ---
 

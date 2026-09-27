@@ -6,42 +6,34 @@
   "insights.analysisLabel": "Analysis",
   "insights.insightLabel": "Insight:",
   "insights.tipLabel": "Tip:",
-
   "insights.analysisOne": "{category} was the biggest, at {amount}.",
   "insights.analysisTwo": "{category} was the biggest at {amount}, then {nextCategory} at {nextAmount}.",
   "insights.analysisNone": "Nothing was spent in {month} — every entry that month was income.",
-
   "insights.p.dining_out": "Eating out came to {amount} over {count} visits. Cooking one of those at home instead would keep about {saving}.",
   "insights.p.many_small": "{category} was {count} separate entries for {amount} — about {average} each time.",
   "insights.p.weekend": "About {percent} of the month — {amount} over {count} entries — landed on a Saturday or a Sunday.",
   "insights.p.idle_subscriptions": "{count} subscriptions are still being paid for and not used: {amount} a month.",
-
   "insights.basis.one": "Based on the {count} transaction you logged in {month}.",
   "insights.basis.other": "Based on the {count} transactions you logged in {month}.",
   "insights.estimateFood": "The saving above is worked out at about {percent} of what you spent on food — planning arithmetic, not a promise.",
   "insights.estimateWeekend": "The weekend line only appears once about {threshold} of a month lands on a weekend.",
-
   "insights.noPatterns": "Nothing stands out this month — no pattern here is big enough to name.",
   "insights.emptyTitle": "Nothing to read yet",
   "insights.emptyBody": "Nothing was logged in {month}, so there is no month to read. Add an entry, or pick another month.",
   "insights.errorTitle": "This month did not load",
-
   "qr.title": "Scan a payment code",
   "qr.open": "Scan a code",
   "qr.close": "Close",
-
   "qr.cameraStarting": "Turning the camera on…",
   "qr.cameraHint": "Point the camera at the payment code. Nothing is paid until you press Pay.",
   "qr.cameraUnsupported": "This browser will not give a web page a camera, so there is nothing to scan from here. Paste the code below — it does exactly the same thing.",
   "qr.cameraDenied": "The camera permission was refused, so the camera is off. Paste the code below — it does exactly the same thing.",
   "qr.cameraUnavailable": "No camera could be started on this device. Paste the code below — it does exactly the same thing.",
   "qr.cameraTryAgain": "Try the camera again",
-
   "qr.code": "Payment code",
   "qr.codeHelp": "Paste the whole code, including the part after the ?.",
   "qr.read": "Read the code",
   "qr.reading": "Reading the code…",
-
   "qr.confirmTitle": "Ready to pay",
   "qr.merchant": "Merchant",
   "qr.asScanned": "As the code states it",
@@ -52,12 +44,12 @@
   "qr.nothingPaid": "Nothing has been paid yet. Press Pay to record it.",
   "qr.pay": "Pay {amount}",
   "qr.paying": "Paying…",
-
   "qr.recordedTitle": "Recorded",
   "qr.balanceNow": "Balance now",
   "qr.kept": "The code's own {amount} {currency} is kept on the entry, with the rate and the day it was good for.",
   "qr.belowZero": "This payment has taken the balance below zero. The entry is recorded — the next income is what fixes it.",
   "qr.categoryChosen": "Nothing in the merchant's name matched a category, so this was filed under the one you use most. Change it on the entry if that is wrong.",
   "qr.noCategory": "Uncategorised",
-  "qr.editEntry": "Edit entry"
+  "qr.editEntry": "Edit entry",
+  "qr.inDisplay": "in your display currency"
 }
