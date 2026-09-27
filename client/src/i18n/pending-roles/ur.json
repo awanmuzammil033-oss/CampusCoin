@@ -1,0 +1,19 @@
+{
+  "groups.roleLegend": "ہر کردار یہاں کیا کر سکتا ہے:",
+  "groups.role.admin": "مالک / مدیر",
+  "groups.role.treasurer": "خزانہ دار",
+  "groups.role.auditor": "ناظر",
+  "groups.role.member": "رکن",
+  "groups.roleCan.admin": "سب کچھ: بل، اندراج، کردار، کتابیں، اور گروپ بند کرنا۔",
+  "groups.roleCan.treasurer": "بل شامل کرتا ہے، حساب صاف کرتا ہے، روزنامے میں اندراج درج کرتا ہے اور مطابقت کرتا ہے۔ کردار تبدیل نہیں کر سکتا اور نہ گروپ حذف کر سکتا ہے۔",
+  "groups.roleCan.auditor": "سب کچھ پڑھ سکتا ہے اور کسی بل یا روزنامے کے اندراج پر نشان لگا سکتا ہے۔ کچھ بھی تبدیل نہیں کرتا۔",
+  "groups.roleCan.member": "گروپ، اس کے بل اور اس کی ہسٹری دیکھ سکتا ہے۔ کچھ بھی شامل نہیں کرتا۔",
+  "groups.roleFor": "{name} کا کردار",
+  "groups.roleChanged": "{name} اب {role} ہیں۔",
+  "groups.roleNoManage": "کردار صرف گروپ مالک تبدیل کر سکتا ہے۔ اگر آپ کو مزید چاہیے تو ان سے درخواست کریں۔",
+  "groups.ledgerJournal": "روزنامہ",
+  "groups.ledgerTrial": "آزمائشی تراز",
+  "groups.ledgerReconcile": "مطابقت کریں",
+  "groups.roleNeedsAccount": "ابھی رجسٹر نہیں ہوا ہے۔ رجسٹر کرتے ہی کردار بھر جاتا ہے — تب ہی دے دیں۔",
+  "groups.roleAfterSignup": "رجسٹر کے بعد کا کردار"
+}

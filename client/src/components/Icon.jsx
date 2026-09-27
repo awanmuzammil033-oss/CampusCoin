@@ -68,6 +68,9 @@ const EMOJI = {
   trophy: '🏆', wave: '🌊', hand: '👋', layers: '🗂️',
   sparkle: '✨', sparkles: '✨', question: '❓', help: '❓',
   mic: '🎤', micLive: '🎙', stop: '⏹', record: '⏺',
+  // the scan button: a camera, because a QR square is one of the glyphs that
+  // goes missing on somebody else's machine and arrives as an empty box
+  scan: '📷',
 };
 
 export const ICON_NAMES = Object.keys(EMOJI);

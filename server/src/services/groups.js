@@ -15,7 +15,7 @@ import { toDec, toNum, formatMoney, isPositiveAmount } from '../utils/money.js';
  *
  *  1. ISOLATION — every read starts at the person, not at the id. A group is
  *     only ever found through `loadGroupFor` (owner or member) or
- *     `loadOwnedGroup`, so somebody who is not in the group gets a 404 and
+ *     `loadAdminGroup`, so somebody who is not in the group gets a 404 and
  *     never a byte of it. Bills and settlements are then scoped by group id.
  *
  *  2. MONEY — the split is worked out once, on the server, in whole cents,
@@ -118,6 +118,28 @@ export async function listGroups(user, { includeArchived = false } = {}) {
         updatedAt: 1,
         isOwner: { $eq: ['$owner', user._id] },
         memberCount: { $size: '$members' },
+        // the viewer's own seat and role, without loading the member rows: the
+        // list shows what each group allows, and a second query per row to find
+        // out would be the slowest thing on the screen.
+        //
+        // The roles are gathered with $map and NOT with `$members.role`, because
+        // projecting a field out of an array of subdocuments DROPS the documents
+        // that have no value for it. A group whose owner has no stored role - the
+        // role is implied - would come back with a shorter array, and every index
+        // after the gap would name the wrong person. $map keeps the positions and
+        // fills the gaps with null, which is what an index needs.
+        myIndex: { $indexOfArray: ['$members.user', user._id] },
+        myRole: {
+          $let: {
+            vars: { at: { $indexOfArray: ['$members.user', user._id] } },
+            in: {
+              $ifNull: [
+                { $arrayElemAt: [{ $map: { input: '$members', as: 'm', in: '$$m.role' } }, '$$at'] },
+                null,
+              ],
+            },
+          },
+        },
         expenseCount: { $ifNull: [{ $arrayElemAt: ['$groupexpenses.count', 0] }, 0] },
         settlementCount: { $ifNull: [{ $arrayElemAt: ['$groupsettlements.count', 0] }, 0] },
         billedTotal: { $ifNull: [{ $arrayElemAt: ['$groupexpenses.total', 0] }, 0] },
@@ -135,6 +157,11 @@ export async function listGroups(user, { includeArchived = false } = {}) {
       archived: Boolean(row.archived),
       isOwner: Boolean(row.isOwner),
       memberCount: row.memberCount,
+      // position 0 is the owner, so it is an admin whatever the row says
+      viewer: capabilitiesForRole(
+        row.myIndex === 0 ? 'admin' : row.myRole || 'member',
+        Number(row.myIndex ?? -1)
+      ),
       expenseCount: row.expenseCount,
       settlementCount: row.settlementCount,
       billedTotal: toNum(row.billedTotal) || 0,
@@ -158,7 +185,7 @@ export async function groupDetail(user, groupId) {
 
   return {
     group: toPublicGroup(group, user),
-    members: group.members.map((member, index) => toPublicMember(member, index)),
+    members: group.members.map((member, index) => toPublicMember(member, index, group)),
     expenses: expenses.map((expense) => toPublicExpense(expense, group)),
     settlements: settlements.map((row) => toPublicSettlement(row, group)),
     balances,
@@ -191,7 +218,7 @@ export async function createGroup(user, { name, currency, members } = {}) {
 
 /** Owner only — a roommate is added, never removed, so no index can shift. */
 export async function addMember(user, groupId, { name, email, userId } = {}) {
-  const group = await loadOwnedGroup(user, groupId);
+  const group = await loadAdminGroup(user, groupId, 'manage');
   if (group.members.length >= MAX_MEMBERS) {
     throw badRequest(`A group holds at most ${MAX_MEMBERS} people.`);
   }
@@ -221,8 +248,77 @@ export async function addMember(user, groupId, { name, email, userId } = {}) {
   return toPublicGroup(group, user);
 }
 
+/**
+ * Move somebody between roles. Admin only, and two rows are untouchable: the
+ * owner (an admin by construction) and a member who has not signed up yet - a
+ * role with no account behind it would quietly stop applying the moment the
+ * link is filled in, so it is refused with a sentence that says why.
+ */
+export async function setMemberRole(user, groupId, { memberIndex: at, role } = {}) {
+  const group = await loadAdminGroup(user, groupId, 'manage');
+  const index = memberIndex(at);
+  if (index === null || index >= group.members.length) {
+    throw badRequest('Choose somebody from this group.');
+  }
+  if (index === 0) {
+    throw badRequest('The owner is an admin by definition, and cannot be given another role.');
+  }
+  if (!ROLES_ASSIGNABLE.includes(role)) {
+    throw badRequest('That is not one of the four group roles.');
+  }
+  const member = group.members[index];
+  if (!member.user) {
+    throw badRequest(
+      `${member.name} has not signed up yet, so a role would not stick. It fills in itself the moment they register — give them a role after that.`
+    );
+  }
+  member.role = role;
+  await group.save();
+  return toPublicGroup(group, user);
+}
+
+/**
+ * Raise a flag on a bill (GRP-1, the auditor's one power over a record they may
+ * not change). A flag is a question, not an edit: the row is untouched, and the
+ * reason is what makes it useful.
+ */
+export async function flagExpense(user, groupId, expenseId, { reason } = {}) {
+  const group = await loadGroupFor(user, groupId);
+  requireCapability(group, user, 'flag');
+  const note = String(reason || '').trim();
+  if (note.length < 3) throw badRequest('Say what looks wrong, in a few words.');
+  if (note.length > 200) throw badRequest('A flag can be at most 200 characters long.');
+  const expense = await GroupExpense.findOne({ _id: expenseId, group: group._id });
+  if (!expense) throw notFound();
+  expense.flag = {
+    by: user._id,
+    byName: group.members[group.members.findIndex((m) => m.user && String(m.user) === String(user._id))]?.name || '',
+    reason: note,
+    at: new Date(),
+    resolvedAt: null,
+    resolvedBy: null,
+  };
+  await expense.save();
+  return toPublicExpense(expense, group);
+}
+
+/** Clear a flag once the treasurer or the owner has looked at it. */
+export async function clearExpenseFlag(user, groupId, expenseId, { note } = {}) {
+  const group = await loadGroupFor(user, groupId);
+  requireCapability(group, user, 'addBill');
+  const expense = await GroupExpense.findOne({ _id: expenseId, group: group._id });
+  if (!expense) throw notFound();
+  expense.flag = {
+    ...(expense.flag ? expense.flag.toObject?.() ?? expense.flag : {}),
+    resolvedAt: new Date(),
+    resolvedBy: user._id,
+    resolution: String(note || '').trim().slice(0, 200),
+  };
+  await expense.save();
+  return toPublicExpense(expense, group);
+}
 export async function updateGroup(user, groupId, { name, archived } = {}) {
-  const group = await loadOwnedGroup(user, groupId);
+  const group = await loadAdminGroup(user, groupId, 'manage');
 
   if (name !== undefined) {
     const cleanName = String(name || '').trim();
@@ -242,7 +338,7 @@ export async function updateGroup(user, groupId, { name, archived } = {}) {
  * delete has to be asked for on purpose. The bills and settlements go with it.
  */
 export async function deleteGroup(user, groupId) {
-  const group = await loadOwnedGroup(user, groupId);
+  const group = await loadAdminGroup(user, groupId, 'manage');
   await Promise.all([
     GroupExpense.deleteMany({ group: group._id }),
     GroupSettlement.deleteMany({ group: group._id }),
@@ -258,6 +354,8 @@ export async function deleteGroup(user, groupId) {
  */
 export async function addExpense(user, groupId, payload = {}) {
   const group = await loadGroupFor(user, groupId);
+  // logging money is a treasurer's job, not a right of membership
+  requireCapability(group, user, 'addBill');
 
   const title = String(payload.title || '').trim();
   if (!title) throw badRequest('Please give the bill a short name, e.g. "Mess bill".');
@@ -318,6 +416,7 @@ export async function addExpense(user, groupId, payload = {}) {
  */
 export async function settleUp(user, groupId, { fromIndex, toIndex, amount, note } = {}) {
   const group = await loadGroupFor(user, groupId);
+  requireCapability(group, user, 'addBill');
 
   const from = memberIndex(fromIndex);
   const to = memberIndex(toIndex);
@@ -595,6 +694,104 @@ function exactCents(totalCents, positions, rawShares) {
   return cents;
 }
 
+/* ---------------------------------- roles ---------------------------------- */
+
+/**
+ * What each role may do, in one table. `rank` only orders the roles for the
+ * dropdown; the permission is the list, never the number.
+ *
+ * view       read the group: its members, its bills, its balances, and the
+ *            ledger pages (journal, trial balance, reconciliation)
+ * addBill    log a shared bill and settle up between members
+ * postJournal write to the group books
+ * reconcile  run a bank reconciliation
+ * flag       raise and clear a flag on a bill or a journal entry
+ * manage     add a roommate, rename, archive, delete the group, set roles
+ */
+export const GROUP_ROLES = [
+  { key: 'admin', rank: 4, can: ['view', 'addBill', 'postJournal', 'reconcile', 'flag', 'manage'] },
+  { key: 'treasurer', rank: 3, can: ['view', 'addBill', 'postJournal', 'reconcile', 'flag'] },
+  { key: 'auditor', rank: 2, can: ['view', 'flag'] },
+  { key: 'member', rank: 1, can: ['view'] },
+];
+
+const CAPABILITIES = new Map(GROUP_ROLES.map((role) => [role.key, new Set(role.can)]));
+const ROLES_ASSIGNABLE = GROUP_ROLES.map((role) => role.key);
+
+/**
+ * The role of one person in one group.
+ *
+ * Position 0 is the owner and is an admin BY CONSTRUCTION, whatever the stored
+ * row says: there has to be one person who can always fix the roles. A member
+ * row with no role - a group written before roles existed - reads as `member`,
+ * which is the least power in the table.
+ */
+export function roleOf(group, memberIndex) {
+  if (memberIndex === 0 || String(group.owner) === String(group.members?.[memberIndex]?.user || '')) {
+    return 'admin';
+  }
+  const stored = group.members?.[memberIndex]?.role;
+  return CAPABILITIES.has(stored) ? stored : 'member';
+}
+
+/** The role the signed-in person holds in this group, or null if not a member. */
+export function roleForUser(group, user) {
+  const index = group.members.findIndex((member) => member.user && String(member.user) === String(user._id));
+  if (index < 0) return String(group.owner) === String(user._id) ? 'admin' : null;
+  return roleOf(group, index);
+}
+
+/** The capability set of a role, as the client reads it. */
+export function capabilitiesForRole(role, index = -1) {
+  const known = CAPABILITIES.has(role) ? role : 'member';
+  const can = {};
+  for (const key of ['view', 'addBill', 'postJournal', 'reconcile', 'flag', 'manage']) {
+    can[key] = CAPABILITIES.get(known).has(key);
+  }
+  return {
+    role: known,
+    rank: GROUP_ROLES.find((row) => row.key === known).rank,
+    can,
+    index,
+  };
+}
+
+/**
+ * Everything the client needs to render this person's powers, and everything the
+ * server needs to check them, from the same source.
+ */
+export function capabilitiesFor(group, user) {
+  const index = group.members.findIndex(
+    (member) => member.user && String(member.user) === String(user._id)
+  );
+  return capabilitiesForRole(roleForUser(group, user) || 'member', index);
+}
+
+/**
+ * The gate. A readable sentence, because "forbidden" with no reason is a
+ * support ticket waiting to happen - the person is told what their role is and
+ * what to ask for.
+ */
+export function requireCapability(group, user, capability) {
+  const { role, can } = capabilitiesFor(group, user);
+  if (can[capability]) return capabilitiesFor(group, user);
+  const asks = {
+    manage: 'ask the group owner to change your role',
+    addBill: 'ask the group owner or the treasurer to add entries',
+    postJournal: 'ask the group owner or the treasurer to post journal entries',
+    reconcile: 'ask the group owner or the treasurer to run the reconciliation',
+    flag: 'ask the group owner to make you an auditor or a treasurer',
+  };
+  throw forbidden(
+    `You are a ${role} in this group, and that cannot ${capability.replace('postJournal', 'post journal entries')}. ${asks[capability] || 'Ask the group owner for access.'}`
+  );
+}
+
+/** The roles a member can be moved to, for the dropdown. */
+export function assignableRoles() {
+  return ROLES_ASSIGNABLE;
+}
+
 /* -------------------------------- membership ------------------------------- */
 
 /**
@@ -613,11 +810,14 @@ export async function loadGroupFor(user, groupId) {
   return group;
 }
 
-async function loadOwnedGroup(user, groupId) {
+/**
+ * A group you are allowed to change the settings of. The owner's row is an
+ * admin by construction, so this is "manage", not "is the owner" - which is what
+ * lets a co-admin do the work and keeps the owner un-demotable.
+ */
+async function loadAdminGroup(user, groupId, capability = 'manage') {
   const group = await loadGroupFor(user, groupId);
-  if (String(group.owner) !== String(user._id)) {
-    throw forbidden('Only the group owner can change this.');
-  }
+  requireCapability(group, user, capability);
   return group;
 }
 
@@ -695,10 +895,12 @@ function toPublicGroup(group, user) {
     isOwner: String(group.owner) === String(user._id),
     memberCount: group.members.length,
     createdAt: group.createdAt ? new Date(group.createdAt).toISOString() : null,
+    // what THIS person may do here, so the client never has to guess
+    viewer: capabilitiesFor(group, user),
   };
 }
 
-function toPublicMember(member, index) {
+function toPublicMember(member, index, group) {
   return {
     index,
     user: member.user ? member.user.toString() : null,
@@ -707,6 +909,7 @@ function toPublicMember(member, index) {
     addedAt: member.addedAt ? new Date(member.addedAt).toISOString() : null,
     // position 0 is the owner by construction — see models/Group.js
     isOwner: index === 0,
+    role: roleOf(group, index),
   };
 }
 
@@ -728,6 +931,18 @@ function toPublicExpense(expense, group) {
     date: new Date(expense.date).toISOString(),
     note: expense.note || '',
     createdBy: expense.createdBy ? expense.createdBy.toString() : null,
+    flag: expense.flag
+      ? {
+          by: expense.flag.by ? expense.flag.by.toString() : null,
+          byName: expense.flag.byName || '',
+          reason: expense.flag.reason,
+          at: expense.flag.at ? new Date(expense.flag.at).toISOString() : null,
+          resolvedAt: expense.flag.resolvedAt ? new Date(expense.flag.resolvedAt).toISOString() : null,
+          resolvedBy: expense.flag.resolvedBy ? expense.flag.resolvedBy.toString() : null,
+          resolution: expense.flag.resolution || '',
+          open: !expense.flag.resolvedAt,
+        }
+      : null,
   };
 }
 

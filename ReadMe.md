@@ -130,28 +130,36 @@ fetch is injectable, and the tests supply their own.
 
 ```
 CampusCoin/
-├── server/
+├── server/                     the API
 │   ├── src/
-│   │   ├── config/        env + database connection
-│   │   ├── models/        20 collections (see db/schema.md)
-│   │   ├── services/      business logic: ledger, alerts, tips, reports,
-│   │   │                  budgets, categoriser, insight, forecast, importer,
-│   │   │                  groups, wishlist, vault, quickText, survival,
-│   │   │                  accounts, fxRates, bankRates, incomeIdeas,
-│   │   │                  growMoney…
-│   │   ├── routes/        thin HTTP layer (auth, transactions, control…)
-│   │   ├── middleware/    sessions, role guards, CSRF, rate limits, errors
-│   │   └── scripts/       seed, recurring generator, dev-local
-│   └── tests/             node:test + supertest suites
-├── client/
+│   │   ├── config/             env + database connection
+│   │   ├── models/             23 collections (see db/schema.md)
+│   │   ├── services/           business logic, one module per feature:
+│   │   │                       ledger, alerts, budgets, categoriser, insight,
+│   │   │                       forecast, importer, reports, tips, vault,
+│   │   │                       wishlist, quickText, survival, accounts,
+│   │   │                       fxRates, bankRates, incomeIdeas, growMoney,
+│   │   │                       groups, groupChat, groupLedger,
+│   │   │                       spendingInsights, qrpay
+│   │   ├── routes/             thin HTTP layer, one file per area
+│   │   ├── middleware/         sessions, role guards, CSRF, rate limits, errors
+│   │   └── scripts/            seed, recurring generator, dev-local
+│   └── tests/                  node:test + supertest suites
+├── client/                     the React app
 │   └── src/
-│       ├── components/    layout, charts, modals, forms, toasts,
-│       │                  quick-text + survival-mode cards, voice input,
-│       │                  currency converter, illustrations
-│       ├── pages/         student screens + pages/control (admin area)
-│       └── styles/        design tokens & components (custom CSS)
-├── db/schema.md           collections, fields, indexes, relationships
-└── docs/                  PRD, architecture, design, phases (spec pack)
+│       ├── components/         layout, charts, modals, forms, toasts,
+│       │                       GroupChat, GroupLedger, SpendingInsightsCard,
+│       │                       QrPaySheet, CurrencyDrawer, VoiceInput,
+│       │                       NotificationPanel
+│       ├── art/                HeroWaves, HeroShowcase, AuthArt, FaqArt, CatsArt
+│       ├── pages/              the student screens, plus pages/control (admin)
+│       │                       and the three group-books pages:
+│       │                       GroupJournalPage, GroupTrialBalancePage,
+│       │                       GroupReconcilePage
+│       ├── i18n/               14 dictionaries + pending/ (English sources)
+│       └── styles/             design tokens & components (campuscoin.css)
+├── db/schema.md                collections, fields, indexes, relationships
+└── docs/                       PRD, architecture, design, phases (spec pack)
 ```
 
 ## 6. Notable behaviours worth knowing
@@ -219,3 +227,57 @@ CampusCoin/
 - **One column, in order** — the dashboard reads top to bottom: balance, goal,
   quick text, survival mode, the tools, then the detail. Cards keep their own
   height, so a tall card never stretches its neighbour.
+- **The group has books of its own** — the split board answers "who owes
+  whom", and the journal answers a different question: where the group's own
+  money is. Every entry is double-entry, and `SUM(debit) = SUM(credit)` is
+  checked in whole cents before anything is written — an unbalanced entry is
+  refused by name, with both totals, and the form will not let you save one
+  either. An entry is never edited: to correct it you *post the reverse*, and
+  the mirror is a new entry with the original left exactly as it was. The
+  **trial balance** is the proof, and it says so in one line — "Debits and
+  credits agree: X = X" — or, if something reached the books without going
+  through the journal, a red "out by X" rather than a quiet correction. The
+  **bank reconciliation** puts the group's figure beside a real statement
+  line by line, auto-pairs what it can within ±5 days, and closes only when
+  `statement balance = book balance + unbooked` and nothing is left
+  unclassified. The honest way to explain a difference is to book the missing
+  entry, or to say the line is not the group's, or to mark a book line as
+  still in transit — not to close the session over it.
+  All three screens print money in the **group's own currency, unconverted**:
+  a statement is a document in one currency and a trial balance is a document
+  in one currency, and comparing them is the whole job.
+
+- **Four roles, and the buttons follow them** — inside a group the owner is
+  an admin by position, and the others are a treasurer (bills, settlements,
+  journal entries, the reconciliation), an auditor (reads everything and can
+  raise a **flag** on a bill or an entry, changing nothing) or a member (sees
+  the group and its history, adds nothing). The role editor is a column on the
+  members list rather than a screen of its own, and a control the server would
+  refuse is not drawn at all — a member who has not signed up yet gets a word
+  and the reason, not a dropdown that would error. A flag is a question, not a
+  complaint: it never blocks anybody from spending their own money.
+
+- **The spending card reads a month that is over** — the card under the
+  filters says where the money went and what stands out, and it opens on the
+  newest month that actually has entries rather than on last month if last
+  month is empty. The server sends **facts only** — totals, counts, shares,
+  an id — and the client writes the words from the dictionary, which is the
+  only reason a tip can exist in fourteen languages and mean the same thing in
+  all of them. Where a figure is planning arithmetic rather than a measurement
+  it is labelled "about", and the footer says which two lines those are.
+
+- **A payment code is read, priced, and then recorded** — the camera asks for
+  permission and, if there is no camera or the permission is refused, says
+  which of the three happened and offers the same code pasted by hand, because
+  both go through the same reader. Three formats are understood: the app's own
+  `campuscoin://pay`, the UPI string a real counter prints, and a JSON payload.
+  A code in another currency is converted with the same cached table the
+  converter drawer uses, and **a pair that table cannot price is refused, not
+  guessed** — a payment is the worst place to invent a rate. Nothing is paid
+  until you press Pay. The code's own amount and currency are kept on the
+  transaction as the receipt, next to the rate and the day it was good for, and
+  the balance is never a stored number: recording the expense *is* the
+  deduction, and the balance that comes back is the same arithmetic the
+  dashboard does.
+---
+

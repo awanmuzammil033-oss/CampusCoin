@@ -1,0 +1,64 @@
+{
+  "insights.title": "Descobertas de gastos",
+  "insights.month": "Mês",
+  "insights.refresh": "Atualizar",
+  "insights.retry": "Tentar de novo",
+  "insights.analysisLabel": "Análise",
+  "insights.insightLabel": "Descoberta:",
+  "insights.tipLabel": "Dica:",
+
+  "insights.analysisOne": "{category} levou {amount} disso — o principal item do mês.",
+  "insights.analysisTwo": "{category} {amount}, depois {nextCategory} {nextAmount}.",
+  "insights.analysisNone": "Em {month} não foi gasto nada: todos os lançamentos desse mês foram receita.",
+
+  "insights.p.dining_out": "Comer fora deu {amount} em {count} visitas. Cozinhar uma delas em casa deixaria cerca de {saving}.",
+  "insights.p.many_small": "{category} foram {count} lançamentos separados por {amount} — cerca de {average} cada um.",
+  "insights.p.weekend": "Cerca de {percent} do mês — {amount} em {count} lançamentos — ocorreu num sábado ou num domingo.",
+  "insights.p.idle_subscriptions": "{count} assinaturas continuam sendo pagas e sem uso: {amount} por mês.",
+
+  "insights.basis.one": "Com base no lançamento que você registrou em {month} ({count}).",
+  "insights.basis.other": "Com base nos {count} lançamentos que você registrou em {month}.",
+
+  "insights.estimateFood": "A poupança acima foi calculada em cerca de {percent} do que você gastou com comida — aritmética de planejamento, não uma promessa.",
+  "insights.estimateWeekend": "A linha de fim de semana só aparece quando cerca de {threshold} de um mês ocorre no fim de semana.",
+
+  "insights.noPatterns": "Nada se destaca neste mês — nenhum padrão aqui é grande o bastante para ter nome.",
+  "insights.emptyTitle": "Nada para ler por enquanto",
+  "insights.emptyBody": "Nada foi registrado em {month}, então não há mês para ler. Adicione um lançamento ou escolha outro mês.",
+  "insights.errorTitle": "Este mês não carregou",
+
+  "qr.title": "Escaneie um código de pagamento",
+  "qr.open": "Escaneie um código",
+  "qr.close": "Fechar",
+
+  "qr.cameraStarting": "Ligando a câmera…",
+  "qr.cameraHint": "Aponte a câmera para o código de pagamento. Nada é pago até você tocar em Pagar.",
+  "qr.cameraUnsupported": "Este navegador não dá câmera a uma página da web, então não há o que escanear daqui. Cole o código aqui — faz exatamente a mesma coisa.",
+  "qr.cameraDenied": "A permissão de câmera foi recusada, então a câmera está desligada. Cole o código aqui — faz exatamente a mesma coisa.",
+  "qr.cameraUnavailable": "Nenhuma câmera pôde ser ligada neste aparelho. Cole o código aqui — faz exatamente a mesma coisa.",
+  "qr.cameraTryAgain": "Tentar a câmera de novo",
+
+  "qr.code": "Código de pagamento",
+  "qr.codeHelp": "Cole o código inteiro, incluindo a parte depois do ?.",
+  "qr.read": "Ler o código",
+  "qr.reading": "Lendo o código…",
+
+  "qr.confirmTitle": "Pronto para pagar",
+  "qr.merchant": "Estabelecimento",
+  "qr.asScanned": "Como o código informa",
+  "qr.yourMoney": "Na sua própria moeda",
+  "qr.reference": "Referência",
+  "qr.rateLive": "Taxa ao vivo, válida para {when}.",
+  "qr.rateReference": "Taxa de referência para {when} — uma tabela datada, não o preço de mercado de hoje.",
+  "qr.nothingPaid": "Nada foi pago até agora. Toque em Pagar para registrar.",
+  "qr.pay": "Pagar {amount}",
+  "qr.paying": "Pagando…",
+
+  "qr.recordedTitle": "Registrado",
+  "qr.balanceNow": "Saldo agora",
+  "qr.kept": "Os próprios {amount} {currency} do código ficam guardados no lançamento, com a taxa e o dia a que se referem.",
+  "qr.belowZero": "Este pagamento deixou o saldo negativo. O lançamento está registrado — quem resolve é a próxima receita.",
+  "qr.categoryChosen": "Nada no nome do estabelecimento correspondeu a uma categoria, então isto foi arquivado na categoria que você costuma usar. Mude no lançamento se isso estiver errado.",
+  "qr.noCategory": "Sem categoria",
+  "qr.editEntry": "Editar lançamento"
+}

@@ -10,6 +10,8 @@ import Icon from '../components/Icon.jsx';
 import { api, qs } from '../api.js';
 import { useToast } from '../components/Toast.jsx';
 import { money } from '../money.js';
+import SpendingInsightsCard from '../components/SpendingInsightsCard.jsx';
+import QrPaySheet from '../components/QrPaySheet.jsx';
 import { useLocale } from '../locale.jsx';
 import { dayLabel } from '../dates.js';
 
@@ -24,6 +26,9 @@ export default function Transactions() {
   const { push } = useToast();
   const [search, setSearch] = useState(''); // typed freely, sent after 300ms
   const [filters, setFilters] = useState(START);
+  // the scanned-payment sheet: one place that creates the camera and one that
+  // lets go of it, rather than one per button
+  const [scanOpen, setScanOpen] = useState(false);
   const [data, setData] = useState(null);
   const [categories, setCategories] = useState({ income: [], expense: [] });
   const [error, setError] = useState('');
@@ -142,6 +147,10 @@ export default function Transactions() {
           <Link className="btn btn-primary" to="/transactions/new">
             {t('tx.add')}
           </Link>
+          {/* another way to add an expense, not a separate place */}
+          <button type="button" className="btn btn-secondary" onClick={() => setScanOpen(true)}>
+            <Icon name="scan" size={16} /> {t('qr.open')}
+          </button>
           <Link className="btn btn-secondary" to="/transactions/import">
             {t('home.link.importCsv')}
           </Link>
@@ -284,6 +293,12 @@ export default function Transactions() {
           <strong>{t('tx.balanceTotal', { amount: money(Number(totals.income) - Number(totals.expense)) })}</strong>
         </p>
       )}
+
+      {/* About the month, not about the rows on screen: it goes here, between the
+          totals and the list, so nobody reads it as another filter. */}
+      <div className="mb-3">
+        <SpendingInsightsCard />
+      </div>
 
       {!data && !error && (
         <div className="card" role="status">
@@ -437,6 +452,17 @@ export default function Transactions() {
           </p>
         </Modal>
       )}
-    </Page>
+    
+      {/* Mounted once, here: the camera is created and let go of in one place,
+          and a paid scan refreshes the very list it was added to. */}
+      <QrPaySheet
+        open={scanOpen}
+        onClose={() => setScanOpen(false)}
+        onPaid={() => {
+          setScanOpen(false);
+          setReloadKey((key) => key + 1);
+        }}
+      />
+</Page>
   );
 }

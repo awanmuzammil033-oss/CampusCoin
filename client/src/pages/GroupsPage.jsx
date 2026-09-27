@@ -90,6 +90,27 @@ export default function GroupsPage() {
   return <GroupList onOpen={open} />;
 }
 
+/**
+ * The four roles, in order of power, with the glyph each one wears. The order is
+ * also the order of the dropdown, and the glyph is the app own emoji table - a
+ * title that looks different from the button it guards is a small lie.
+ */
+const ROLE_KEYS = ['admin', 'treasurer', 'auditor', 'member'];
+
+const ROLE_ICON = {
+  admin: 'award',
+  treasurer: 'coins',
+  auditor: 'search',
+  member: 'user',
+};
+
+/** The group books, in the order somebody meets them. */
+const BOOK_LINKS = [
+  { key: 'journal', path: 'journal', icon: 'book', labelKey: 'groups.ledgerJournal' },
+  { key: 'trial', path: 'trial-balance', icon: 'scale', labelKey: 'groups.ledgerTrial' },
+  { key: 'reconcile', path: 'reconcile', icon: 'bank', labelKey: 'groups.ledgerReconcile' },
+];
+
 /* --------------------------------- the list -------------------------------- */
 
 function GroupList({ onOpen }) {
@@ -413,6 +434,32 @@ function GroupDetail({ groupId, onBack }) {
 
   const members = data?.members || [];
 
+  // what this person may do here, straight from the server: the same table the
+  // guards use, so a control that would be refused is never drawn (GRP-1)
+  const can = data?.group?.viewer?.can || {};
+  const myRole = data?.group?.viewer?.role || 'member';
+  const [roleBusy, setRoleBusy] = useState(0);
+  const [roleError, setRoleError] = useState('');
+
+  /** Move somebody between the four roles; the roster re-reads from the answer. */
+  async function changeRole(member, role) {
+    if (roleBusy) return;
+    setRoleBusy(member.index);
+    setRoleError('');
+    try {
+      const res = await api.patch(`/api/groups/${data.group.id}/members/${member.index}/role`, { role });
+      setData((prev) => (prev ? { ...prev, group: { ...prev.group, ...res.group } } : prev));
+      // the role name goes through the dictionary first: the sentence is built
+      // in the reader's language, so its subject has to be in that language too
+      push(t('groups.roleChanged', { name: member.name, role: t(`groups.role.${role}`) }), 'success');
+    } catch (err) {
+      setRoleError(err.message);
+      push(err.message, 'error');
+    } finally {
+      setRoleBusy(0);
+    }
+  }
+
   // Who this bill is between. `null` means nobody has chosen yet, which is
   // everybody - the usual answer, and one tap away from any other.
   const included = bill.included ?? members.map((m) => String(m.index));
@@ -630,6 +677,22 @@ function GroupDetail({ groupId, onBack }) {
           {/* the chat belongs to every member, and it sits to the LEFT of the
               owner-only buttons: talking about the group is what you do with
               it, closing it is what you do to it. */}
+          {/* the group own books: a journal that has to balance, the proof that it
+              does, and the statement reconciliation. A link here rather than three
+              more cards, because they are the same group of questions. */}
+          {ROLE_KEYS.length > 0 && (
+            <span className="cc-books">
+              {BOOK_LINKS.map((book) => (
+                <Link
+                  key={book.key}
+                  to={`/groups/${data.group.id}/${book.path}`}
+                  className="btn btn-ghost btn-sm"
+                >
+                  <Icon name={book.icon} size={15} /> {t(book.labelKey)}
+                </Link>
+              ))}
+            </span>
+          )}
           <Link
             to={`/groups/${data.group.id}/chat`}
             className="btn btn-secondary btn-sm"
@@ -663,11 +726,11 @@ function GroupDetail({ groupId, onBack }) {
         </div>
         <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {members.map((member) => (
-            <li key={member.index} className="d-flex align-items-center gap-2 flex-wrap" style={{ padding: '6px 0' }}>
+            <li key={member.index} className="cc-role-row">
               <span className="txn-ico" style={{ width: 32, height: 32 }}>
                 <Icon name="user" size={17} />
               </span>
-              <span style={{ minWidth: 0 }}>
+              <span className="cc-role-name">
                 <strong>{member.name}</strong>
                 {member.isOwner && <span className="pill" style={{ marginLeft: 8 }}>{t('groups.owner')}</span>}
                 {member.index === myIndex && <span className="pill" style={{ marginLeft: 8 }}>{t('groups.you')}</span>}
@@ -677,9 +740,74 @@ function GroupDetail({ groupId, onBack }) {
                   </span>
                 )}
               </span>
+
+              {/* THE ROLE (GRP-1): a select for the owner, a word for everybody else */}
+              <span className="cc-role-cell">
+                {/* A select only where the server would accept one: not on the
+                    owner, who is an admin by definition, and not on somebody with
+                    no account, because a role has nothing to attach to yet. */}
+                {can.manage && !member.isOwner && member.user ? (
+                  <select
+                    className="input cc-role-select"
+                    value={member.role || 'member'}
+                    disabled={roleBusy === member.index}
+                    aria-label={t('groups.roleFor', { name: member.name })}
+                    onChange={(e) => changeRole(member, e.target.value)}
+                  >
+                    {ROLE_KEYS.map((role) => (
+                      <option key={role} value={role}>
+                        {t(`groups.role.${role}`)}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <>
+                    {can.manage && !member.isOwner && !member.user && (
+                      <span className="cc-role-pending" title={t('groups.roleNeedsAccount')}>
+                        <Icon name="clock" size={13} /> {t('groups.roleAfterSignup')}
+                      </span>
+                    )}
+                    <span className={`pill cc-role-pill cc-role-${member.role || 'member'}`}>
+                      <Icon name={ROLE_ICON[member.role] || 'user'} size={13} />
+                      {t(`groups.role.${member.role || 'member'}`)}
+                    </span>
+                  </>
+                )}
+              </span>
             </li>
           ))}
         </ul>
+
+        {/* What the four roles may do, spelled out. A word on a dropdown tells
+            you nothing; this tells the whole room what a title means. */}
+        <div className="cc-role-legend">
+          <p className="smallish muted mb-2">
+            <Icon name="info" size={14} /> {t('groups.roleLegend')}
+          </p>
+          <ul>
+            {ROLE_KEYS.map((role) => (
+              <li key={role} className={role === myRole ? 'cc-role-here' : ''}>
+                <strong>
+                  <Icon name={ROLE_ICON[role]} size={13} /> {t(`groups.role.${role}`)}
+                </strong>
+                <span className="smallish muted">{t(`groups.roleCan.${role}`)}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {roleError && (
+          <div className="field-error" role="alert" style={{ marginTop: 10 }}>
+            <Icon name="warning" />
+            <span>{roleError}</span>
+          </div>
+        )}
+
+        {!can.manage && (
+          <p className="smallish muted mt-2 mb-0">
+            <Icon name="lock" size={13} /> {t('groups.roleNoManage')}
+          </p>
+        )}
 
         {isOwner && (
           <form className="d-flex gap-2 align-items-end flex-wrap" onSubmit={addMate} noValidate style={{ marginTop: 12 }}>

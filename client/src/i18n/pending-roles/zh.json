@@ -1,0 +1,19 @@
+{
+  "groups.roleLegend": "各个角色在这里可以做什么：",
+  "groups.role.admin": "创建者 / 管理员",
+  "groups.role.treasurer": "出纳",
+  "groups.role.auditor": "审计员",
+  "groups.role.member": "成员",
+  "groups.roleCan.admin": "全部权限：账单、分录、角色、账簿，以及关闭分组。",
+  "groups.roleCan.treasurer": "添加账单、结清款项、登记日记账分录并完成对账。不能更改角色，也不能删除分组。",
+  "groups.roleCan.auditor": "可以查看全部内容，并能对某笔账单或某条日记账分录添加标记。不会更改任何内容。",
+  "groups.roleCan.member": "可以查看分组、它的账单和历史记录。不会添加任何内容。",
+  "groups.roleFor": "{name} 的角色",
+  "groups.roleChanged": "{name} 现在是 {role}。",
+  "groups.roleNoManage": "只有分组创建者才能更改角色。如果需要更多权限，就去问他们。",
+  "groups.ledgerJournal": "日记账",
+  "groups.ledgerTrial": "试算平衡表",
+  "groups.ledgerReconcile": "对账",
+  "groups.roleNeedsAccount": "还没有注册账号。他一注册，角色就能填上——到时候再给他吧。",
+  "groups.roleAfterSignup": "注册后的角色"
+}

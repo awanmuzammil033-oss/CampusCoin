@@ -7,7 +7,8 @@ import Icon from '../components/Icon.jsx';
 import AuthArt from '../components/art/AuthArt.jsx';
 
 /** Student sign-in. The administrator door lives at /control/login. */
-export default function Login() {
+
+export default function Login({ embedded = false, onClose, onSwitch } = {}) {
   const { login } = useAuth();
   const { t } = useLocale();
   const navigate = useNavigate();
@@ -33,8 +34,41 @@ export default function Login() {
     }
   }
 
+  /**
+   * The three ways this form can be hosted, in one place so the page version and
+   * the landing-panel version can never drift apart:
+   *
+   *  - `embedded`  the form is inside another page rather than being a page of
+   *                 its own, so "back" closes the panel and the cross-links swap
+   *                 it instead of navigating;
+   *  - `onClose`   what "back to the site" does when embedded;
+   *  - `onSwitch`  what "create an account" and the staff door do when embedded.
+   *
+   * With none of them it is the same form on its own page, with real links.
+   */
+  const host = {
+    wrapper: embedded ? ' auth-wrap--embedded' : '',
+    back: embedded ? (
+      <button type="button" className="btn btn-ghost btn-sm auth-back" onClick={onClose}>
+        <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
+      </button>
+    ) : (
+      <Link to="/" className="btn btn-ghost btn-sm auth-back">
+        <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
+      </Link>
+    ),
+    switchTo: (target, label) =>
+      embedded ? (
+        <button type="button" className="linklike" onClick={() => onSwitch && onSwitch(target)}>
+          {label}
+        </button>
+      ) : (
+        <Link to={target}>{label}</Link>
+      ),
+  };
+
   return (
-    <div className="auth-wrap">
+    <div className={`auth-wrap${host.wrapper}`}>
       <div className="auth-split">
         {/* Left: what the student gets. Hidden below 1000px so the form owns
             the whole screen on a phone. */}
@@ -53,11 +87,7 @@ export default function Login() {
 
         {/* Right: the form itself. */}
         <div className="card auth-card">
-        <div className="auth-top">
-          <Link to="/" className="btn btn-ghost btn-sm auth-back">
-            <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
-          </Link>
-        </div>
+        <div className="auth-top">{host.back}</div>
         <div className="auth-brand">
           <span className="brand-mark" aria-hidden="true">C</span>
         </div>
@@ -127,13 +157,13 @@ export default function Login() {
         <div className="d-flex justify-content-between mt-4 smallish">
           <Link to="/forgot-password">{t('auth.forgotPassword')}</Link>
           <span className="muted">
-            {t('auth.newHere')} <Link to="/register">{t('auth.createAccount')}</Link>
+            {t('auth.newHere')} {host.switchTo('/register', t('auth.createAccount'))}
           </span>
         </div>
 
         {/* Staff door, right here — nobody needs to go back home to find it. */}
         <div className="auth-alt mt-4 pt-3 smallish">
-          <Icon name="shield" size={15} /> <Link to="/control/login">{t('home.link.adminSignIn')}</Link>
+          <Icon name="shield" size={15} /> {host.switchTo('/control/login', t('home.link.adminSignIn'))}
         </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { requireStudent } from '../middleware/auth.js';
 import Insight from '../models/Insight.js';
 import { generateInsight, DISCLAIMER } from '../services/insight.js';
 import { forecastNextMonth } from '../services/forecast.js';
+import { spendingInsights, insightMonths } from '../services/spendingInsights.js';
 
 /**
  * Insight history, generation, bookmarking and the forecast strip
@@ -55,6 +56,34 @@ router.get('/forecast', async (req, res, next) => {
 });
 
 /* -------------------------------- one month ----------------------------------- */
+
+/* ------------------------- the spending-insights card ------------------------ */
+
+/**
+ * One month of spending, as FACTS: totals, per-category figures, and a list of
+ * patterns with ids. No sentence is produced here - the client writes the words
+ * from the dictionary, which is what lets a tip exist in fourteen languages and
+ * still mean the same thing in all of them. `month` is YYYY-MM and defaults to
+ * last month, because a card about a month still being lived is a to-do list
+ * rather than an insight.
+ */
+router.get('/spending', async (req, res, next) => {
+  try {
+    const data = await spendingInsights(req.user, { month: req.query.month });
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** The months this person can be shown, newest first, for the card's month picker. */
+router.get('/spending/months', async (req, res, next) => {
+  try {
+    res.json({ months: await insightMonths(req.user, { limit: req.query.limit }) });
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get('/:ym', async (req, res, next) => {
   try {

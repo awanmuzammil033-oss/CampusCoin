@@ -9,6 +9,9 @@ import {
   addMember,
   addExpense,
   settleUp,
+  setMemberRole,
+  flagExpense,
+  clearExpenseFlag,
 } from '../services/groups.js';
 
 /**
@@ -67,6 +70,47 @@ router.delete('/:id', async (req, res, next) => {
 });
 
 /** Add a roommate (owner only) — a name and an email are enough. */
+/** Roles (GRP-1). A move a member between the four, and the one row that
+ * cannot move is the owner's: see setMemberRole for why.
+ */
+router.patch('/:id/members/:memberIndex/role', async (req, res, next) => {
+  try {
+    const group = await setMemberRole(req.user, req.params.id, {
+      memberIndex: req.params.memberIndex,
+      role: req.body?.role,
+    });
+    res.json({ group });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * An auditor's question about a bill, and the treasurer's answer to it. Neither
+ * one touches the money on the row.
+ */
+router.post('/:id/expenses/:expenseId/flag', async (req, res, next) => {
+  try {
+    const expense = await flagExpense(req.user, req.params.id, req.params.expenseId, {
+      reason: req.body?.reason,
+    });
+    res.status(201).json({ expense });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/:id/expenses/:expenseId/flag/clear', async (req, res, next) => {
+  try {
+    const expense = await clearExpenseFlag(req.user, req.params.id, req.params.expenseId, {
+      note: req.body?.note,
+    });
+    res.json({ expense });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/:id/members', async (req, res, next) => {
   try {
     const group = await addMember(req.user, req.params.id, req.body);

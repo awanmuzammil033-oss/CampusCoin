@@ -1,0 +1,19 @@
+{
+  "groups.roleLegend": "هر نقش اینجا چه کاری می‌تواند بکند:",
+  "groups.role.admin": "سازنده / مدیر",
+  "groups.role.treasurer": "خزانه‌دار",
+  "groups.role.auditor": "حسابرس",
+  "groups.role.member": "عضو",
+  "groups.roleCan.admin": "همه چیز: قبض‌ها، ثبت‌ها، نقش‌ها، دفترها، و بستن گروه.",
+  "groups.roleCan.treasurer": "قبض اضافه می‌کند، حساب را تسویه می‌کند، ثبت‌های روزنامه را وارد می‌کند و مغایرت‌گیری را انجام می‌دهد. نمی‌تواند نقش‌ها را تغییر دهد یا گروه را حذف کند.",
+  "groups.roleCan.auditor": "همه چیز را می‌خواند و می‌تواند روی یک قبض یا یک ثبت روزنامه علامت بگذارد. هیچ چیزی را تغییر نمی‌دهد.",
+  "groups.roleCan.member": "گروه، قبض‌هایش و تاریخچهٔ آن را می‌بیند. هیچ چیزی اضافه نمی‌کند.",
+  "groups.roleFor": "نقش {name}",
+  "groups.roleChanged": "{name} اکنون {role} است.",
+  "groups.roleNoManage": "فقط سازندهٔ گروه می‌تواند نقش‌ها را تغییر دهد. اگر بیشتر می‌خواهید، از او بخواهید.",
+  "groups.ledgerJournal": "روزنامه",
+  "groups.ledgerTrial": "تراز آزمایشی",
+  "groups.ledgerReconcile": "مغایرت‌گیری",
+  "groups.roleNeedsAccount": "هنوز ثبت‌نام نکرده. نقش فقط پس از ثبت‌نام تعیین می‌شود — همان موقع به او بدهید.",
+  "groups.roleAfterSignup": "نقش پس از ثبت‌نام"
+}

@@ -1,0 +1,64 @@
+{
+  "insights.title": "Éclairages sur les dépenses",
+  "insights.month": "Mois",
+  "insights.refresh": "Actualiser",
+  "insights.retry": "Réessayer",
+  "insights.analysisLabel": "Analyse",
+  "insights.insightLabel": "Éclairage :",
+  "insights.tipLabel": "Astuce :",
+
+  "insights.analysisOne": "{category} a représenté {amount} — le plus gros poste du mois.",
+  "insights.analysisTwo": "{category} {amount}, puis {nextCategory} {nextAmount}.",
+  "insights.analysisNone": "Rien n'a été dépensé en {month} — chaque opération de ce mois-là a été un revenu.",
+
+  "insights.p.dining_out": "Manger à l'extérieur a coûté {amount} sur {count} sorties. Cuisiner l'une d'elles chez vous, c'est environ {saving} de moins sur le mois.",
+  "insights.p.many_small": "{category} : {count} opérations séparées pour {amount} — environ {average} chacune.",
+  "insights.p.weekend": "Environ {percent} du mois — {amount} sur {count} opérations — a été dépensé un samedi ou un dimanche.",
+  "insights.p.idle_subscriptions": "{count} abonnements sont toujours payés et inutilisés : {amount} par mois.",
+
+  "insights.basis.one": "D'après l'opération enregistrée en {month} ({count}).",
+  "insights.basis.other": "D'après les {count} opérations enregistrées en {month}.",
+
+  "insights.estimateFood": "L'économie ci-dessus est calculée à environ {percent} de ce que vous avez dépensé en nourriture — de l'arithmétique de planification, pas une promesse.",
+  "insights.estimateWeekend": "La ligne du week-end n'apparaît que lorsqu'environ {threshold} d'un mois tombe un week-end.",
+
+  "insights.noPatterns": "Rien ne ressort ce mois-ci — aucun motif ici n'est assez grand pour être nommé.",
+  "insights.emptyTitle": "Rien à lire pour l'instant",
+  "insights.emptyBody": "Rien n'a été enregistré en {month}, il n'y a donc aucun mois à lire. Ajoutez une opération, ou choisissez un autre mois.",
+  "insights.errorTitle": "Ce mois-ci n'a pas été chargé",
+
+  "qr.title": "Scanner un code de paiement",
+  "qr.open": "Scanner un code",
+  "qr.close": "Fermer",
+
+  "qr.cameraStarting": "Mise en marche de la caméra…",
+  "qr.cameraHint": "Dirigez la caméra vers le code de paiement. Rien n'est payé tant que vous n'avez pas appuyé sur Payer.",
+  "qr.cameraUnsupported": "Ce navigateur ne donne pas de caméra à une page web, il n'y a donc rien à scanner d'ici. Collez le code ci-dessous — cela donne exactement le même résultat.",
+  "qr.cameraDenied": "L'autorisation de la caméra a été refusée, la caméra est donc éteinte. Collez le code ci-dessous — cela donne exactement le même résultat.",
+  "qr.cameraUnavailable": "Aucune caméra n'a pu démarrer sur cet appareil. Collez le code ci-dessous — cela donne exactement le même résultat.",
+  "qr.cameraTryAgain": "Réessayer la caméra",
+
+  "qr.code": "Code de paiement",
+  "qr.codeHelp": "Collez le code entier, y compris la partie après le ?.",
+  "qr.read": "Lire le code",
+  "qr.reading": "Lecture du code…",
+
+  "qr.confirmTitle": "Prêt à payer",
+  "qr.merchant": "Commerçant",
+  "qr.asScanned": "Tel que le code l'indique",
+  "qr.yourMoney": "Dans votre propre monnaie",
+  "qr.reference": "Référence",
+  "qr.rateLive": "Taux en direct, valable pour {when}.",
+  "qr.rateReference": "Taux de référence pour {when} — un tableau daté, pas le prix de marché du jour.",
+  "qr.nothingPaid": "Rien n'a encore été payé. Appuyez sur Payer pour l'enregistrer.",
+  "qr.pay": "Payer {amount}",
+  "qr.paying": "Paiement…",
+
+  "qr.recordedTitle": "Enregistré",
+  "qr.balanceNow": "Solde actuel",
+  "qr.kept": "Les {amount} {currency} du code restent sur l'opération, avec le taux et le jour de validité.",
+  "qr.belowZero": "Ce paiement a poussé le solde sous zéro. L'opération est enregistrée — c'est le revenu qui suit qui remettra cela droit.",
+  "qr.categoryChosen": "Rien dans le nom du commerçant n'a correspondu à une catégorie, cela a donc été classé sous celle que vous utilisez le plus. Changez-la sur l'opération si ce n'est pas juste.",
+  "qr.noCategory": "Sans catégorie",
+  "qr.editEntry": "Modifier l'opération"
+}

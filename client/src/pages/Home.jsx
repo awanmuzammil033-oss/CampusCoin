@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import Login from './Login.jsx';
+import Register from './Register.jsx';
+import AdminLogin from './AdminLogin.jsx';
 import { useAuth } from '../auth.jsx';
 import { useLocale } from '../locale.jsx';
 import LocalePickers from '../components/LocalePickers.jsx';
 import ThemeToggle from '../components/ThemeToggle.jsx';
 import Icon from '../components/Icon.jsx';
 import HeroWaves from '../components/art/HeroWaves.jsx';
+import HeroShowcase from '../components/art/HeroShowcase.jsx';
 import FaqArt from '../components/art/FaqArt.jsx';
 import CatsArt from '../components/art/CatsArt.jsx';
 
@@ -27,12 +31,27 @@ import CatsArt from '../components/art/CatsArt.jsx';
  * with an instant fallback), cards lift on hover, the phone and floating
  * cards bob gently. prefers-reduced-motion switches all of it off in CSS.
  */
+/**
+ * The links, in the order the page actually reads: home, what it does, the rooms
+ * money lives in, insights, how it works, questions. Insights comes before
+ * How-it-works because that is the order the sections are in - when the two
+ * disagreed, the highlight followed the list and lit up the wrong link.
+ */
+/**
+ * How far below the top of the page a section should land when its link is
+ * clicked. The landing header is fixed, so a plain anchor would put the
+ * section's heading underneath it - which is what made a click look like it
+ * had gone somewhere else. Measured from the header itself rather than
+ * hard-coded, because the header is taller on a narrow phone where it wraps.
+ */
+const HEADER_OFFSET = 96;
+
 const NAV = [
   { id: 'top', label: 'home.nav.home' },
   { id: 'features', label: 'home.nav.features' },
   { id: 'rooms', label: 'home.nav.rooms' },
-  { id: 'how', label: 'home.nav.how' },
   { id: 'overview', label: 'home.nav.insights' },
+  { id: 'how', label: 'home.nav.how' },
   { id: 'faq', label: 'home.nav.faq' },
 ];
 
@@ -45,10 +64,55 @@ const PHONE_LEGEND = [
   { key: 'home.catOther', pct: 9, color: '#64748b', icon: 'dots' },
 ];
 
+/**
+ * The form that stands in for the landing page, inside the landing page.
+ *
+ * One component for three forms, because they are three answers to the same
+ * question and have to look and behave the same: a card in the middle of the
+ * page, the landing header still above it and the landing footer still below
+ * it, and no second copy of any form.
+ *
+ * `onSwitch` is what makes the cross-links inside the forms ("create an
+ * account", the staff door) swap the panel instead of navigating away - which
+ * is the whole reason for opening a form here rather than on its own page.
+ */
+function AuthPanel({ which, onClose, onSwitch }) {
+  const shared = { embedded: true, onClose, onSwitch };
+
+  if (which === 'register') return <Register {...shared} />;
+  if (which === 'admin') return <AdminLogin {...shared} />;
+  return <Login {...shared} />;
+}
+
 export default function Home() {
   const { t } = useLocale();
   const { user, loading, logout } = useAuth() || {};
   const [active, setActive] = useState('top');
+
+  /* The sign-in panel, held in the URL so Back and a refresh behave.
+     `null` means the landing page; anything else is the form to show. */
+  const [params, setParams] = useSearchParams();
+  const panel = params.get('panel');
+
+  /** Open a form in place of the landing content. */
+  function openPanel(which) {
+    setParams({ panel: which });
+  }
+
+  /** Close it and put the landing page back, exactly as it was. */
+  function closePanel() {
+    setParams({}, { replace: false });
+  }
+
+  /**
+   * A cross-link inside a form - "create an account", the staff door - asks for a
+   * path. When the form is on the landing page that path is turned into a panel
+   * instead of a navigation, so the reader never leaves the page.
+   */
+  function switchTo(path) {
+    const map = { '/login': 'login', '/register': 'register', '/control/login': 'admin' };
+    if (map[path]) openPanel(map[path]);
+  }
   const [showTop, setShowTop] = useState(false);
   const [stuck, setStuck] = useState(false);
 
@@ -80,11 +144,23 @@ export default function Home() {
     function onScroll() {
       setShowTop(window.scrollY > 560);
       setStuck(window.scrollY > 8);
+
+      // The section whose top has passed the header, and which is the NEAREST one
+      // to it. Walking the link list in order and keeping the last match is what
+      // put the underline under the wrong link: the answer depended on the order
+      // the links were written in rather than on where the reader is.
+      const MARK = 130;
       let cur = 'top';
-      NAV.forEach(({ id }) => {
+      let best = -Infinity;
+      for (const { id } of NAV) {
         const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top <= 130) cur = id;
-      });
+        if (!el) continue;
+        const top = el.getBoundingClientRect().top;
+        if (top <= MARK && top > best) {
+          best = top;
+          cur = id;
+        }
+      }
       setActive(cur);
     }
     onScroll();
@@ -105,7 +181,9 @@ export default function Home() {
       <span id="top" aria-hidden="true" />
 
       {/* ------------------------- sticky glass header ------------------------ */}
-      <header className={`lp-nav${stuck ? ' is-stuck' : ''}`}>
+      {/* A panel is a white page, and this header is drawn for a dark hero:
+          without `is-panel` every word in it would be mint on white. */}
+      <header className={`lp-nav${stuck ? ' is-stuck' : ''}${panel ? ' is-panel' : ''}`}>
         <Link to="/" className="brand lp-brand">
           <span className="brand-mark" aria-hidden="true">C</span>
           <span className="brand-name">{t('app.name')}</span>
@@ -117,6 +195,36 @@ export default function Home() {
               key={item.id}
               href={`#${item.id}`}
               className={`lp-nav-link${active === item.id ? ' active' : ''}`}
+              aria-current={active === item.id ? 'true' : undefined}
+              onClick={(e) => {
+                // With a form open there are no sections to scroll to yet, so the
+                // panel closes first and the scroll happens on the next frame.
+                if (panel) {
+                  e.preventDefault();
+                  closePanel();
+                  window.requestAnimationFrame(() => {
+                    const target = document.getElementById(item.id);
+                    if (target) {
+                      window.scrollTo({
+                        top: item.id === 'top' ? 0 : target.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET,
+                        behavior: 'smooth',
+                      });
+                    }
+                  });
+                  return;
+                }
+                // The header is fixed, so a plain anchor would put the section's
+                // heading underneath it. Land on the section's own offset
+                // instead, and mark the link the reader is on for anything that
+                // is not CSS (a screen reader, a print stylesheet).
+                const el = document.getElementById(item.id);
+                if (!el) return;
+                e.preventDefault();
+                const top = item.id === 'top' ? 0 : el.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
+                window.scrollTo({ top, behavior: 'smooth' });
+                window.history.replaceState(null, '', `#${item.id}`);
+                setActive(item.id);
+              }}
             >
               {t(item.label)}
             </a>
@@ -146,14 +254,32 @@ export default function Home() {
             </>
           ) : (
             <>
-              <Link className="lp-nav-link lp-nav-signin" to="/login">{t('auth.signIn')}</Link>
-              <Link className="btn btn-grad btn-sm" to="/register">{t('home.getStarted')}</Link>
+              {/* Both open here, not on another page. Buttons, not links: a
+                  link would promise a URL, and there is not one - the panel is
+                  a state of this page, and a link that pretends otherwise is a
+                  broken promise the moment somebody middle-clicks it. */}
+              <button
+                type="button"
+                className="lp-nav-link lp-nav-signin"
+                onClick={() => openPanel('login')}
+              >
+                {t('auth.signIn')}
+              </button>
+              <button type="button" className="btn btn-grad btn-sm" onClick={() => openPanel('register')}>
+                {t('home.getStarted')}
+              </button>
             </>
           )}
         </div>
       </header>
 
-      <main id="main-content">
+      <main id="main-content" className={panel ? 'landing-main is-panel' : 'landing-main'}>
+        {/* A form opened from the header replaces the page, not the frame: the
+            navbar above and the footer below stay exactly where they were. */}
+        {panel ? (
+          <AuthPanel which={panel} onClose={closePanel} onSwitch={switchTo} />
+        ) : (
+          <>
         {/* ------------------------------ hero ------------------------------- */}
         <section className="lp2-hero" aria-label={t('home.previewAria')}>
           <HeroWaves />
@@ -185,90 +311,10 @@ export default function Home() {
             </ul>
           </div>
 
-          <div className="lp2-hero-visual lp-reveal">
-            {/* phone: the board's own mock — kept exactly as approved, the
-                hand-drawn SVG replacement was not what the design called for */}
-            <div className="lp2-phone" role="img" aria-label={t('home.previewAria')}>
-              <div className="pp-notch" aria-hidden="true" />
-              <div className="pp-head">
-                <span className="brand-mark pp-mark" aria-hidden="true">C</span>
-                <strong>{t('app.name')}</strong>
-                <span className="pp-avatar" aria-hidden="true">👩‍🎓</span>
-              </div>
-              <div className="pp-greet">
-                <strong>{t('home.mockGreeting')}</strong>
-                <span>{t('home.mockGreetingSub')}</span>
-              </div>
-              <div className="pp-total">
-                <span className="pp-label"><span aria-hidden="true">🔒</span> {t('home.mockTotal')}</span>
-                <strong>$1,240.50</strong>
-                <span className="pp-chip">+12%</span>
-              </div>
-              <div className="pp-grid">
-                <div className="pp-mini">
-                  <span className="pp-ico g" aria-hidden="true">💵</span>
-                  <span className="pp-label">{t('home.mockBalance')}</span>
-                  <strong>$1,800.00</strong>
-                </div>
-                <div className="pp-mini">
-                  <span className="pp-ico p" aria-hidden="true">💸</span>
-                  <span className="pp-label">{t('home.mockExpense')}</span>
-                  <strong>$559.50</strong>
-                </div>
-              </div>
-              <div className="pp-section">
-                <span className="pp-label"><span aria-hidden="true">📊</span> {t('home.mockOverview')}</span>
-                <div className="pp-chart">
-                  <span className="pp-donut" aria-hidden="true" />
-                  <div className="pp-legend">
-                    {PHONE_LEGEND.map((row) => (
-                      <span key={row.key}>
-                        <i className="dot" style={{ background: row.color }} aria-hidden="true" />
-                        {t(row.key)} <b>{row.pct}%</b>
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="pp-tabs" aria-hidden="true">
-                <span className="pp-tab active">⌂<em>{t('home.mockTabHome')}</em></span>
-                <span className="pp-tab">⇄<em>{t('nav.transactions')}</em></span>
-                <span className="pp-tab">◎<em>{t('nav.budgets')}</em></span>
-                <span className="pp-tab">⋯<em>{t('home.mockMore')}</em></span>
-              </div>
-            </div>
-
-            {/* floating glass cards */}
-            <div className="lp2-float f1" aria-hidden="true">
-              <span className="lp2-f-ico coin">🪙</span>
-              <div>
-                <strong>+$500</strong>
-                <span>{t('home.floatAllowanceT')}</span>
-                <small>{t('home.floatAllowanceD')}</small>
-              </div>
-            </div>
-            <div className="lp2-float f2" aria-hidden="true">
-              <span className="lp2-f-ico">🍔</span>
-              <div>
-                <strong>{t('home.floatFoodT')} 72%</strong>
-                <span className="lp2-f-track"><span style={{ width: '72%' }} /></span>
-                <small>$180 / $250</small>
-              </div>
-            </div>
-            <div className="lp2-float f3" aria-hidden="true">
-              <span className="lp2-f-ico bulb">💡</span>
-              <div>
-                <strong>{t('home.floatSaveT')}</strong>
-                <small>{t('home.floatSaveW')}</small>
-                <span>{t('home.floatSaveS')}</span>
-              </div>
-            </div>
-
-            <div className="lp2-hand hp1" aria-hidden="true">
-              {t('home.handSteps')}
-              <svg viewBox="0 0 60 34" className="lp2-hand-arrow"><path d="M2 4 C 22 2, 46 8, 54 26 M46 24 l9 4 -3 -10" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /></svg>
-            </div>
-          </div>
+          {/* the picture side of the hero: the phone that bobs, the converter
+              popover over it, the coin and the notes. One component, because it
+              is one picture and not a page. */}
+          <HeroShowcase className="lp-reveal" />
         </section>
 
         {/* ---------------------------- stats band --------------------------- */}
@@ -687,7 +733,11 @@ export default function Home() {
         </section>
 
         {/* ------------------------------- faq ------------------------------- */}
+        {/* The picture on the left and the questions on the right: the questions
+            are the point of a FAQ, and a narrow column of long sentences is the
+            wrong shape for them. */}
         <section id="faq" className="lp2-section lp2-faq" aria-labelledby="faq-heading">
+          <FaqArt />
           <div className="lp2-faq-copy">
             <span className="lp2-eyebrow">{t('home.nav.faq')}</span>
             <h2 id="faq-heading">{t('home.faqTitle')}</h2>
@@ -703,7 +753,6 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <FaqArt />
         </section>
 
         {/* -------------------------- closing banner ------------------------- */}
@@ -731,8 +780,8 @@ export default function Home() {
             <div>
               <h3>{t('nav.section.account')}</h3>
               <ul>
-                <li><Link to="/register">{t('home.link.register')}</Link></li>
-                <li><Link to="/login">{t('auth.signIn')}</Link></li>
+                <li><button type="button" className="linklike" onClick={() => openPanel('register')}>{t('home.link.register')}</button></li>
+                <li><button type="button" className="linklike" onClick={() => openPanel('login')}>{t('auth.signIn')}</button></li>
                 <li><Link to="/forgot-password">{t('home.link.resetPassword')}</Link></li>
               </ul>
             </div>
@@ -787,11 +836,13 @@ export default function Home() {
             <div>
               <h3>{t('home.section.staff')}</h3>
               <ul>
-                <li><Link to="/control/login">{t('home.link.adminSignIn')}</Link></li>
+                <li><button type="button" className="linklike" onClick={() => openPanel('admin')}>{t('home.link.adminSignIn')}</button></li>
               </ul>
             </div>
           </nav>
         </section>
+          </>
+        )}
       </main>
 
       {/* ------------------------------ footer ------------------------------- */}

@@ -1,0 +1,19 @@
+{
+  "groups.roleLegend": "Ce que chaque rôle peut faire ici :",
+  "groups.role.admin": "Propriétaire / Administrateur",
+  "groups.role.treasurer": "Trésorier",
+  "groups.role.auditor": "Auditeur",
+  "groups.role.member": "Membre",
+  "groups.roleCan.admin": "Tout : les factures, les écritures, les rôles, les livres et la clôture du groupe.",
+  "groups.roleCan.treasurer": "Ajoute des factures, règle les comptes, saisit des écritures au journal et réalise le rapprochement. Ne peut pas changer les rôles ni supprimer le groupe.",
+  "groups.roleCan.auditor": "Lit tout et peut signaler une facture ou une écriture au journal. Ne change rien.",
+  "groups.roleCan.member": "Voit le groupe, ses factures et son historique. N’ajoute rien.",
+  "groups.roleFor": "Rôle de {name}",
+  "groups.roleChanged": "{name} est désormais {role}.",
+  "groups.roleNoManage": "Seul le propriétaire du groupe peut changer les rôles. Demandez à cette personne si vous avez besoin de plus.",
+  "groups.ledgerJournal": "Journal",
+  "groups.ledgerTrial": "Balance générale",
+  "groups.ledgerReconcile": "Rapprocher",
+  "groups.roleNeedsAccount": "Ne s’est pas encore inscrit. Le rôle se remplit dès l’inscription — c’est le moment de le lui attribuer.",
+  "groups.roleAfterSignup": "Rôle après l’inscription"
+}

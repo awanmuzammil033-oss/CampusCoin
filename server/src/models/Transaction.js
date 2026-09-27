@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 
+import { toNum } from '../utils/money.js';
+
 /**
  * One money movement (TXN-1..6).
  * The sign is not stored — `type` decides whether it adds to or takes from
@@ -8,6 +10,28 @@ import mongoose from 'mongoose';
  * Rows are never hard-deleted: `isDeleted` flips and every change is copied
  * into TransactionHistory (TXN-4).
  */
+/**
+ * A payment that arrived as a scanned code rather than as typing (ADV-6).
+ *
+ * The original amount and currency are kept exactly as the code stated them,
+ * next to the rate that moved it and the day that rate was good for. Six months
+ * later "600 PKR" on a receipt is only checkable if the code that produced it
+ * was written down, so the raw payload is stored too - it is the receipt.
+ */
+const scanSchema = new mongoose.Schema(
+  {
+    merchant: { type: String, default: '', maxlength: 120 },
+    originalAmount: { type: mongoose.Schema.Types.Decimal128, default: null },
+    originalCurrency: { type: String, default: '', uppercase: true, maxlength: 3 },
+    rate: { type: Number, default: null },
+    rateAsOf: { type: String, default: '' },
+    rateSource: { type: String, default: '' },
+    reference: { type: String, default: '', maxlength: 80 },
+    raw: { type: String, default: '', maxlength: 400 },
+  },
+  { _id: false }
+);
+
 const transactionSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
@@ -25,6 +49,8 @@ const transactionSchema = new mongoose.Schema(
 
     isDeleted: { type: Boolean, default: false },
     flag: { type: String, enum: ['none', 'large', 'duplicate'], default: 'none' },
+    // set only when the amount came out of a scanned payment code
+    scan: { type: scanSchema, default: null },
   },
   { timestamps: true }
 );
@@ -48,6 +74,19 @@ transactionSchema.methods.toPublic = function toPublic() {
     recurringRule: this.recurringRule,
     isDeleted: this.isDeleted,
     flag: this.flag,
+    scan: this.scan
+      ? {
+          merchant: this.scan.merchant || '',
+          // a Decimal128 has to become a number here, the same as every other
+          // amount in this app - handed raw it reaches the client as an object
+          originalAmount: this.scan.originalAmount ? toNum(this.scan.originalAmount) : null,
+          originalCurrency: this.scan.originalCurrency || '',
+          rate: this.scan.rate,
+          rateAsOf: this.scan.rateAsOf || '',
+          rateSource: this.scan.rateSource || '',
+          reference: this.scan.reference || '',
+        }
+      : null,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,
   };

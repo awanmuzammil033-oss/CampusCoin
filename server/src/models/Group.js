@@ -19,6 +19,12 @@ const memberSchema = new mongoose.Schema(
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     name: { type: String, required: true, trim: true, maxlength: 80 },
     email: { type: String, trim: true, lowercase: true, maxlength: 254, default: '' },
+    // What this person may do in this group: admin | treasurer | auditor | member.
+    // Absent on every row of a group written before roles existed, and the
+    // reader resolves that to "owner is an admin, everybody else is a member"
+    // — so an old group keeps exactly the powers it had, and the owner can
+    // promote a roommate in one click from the members list.
+    role: { type: String, enum: ['admin', 'treasurer', 'auditor', 'member'] },
     addedAt: { type: Date, default: () => new Date() },
   },
   { _id: false }

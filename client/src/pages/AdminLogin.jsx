@@ -11,7 +11,8 @@ import AuthArt from '../components/art/AuthArt.jsx';
  * differently from the student page, and the server refuses student
  * accounts here just as the student page refuses staff accounts.
  */
-export default function AdminLogin() {
+
+export default function AdminLogin({ embedded = false, onClose, onSwitch } = {}) {
   const navigate = useNavigate();
   const { t } = useLocale();
   const { controlLogin, logout } = useAuth();
@@ -42,8 +43,41 @@ export default function AdminLogin() {
     }
   }
 
+  /**
+   * The three ways this form can be hosted, in one place so the page version and
+   * the landing-panel version can never drift apart:
+   *
+   *  - `embedded`  the form is inside another page rather than being a page of
+   *                 its own, so "back" closes the panel and the cross-links swap
+   *                 it instead of navigating;
+   *  - `onClose`   what "back to the site" does when embedded;
+   *  - `onSwitch`  what "create an account" and the staff door do when embedded.
+   *
+   * With none of them it is the same form on its own page, with real links.
+   */
+  const host = {
+    wrapper: embedded ? ' auth-wrap--embedded' : '',
+    back: embedded ? (
+      <button type="button" className="btn btn-ghost btn-sm auth-back" onClick={onClose}>
+        <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
+      </button>
+    ) : (
+      <Link to="/" className="btn btn-ghost btn-sm auth-back">
+        <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
+      </Link>
+    ),
+    switchTo: (target, label) =>
+      embedded ? (
+        <button type="button" className="linklike" onClick={() => onSwitch && onSwitch(target)}>
+          {label}
+        </button>
+      ) : (
+        <Link to={target}>{label}</Link>
+      ),
+  };
+
   return (
-    <div className="auth-wrap">
+    <div className={`auth-wrap${host.wrapper}`}>
       <div className="auth-split">
         {/* Left: what the staff door is for. Hidden below 1000px. */}
         <aside className="auth-art-col">
@@ -61,11 +95,7 @@ export default function AdminLogin() {
 
         {/* Right: the form itself. */}
         <div className="card auth-card admin-mode">
-        <div className="auth-top">
-          <Link to="/" className="btn btn-ghost btn-sm auth-back">
-            <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
-          </Link>
-        </div>
+        <div className="auth-top">{host.back}</div>
         <div className="auth-brand">
           <span className="brand-mark" aria-hidden="true">C</span>
         </div>
@@ -119,7 +149,7 @@ export default function AdminLogin() {
         </form>
 
         <p className="smallish text-center mt-4 mb-0 muted">
-          {t('auth.studentPrompt')} <Link to="/login">{t('auth.goToStudentSignIn')}</Link>
+          {t('auth.studentPrompt')} {host.switchTo('/login', t('auth.goToStudentSignIn'))}
         </p>
         </div>
       </div>

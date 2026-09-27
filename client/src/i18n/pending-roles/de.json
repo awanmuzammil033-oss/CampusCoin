@@ -1,0 +1,19 @@
+{
+  "groups.roleLegend": "Was jede Rolle hier kann:",
+  "groups.role.admin": "Eigentümer / Admin",
+  "groups.role.treasurer": "Kassenwart",
+  "groups.role.auditor": "Rechnungsprüfer",
+  "groups.role.member": "Mitglied",
+  "groups.roleCan.admin": "Alles: Rechnungen, Buchungen, Rollen, die Bücher und das Schließen der Gruppe.",
+  "groups.roleCan.treasurer": "Fügt Rechnungen hinzu, gleicht aus, trägt Buchungen ins Journal ein und führt den Abgleich durch. Kann weder Rollen ändern noch die Gruppe löschen.",
+  "groups.roleCan.auditor": "Liest alles und kann eine Rechnung oder eine Journalbuchung markieren. Ändert nichts.",
+  "groups.roleCan.member": "Sieht die Gruppe, ihre Rechnungen und ihren Verlauf. Fügt nichts hinzu.",
+  "groups.roleFor": "Rolle für {name}",
+  "groups.roleChanged": "{name} ist jetzt {role}.",
+  "groups.roleNoManage": "Nur der Gruppeneigentümer kann Rollen ändern. Brauchst du mehr, frag diese Person.",
+  "groups.ledgerJournal": "Journal",
+  "groups.ledgerTrial": "Saldenliste",
+  "groups.ledgerReconcile": "Abgleichen",
+  "groups.roleNeedsAccount": "Noch nicht angemeldet. Die Rolle wird bei der Anmeldung ausgefüllt — dann kannst du sie vergeben.",
+  "groups.roleAfterSignup": "Rolle nach der Anmeldung"
+}

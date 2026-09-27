@@ -431,7 +431,7 @@ test('two uneven bills still add up to the cent', async () => {
 
 /* ------------------------------ the roommate ------------------------------ */
 
-test('a roommate can add bills; only the owner can change the group', async () => {
+test('a roommate starts as a viewer, and only the owner can change that or the group', async () => {
   const owner = await session({ name: 'Aisha' });
   const roommate = await session({ name: 'Bilal' });
   const stranger = await session({ name: 'Noor' });
@@ -446,14 +446,27 @@ test('a roommate can add bills; only the owner can change the group', async () =
   assert.equal(detail.body.members[1].user, roommate.user.user.id);
   assert.equal(detail.body.members[1].name, 'Bilal');
 
-  // a linked member sees the group, and can put a bill on it
+  // a linked member sees the group straight away
   assert.equal((await roommate.agent.get('/api/groups')).body.rows.length, 1);
+
+  // ...but a roommate starts as a viewer (GRP-1), so a bill is refused, with a
+  // sentence that says who could do it instead of a bare "forbidden"
+  const refused = await addBill(roommate, group.id, bill({ amount: '30.00', paidByIndex: 1, title: 'Soap' }));
+  assert.equal(refused.status, 403, refused.text);
+  assert.match(refused.body.error, /treasurer|owner/i);
+
+  // the owner promotes them, and the very same bill goes through
+  const promoted = await withCsrf(owner.user, owner.agent.patch(`/api/groups/${group.id}/members/1/role`)).send({
+    role: 'treasurer',
+  });
+  assert.equal(promoted.status, 200, promoted.text);
+
   const billByMember = await addBill(roommate, group.id, bill({ amount: '30.00', paidByIndex: 1, title: 'Soap' }));
   assert.equal(billByMember.status, 201, billByMember.text);
   assert.equal(billByMember.body.balances[1].net, 15, 'Bilal fronted 30 and owes 15 of it');
   assert.equal(billByMember.body.balances[0].net, -15);
 
-  // ...but not change who is in it
+  // ...and still cannot change who is in it, whatever their role
   const asMember = await withCsrf(roommate.user, roommate.agent.post(`/api/groups/${group.id}/members`)).send({
     name: 'Sana',
     email: 'sana-room204@test.local',

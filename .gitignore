@@ -1,7 +1,19 @@
+# Dependencies and build output: fetched, not written. The app is the source.
 node_modules/
 dist/
+build/
+
+# the browser probes and the screenshots they take: tools, not the app
+.probes/
+.shots/
+.tmp-tests/
+
+# local environment and the dev database
 .env
-*.log
-.DS_Store
-# local development database files (dev:local) — never committed
+.env.local
 db/data/
+
+# editor and OS noise
+.DS_Store
+Thumbs.db
+*.log

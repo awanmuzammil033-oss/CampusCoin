@@ -27,7 +27,9 @@ import bookmarkRoutes from './routes/bookmarks.js';
 import quickTextRoutes from './routes/quickText.js';
 import survivalRoutes from './routes/survival.js';
 import groupsRoutes from './routes/groups.js';
+import qrpayRoutes from './routes/qrpay.js';
 import groupChatRoutes from './routes/groupChat.js';
+import groupLedgerRoutes from './routes/groupLedger.js';
 import wishlistRoutes from './routes/wishlist.js';
 import vaultRoutes from './routes/vault.js';
 import fxRoutes from './routes/fx.js';
@@ -74,6 +76,8 @@ app.use('/api/tips', tipRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api', suggestionRoutes);
 app.use('/api/insights', insightRoutes);
+// a scanned payment code: read it, price it, and record it as an expense
+app.use('/api/qr', qrpayRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api/quick-text', quickTextRoutes);
 app.use('/api/survival', survivalRoutes);
@@ -81,6 +85,9 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/groups', groupsRoutes);
 // the chat hangs off the group, so it inherits the group isolation
 app.use('/api/groups/:id/chat', groupChatRoutes);
+// the group own books: a journal that has to balance, the trial balance that
+// proves it does, and the bank reconciliation that explains the difference
+app.use('/api/groups/:id/ledger', groupLedgerRoutes);
 app.use('/api/vault', vaultRoutes);
 app.use('/api/fx', fxRoutes);
 app.use('/api/grow-money', growMoneyRoutes);

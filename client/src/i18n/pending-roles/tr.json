@@ -1,0 +1,19 @@
+{
+  "groups.roleLegend": "Burada her rolün yapabildikleri:",
+  "groups.role.admin": "Sahip / Yönetici",
+  "groups.role.treasurer": "Sayman",
+  "groups.role.auditor": "Denetçi",
+  "groups.role.member": "Üye",
+  "groups.roleCan.admin": "Her şey: faturalar, kayıtlar, roller, defterler ve grubu kapatma.",
+  "groups.roleCan.treasurer": "Fatura ekler, hesaplaşır, yevmiye kayıtları girer ve mutabakatı yapar. Rolleri değiştiremez ve grubu silemez.",
+  "groups.roleCan.auditor": "Her şeyi okur ve bir faturayı ya da bir yevmiye kaydını işaretleyebilir. Hiçbir şeyi değiştirmez.",
+  "groups.roleCan.member": "Grubu, faturalarını ve geçmişini görür. Hiçbir şey eklemez.",
+  "groups.roleFor": "{name} rolü",
+  "groups.roleChanged": "{name} artık {role}.",
+  "groups.roleNoManage": "Rolleri yalnızca grup sahibi değiştirebilir. Daha fazlası gerekiyorsa ondan isteyin.",
+  "groups.ledgerJournal": "Yevmiye",
+  "groups.ledgerTrial": "Mizan",
+  "groups.ledgerReconcile": "Mutabakat",
+  "groups.roleNeedsAccount": "Henüz kayıt olmadı. Kayıt olduğu anda rol dolar — o zaman verin.",
+  "groups.roleAfterSignup": "Kayıttan sonraki rol"
+}

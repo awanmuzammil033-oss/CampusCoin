@@ -1,0 +1,19 @@
+{
+  "groups.roleLegend": "What each role can do here:",
+  "groups.role.admin": "Owner / Admin",
+  "groups.role.treasurer": "Treasurer",
+  "groups.role.auditor": "Auditor",
+  "groups.role.member": "Member",
+  "groups.roleCan.admin": "Everything: bills, entries, roles, the books, and closing the group.",
+  "groups.roleCan.treasurer": "Adds bills, settles up, posts journal entries and runs the reconciliation. Cannot change roles or delete the group.",
+  "groups.roleCan.auditor": "Reads everything and can raise a flag on a bill or a journal entry. Changes nothing.",
+  "groups.roleCan.member": "Sees the group, its bills and its history. Adds nothing.",
+  "groups.roleFor": "Role for {name}",
+  "groups.roleChanged": "{name} is now {role}.",
+  "groups.roleNoManage": "Only the group owner can change roles. Ask them if you need more.",
+  "groups.ledgerJournal": "Journal",
+  "groups.ledgerTrial": "Trial balance",
+  "groups.ledgerReconcile": "Reconcile",
+  "groups.roleNeedsAccount": "They have not signed up yet. A role fills in the moment they register — give it to them then.",
+  "groups.roleAfterSignup": "Role after sign-up"
+}

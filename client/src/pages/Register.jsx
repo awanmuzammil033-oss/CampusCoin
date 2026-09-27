@@ -12,7 +12,8 @@ const TIP_KEYS = ['auth.tipUseEight', 'auth.tipNumbersCapitals', 'auth.tipSymbol
 
 /** Registration (AUTH-1). The same rules are checked server-side too —
  *  this live hint just saves a round trip. */
-export default function Register() {
+
+export default function Register({ embedded = false, onClose, onSwitch } = {}) {
   const { register } = useAuth();
   const { t } = useLocale();
   const navigate = useNavigate();
@@ -24,7 +25,9 @@ export default function Register() {
   const strength = passwordStrength(form.password);
 
   function update(field) {
-    return (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+  
+
+  return (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
   }
 
   async function onSubmit(e) {
@@ -62,8 +65,41 @@ export default function Register() {
     }
   }
 
+  /**
+   * The three ways this form can be hosted, in one place so the page version and
+   * the landing-panel version can never drift apart:
+   *
+   *  - `embedded`  the form is inside another page rather than being a page of
+   *                 its own, so "back" closes the panel and the cross-links swap
+   *                 it instead of navigating;
+   *  - `onClose`   what "back to the site" does when embedded;
+   *  - `onSwitch`  what "create an account" and the staff door do when embedded.
+   *
+   * With none of them it is the same form on its own page, with real links.
+   */
+  const host = {
+    wrapper: embedded ? ' auth-wrap--embedded' : '',
+    back: embedded ? (
+      <button type="button" className="btn btn-ghost btn-sm auth-back" onClick={onClose}>
+        <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
+      </button>
+    ) : (
+      <Link to="/" className="btn btn-ghost btn-sm auth-back">
+        <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
+      </Link>
+    ),
+    switchTo: (target, label) =>
+      embedded ? (
+        <button type="button" className="linklike" onClick={() => onSwitch && onSwitch(target)}>
+          {label}
+        </button>
+      ) : (
+        <Link to={target}>{label}</Link>
+      ),
+  };
+
   return (
-    <div className="auth-wrap">
+    <div className={`auth-wrap${host.wrapper}`}>
       <div className="auth-split">
         {/* Left: the promise of the account. Hidden below 1000px so the form
             owns the whole screen on a phone. */}
@@ -82,11 +118,7 @@ export default function Register() {
 
         {/* Right: the form itself. */}
         <div className="card auth-card auth-register">
-        <div className="auth-top">
-          <Link to="/" className="btn btn-ghost btn-sm auth-back">
-            <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
-          </Link>
-        </div>
+        <div className="auth-top">{host.back}</div>
         <div className="auth-brand">
           <span className="brand-mark" aria-hidden="true">C</span>
         </div>
@@ -204,7 +236,7 @@ export default function Register() {
         </form>
 
         <p className="smallish text-center mt-3 mb-0 muted">
-          {t('auth.alreadyRegistered')} <Link to="/login">{t('auth.signIn')}</Link>
+          {t('auth.alreadyRegistered')} {host.switchTo('/login', t('auth.signIn'))}
         </p>
         </div>
       </div>

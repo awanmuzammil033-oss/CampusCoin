@@ -1,0 +1,19 @@
+{
+  "groups.roleLegend": "Qué puede hacer cada rol aquí:",
+  "groups.role.admin": "Propietario / Administrador",
+  "groups.role.treasurer": "Tesorero",
+  "groups.role.auditor": "Auditor",
+  "groups.role.member": "Miembro",
+  "groups.roleCan.admin": "Todo: facturas, asientos, roles, los libros y cerrar el grupo.",
+  "groups.roleCan.treasurer": "Añade facturas, salda cuentas, registra asientos en el libro diario y hace la conciliación. No puede cambiar los roles ni eliminar el grupo.",
+  "groups.roleCan.auditor": "Lo lee todo y puede marcar una factura o un asiento del libro diario. No cambia nada.",
+  "groups.roleCan.member": "Ve el grupo, sus facturas y su historial. No añade nada.",
+  "groups.roleFor": "Rol de {name}",
+  "groups.roleChanged": "{name} ahora es {role}.",
+  "groups.roleNoManage": "Solo el propietario del grupo puede cambiar los roles. Pídeselo si necesitas más.",
+  "groups.ledgerJournal": "Libro diario",
+  "groups.ledgerTrial": "Balance de comprobación",
+  "groups.ledgerReconcile": "Conciliar",
+  "groups.roleNeedsAccount": "Todavía no se ha registrado. El rol se rellena en cuanto se registre — dáselo entonces.",
+  "groups.roleAfterSignup": "Rol después del registro"
+}

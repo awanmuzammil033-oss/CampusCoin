@@ -1,0 +1,64 @@
+{
+  "insights.title": "支出のインサイト",
+  "insights.month": "月",
+  "insights.refresh": "更新",
+  "insights.retry": "もう一度試す",
+  "insights.analysisLabel": "分析",
+  "insights.insightLabel": "インサイト：",
+  "insights.tipLabel": "ヒント：",
+
+  "insights.analysisOne": "{category}が{amount}で、今月ではいちばん大きい項目でした。",
+  "insights.analysisTwo": "{category} {amount}、次は{nextCategory} {nextAmount}。",
+  "insights.analysisNone": "{month}には支出がありませんでした。その月の記録はすべて収入でした。",
+
+  "insights.p.dining_out": "外食は{count}回で{amount}でした。そのうち1回を家での料理に変えると、{saving}ほど残る見積りです。",
+  "insights.p.many_small": "{category}は別々の記録が{count}件、合計{amount}——1回あたり{average}ほどです。",
+  "insights.p.weekend": "今月の{percent}ほど——{count}件の{amount}——が、土曜か日曜に当たっていました。",
+  "insights.p.idle_subscriptions": "{count}件のサブスクリプションは、まだ支払い続けのまま使われていません：1か月{amount}。",
+
+  "insights.basis.one": "{month}に記録した{count}件の取引に基づきます。",
+  "insights.basis.other": "{month}に記録した{count}件の取引に基づきます。",
+
+  "insights.estimateFood": "上の節約額は、食べ只用のおよそ{percent}から算出した数字です。計画の計算であって、約束ではありません。",
+  "insights.estimateWeekend": "週末の行は、1か月のうちおよそ{threshold}が週末に当たるときにだけ出てきます。",
+
+  "insights.noPatterns": "今月目立つものはありません——ここにある傾向は、どれも名前をつけるほど大きくありません。",
+  "insights.emptyTitle": "まだ読むものがありません",
+  "insights.emptyBody": "{month}には何も記録されていないので、読める月がありません。記録を1件追加するか、別の月を選んでください。",
+  "insights.errorTitle": "この月を読み込めませんでした",
+
+  "qr.title": "支払いコードを読み取る",
+  "qr.open": "コードを読み取る",
+  "qr.close": "閉じる",
+
+  "qr.cameraStarting": "カメラを起動しています…",
+  "qr.cameraHint": "カメラを支払いコードに向けてください。支払いを押すまで、何も支払われません。",
+  "qr.cameraUnsupported": "このブラウザはウェブページにカメラを渡さないので、ここでは読み取ることができません。下にコードを貼り付けてください——まったく同じ結果になります。",
+  "qr.cameraDenied": "カメラの許可が拒否されたので、カメラは切れています。下にコードを貼り付けてください——まったく同じ結果になります。",
+  "qr.cameraUnavailable": "この端末ではカメラを起動できませんでした。下にコードを貼り付けてください——まったく同じ結果になります。",
+  "qr.cameraTryAgain": "カメラをもう一度試す",
+
+  "qr.code": "支払いコード",
+  "qr.codeHelp": "?のあとを含め、コード全体を貼り付けてください。",
+  "qr.read": "コードを読み取る",
+  "qr.reading": "コードを読み取っています…",
+
+  "qr.confirmTitle": "支付的準備",
+  "qr.merchant": "店舗",
+  "qr.asScanned": "コードの記載どおりに",
+  "qr.yourMoney": "あなたの通貨に",
+  "qr.reference": "参考",
+  "qr.rateLive": "ライブレート。{when}の分です。",
+  "qr.rateReference": "{when}の参考レート——日付の付いた表で、今日の市場価格ではありません。",
+  "qr.nothingPaid": "まだ何も支払っていません。支払いを押して記録してください。",
+  "qr.pay": "{amount}を支払う",
+  "qr.paying": "支払っています…",
+
+  "qr.recordedTitle": "記録しました",
+  "qr.balanceNow": "現在の残高",
+  "qr.kept": "コード自身の{amount} {currency}は、レートと適用された日とあわせて記録に残ります。",
+  "qr.belowZero": "この支払いで残高がゼロを下回りました。記録は残っています——それを直すのは次の収入です。",
+  "qr.categoryChosen": "店舗名の中にカテゴリに合致するものはありませんでした。そのため、よく使うカテゴリの下に入れました。違う場合は記録上で変更してください。",
+  "qr.noCategory": "カテゴリなし",
+  "qr.editEntry": "記録を編集"
+}

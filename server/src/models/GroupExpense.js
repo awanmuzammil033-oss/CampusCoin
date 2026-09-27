@@ -43,6 +43,25 @@ const splitLineSchema = new mongoose.Schema(
   { _id: false }
 );
 
+/**
+ * An auditor's question about a bill (GRP-1). It is deliberately not an edit:
+ * the split, the amounts and the payer stay exactly as they were posted, and
+ * the value of a flag is the sentence attached to it. `resolvedAt` is what turns
+ * it from an open question into a closed one — the treasurer or the owner looked
+ * at it, and said what they did about it.
+ */
+const flagSchema = new mongoose.Schema(
+  {
+    by: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    byName: { type: String, default: '' },
+    reason: { type: String, required: true, trim: true, maxlength: 200 },
+    at: { type: Date, default: () => new Date() },
+    resolvedAt: { type: Date, default: null },
+    resolvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    resolution: { type: String, default: '', maxlength: 200 },
+  },
+  { _id: false }
+);
 const groupExpenseSchema = new mongoose.Schema(
   {
     group: { type: mongoose.Schema.Types.ObjectId, ref: 'Group', required: true },
@@ -61,6 +80,8 @@ const groupExpenseSchema = new mongoose.Schema(
     date: { type: Date, required: true, default: () => new Date() },
     note: { type: String, trim: true, maxlength: 200, default: '' },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    // an open question about this bill; null when nobody has raised one
+    flag: { type: flagSchema, default: null }
   },
   { timestamps: true }
 );

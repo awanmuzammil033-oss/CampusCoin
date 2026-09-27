@@ -201,6 +201,19 @@ export function present(txn) {
     suggestedCategory: txn.suggestedCategory || null,
     suggestionSource: txn.suggestionSource || null,
     recurringRule: txn.recurringRule || null,
+    // what a scanned payment was BEFORE it became an expense, so the row can say
+    // where the number came from - the same receipt the single-entry shape has
+    scan: txn.scan
+      ? {
+          merchant: txn.scan.merchant || '',
+          originalAmount: txn.scan.originalAmount ? toNum(txn.scan.originalAmount) : null,
+          originalCurrency: txn.scan.originalCurrency || '',
+          rate: txn.scan.rate ?? null,
+          rateAsOf: txn.scan.rateAsOf || '',
+          rateSource: txn.scan.rateSource || '',
+          reference: txn.scan.reference || '',
+        }
+      : null,
     category:
       cat && typeof cat === 'object' && cat.name !== undefined
         ? { id: cat._id.toString(), name: cat.name, type: cat.type, icon: cat.icon }

@@ -1,0 +1,64 @@
+{
+  "insights.title": "Wawasan pengeluaran",
+  "insights.month": "Bulan",
+  "insights.refresh": "Segarkan",
+  "insights.retry": "Coba lagi",
+  "insights.analysisLabel": "Analisis",
+  "insights.insightLabel": "Wawasan:",
+  "insights.tipLabel": "Tips:",
+
+  "insights.analysisOne": "{category} mengambil {amount} — yang terbesar bulan ini.",
+  "insights.analysisTwo": "{category} {amount}, lalu {nextCategory} {nextAmount}.",
+  "insights.analysisNone": "Tidak ada yang pengeluaran di {month} — setiap entri bulan itu adalah pemasukan.",
+
+  "insights.p.dining_out": "Makan di luar berjumlah {amount} untuk {count} kunjungan. Memasak salah satunya di rumah akan menyisakan sekitar {saving}.",
+  "insights.p.many_small": "{category} tercatat {count} entri terpisah dengan total {amount} — sekitar {average} tiap kali.",
+  "insights.p.weekend": "Sekitar {percent} bulan ini — {amount} dari {count} entri — jatuh pada hari Sabtu atau Minggu.",
+  "insights.p.idle_subscriptions": "{count} langganan masih dibayar tapi tidak digunakan: {amount} per bulan.",
+
+  "insights.basis.one": "Berdasarkan transaksi ({count}) yang kamu catat di {month}.",
+  "insights.basis.other": "Berdasarkan {count} transaksi yang kamu catat di {month}.",
+
+  "insights.estimateFood": "Penghematan di atas dihitung dari sekitar {percent} dari yang kamu belanjakan untuk makanan — hitungan perencanaan, bukan janji.",
+  "insights.estimateWeekend": "Baris akhir pekan baru muncul ketika sekitar {threshold} sebulan jatuh pada akhir pekan.",
+
+  "insights.noPatterns": "Tidak ada yang menonjol bulan ini — tidak satu pun pola di sini cukup besar untuk diberi nama.",
+  "insights.emptyTitle": "Belum ada yang bisa dibaca",
+  "insights.emptyBody": "Tidak ada yang dicatat di {month}, jadi tidak ada bulan untuk dibaca. Tambahkan entri, atau pilih bulan yang berbeda.",
+  "insights.errorTitle": "Bulan ini gagal dimuat",
+
+  "qr.title": "Pindai kode pembayaran",
+  "qr.open": "Pindai kode",
+  "qr.close": "Tutup",
+
+  "qr.cameraStarting": "Menyalakan kamera…",
+  "qr.cameraHint": "Arahkan kamera ke kode pembayaran. Tidak ada yang dibayar hingga kamu menekan Bayar.",
+  "qr.cameraUnsupported": "Peramban ini tidak memberi kamera ke halaman web, jadi dari sini tidak ada yang bisa dibaca. Tempel kode di bawah — hasilnya persis sama.",
+  "qr.cameraDenied": "Izin kamera ditolak, jadi kameranya mati. Tempel kode di bawah — hasilnya persis sama.",
+  "qr.cameraUnavailable": "Tidak ada kamera yang bisa dinyalakan di perangkat ini. Tempel kode di bawah — hasilnya persis sama.",
+  "qr.cameraTryAgain": "Coba kamera lagi",
+
+  "qr.code": "Kode pembayaran",
+  "qr.codeHelp": "Tempel kode seluruhnya, termasuk bagian setelah ?.",
+  "qr.read": "Baca kodenya",
+  "qr.reading": "Membaca kode…",
+
+  "qr.confirmTitle": "Siap membayar",
+  "qr.merchant": "Pedagang",
+  "qr.asScanned": "Seperti yang tertulis di kode",
+  "qr.yourMoney": "Dalam mata uangmu",
+  "qr.reference": "Referensi",
+  "qr.rateLive": "Kurs langsung, berlaku untuk {when}.",
+  "qr.rateReference": "Kurs referensi untuk {when} — tabel bertanggal, bukan harga pasar hari ini.",
+  "qr.nothingPaid": "Belum ada yang dibayar. Tekan Bayar untuk mencatatnya.",
+  "qr.pay": "Bayar {amount}",
+  "qr.paying": "Membayar…",
+
+  "qr.recordedTitle": "Tercatat",
+  "qr.balanceNow": "Saldo sekarang",
+  "qr.kept": "{amount} {currency} milik kode itu sendiri tersimpan di entri, beserta kursnya dan hari berlakunya.",
+  "qr.belowZero": "Pembayaran ini membuat saldo turun ke bawah nol. Entrinya sudah tercatat — yang membenarkannya adalah pemasukan berikutnya.",
+  "qr.categoryChosen": "Tidak ada isi nama pedagang yang cocok dengan sebuah kategori, jadi ini disimpan di kategori yang paling sering kamu gunakan. Ubah di entri kalau itu keliru.",
+  "qr.noCategory": "Tanpa kategori",
+  "qr.editEntry": "Ubah entri"
+}

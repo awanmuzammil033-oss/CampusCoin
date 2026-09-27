@@ -33,6 +33,9 @@ const WishlistPage = lazy(() => import('./pages/WishlistPage.jsx'));
 const GroupsPage = lazy(() => import('./pages/GroupsPage.jsx'));
 const VaultPage = lazy(() => import('./pages/VaultPage.jsx'));
 const GroupChatPage = lazy(() => import('./pages/GroupChatPage.jsx'));
+const GroupJournalPage = lazy(() => import('./pages/GroupJournalPage.jsx'));
+const GroupTrialBalancePage = lazy(() => import('./pages/GroupTrialBalancePage.jsx'));
+const GroupReconcilePage = lazy(() => import('./pages/GroupReconcilePage.jsx'));
 const GrowMoneyPage = lazy(() => import('./pages/GrowMoneyPage.jsx'));
 const SavingsOptionsPage = lazy(() => import('./pages/SavingsOptionsPage.jsx'));
 const SideIncomePage = lazy(() => import('./pages/SideIncomePage.jsx'));
@@ -167,6 +170,21 @@ export default function App() {
         <Route
           path="/groups/:groupId/chat"
           element={<Screen><RequireStudent><GroupChatPage /></RequireStudent></Screen>}
+        />
+
+        {/* the group own books, in the order they answer each other: post an
+            entry, prove the two columns agree, then reconcile the bank. */}
+        <Route
+          path="/groups/:groupId/journal"
+          element={<Screen><RequireStudent><GroupJournalPage /></RequireStudent></Screen>}
+        />
+        <Route
+          path="/groups/:groupId/trial-balance"
+          element={<Screen><RequireStudent><GroupTrialBalancePage /></RequireStudent></Screen>}
+        />
+        <Route
+          path="/groups/:groupId/reconcile"
+          element={<Screen><RequireStudent><GroupReconcilePage /></RequireStudent></Screen>}
         />
         {/* the educational guide reads the student's own surplus, so it lives
             inside the signed-in app */}

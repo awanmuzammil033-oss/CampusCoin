@@ -570,7 +570,80 @@ source (`sourceUrl` or `sourceNote`), so a badge can never point at nothing.
 
 ---
 
-## 22. Relationships
+## 22. `groupaccounts`
+
+One row per account, per group. Seeded on first use from a fixed chart of
+accounts (1000 Cash in hand, 1010 Bank account, 1100 Receivable from members,
+2000 Payable to members, 3000 Group fund, 4000 Income, and the 5xxx expense
+codes) and then editable per group, so a group can add an account of its own
+without a code change.
+
+| Field | Type | Notes |
+|---|---|---|
+| `group` | ObjectId → `groups` | required; the owning group |
+| `code` | String | required, 4 digits, unique **within the group** |
+| `name` | String | required, ≤ 80 |
+| `type` | Enum | `asset` \| `liability` \| `equity` \| `income` \| `expense` |
+| `system` | Boolean | true for the seeded chart, so a rename can be told from a custom account |
+
+**Indexes** — `{ group: 1, code: 1 }` unique: two groups may both have 1010, one
+group may not have it twice. That is also what makes a code from another group
+a 404 rather than a silent edit.
+
+## 23. `groupjournalentries`
+
+A posted journal entry: the group's own books, as opposed to the split board
+in `groupexpenses`. **Immutable.** Nothing here is ever updated — a mistake is
+corrected by posting the mirror, which is another row.
+
+| Field | Type | Notes |
+|---|---|---|
+| `group` | ObjectId → `groups` | required |
+| `ref` | String | required, e.g. `J-0001`; assigned by the server, never by the client |
+| `date` | Date | UTC midnight, so a day is a day in every timezone |
+| `memo` | String | ≤ 200 |
+| `lines` | Array (2..20) | `{ code, debit, credit }`; exactly one side is non-zero per line |
+| `source` | Enum | `manual` \| `reconcile` — how the entry came to exist |
+| `sourceRef` | String | the statement line key when `source` is `reconcile` |
+| `by` | ObjectId → `users` | who posted it |
+
+**The invariant the service keeps:** `SUM(debit) = SUM(credit)`, compared in
+whole cents, checked before the row is created. The amounts are stored as
+Decimal128 and the service reads their digits rather than their float value, so
+33.33 posted three times is 99.99 and not 99.98999999999999.
+
+**Indexes** — `{ group: 1, ref: 1 }` unique (two entries can never share a
+number), `{ group: 1, date: -1 }` for the list, and `{ group: 1, source: 1,
+sourceRef: 1 }` for finding the entry a booked statement line produced.
+
+## 24. `groupreconciles`
+
+One reconciliation session: the bank's figure beside the group's books, line
+by line. It is a document in progress, not a report — it is kept so a person can
+come back to it.
+
+| Field | Type | Notes |
+|---|---|---|
+| `group` | ObjectId → `groups` | required |
+| `account` | ObjectId → `groupaccounts` | the account being reconciled |
+| `statementDate` | Date | the day the statement is dated |
+| `statementBalance` | Decimal128 | the closing balance it prints |
+| `lines` | Array | `{ key, date, description, amount, as, entryId, entryLineId, reason, at }` |
+| `outstanding` | [ObjectId] | book lines marked as still in transit |
+| `status` | Enum | `draft` \| `reconciled` |
+| `note`, `by`, `createdAt`, `reconciledAt`, `reconciledBy` | | who did what, and when |
+
+`as` is the classification of one statement line: `matched` (paired with a book
+line by the server), `book` (the missing entry has been posted for it), `ignore`
+(it is not the group's money, and `reason` says why) or `open` (nobody has
+decided yet). A session closes only when the two sides agree **and** no line is
+still open.
+
+**Indexes** — a **partial** unique index on `{ group: 1, status: 1 }` where
+`status = "draft"`: one open session per group, enforced by the database rather
+than by trusting each caller to look first.
+
+## 25. Relationships
 
 | From | Field | To | Meaning |
 |---|---|---|---|
@@ -616,6 +689,14 @@ vote lands in **categorycorrections**, which later suggestions count. The
 **recentactivities** table keeps each user's last twenty viewed or edited
 entries for the dashboard strip.
 
+
+A group that keeps books has two more layers above that, and they answer a
+different question from the split: **groupaccounts** is the chart,
+**groupjournalentries** the postings (never edited, balanced to the cent before
+they are written), and **groupreconciles** the workbench where a real bank
+statement is compared against those postings and can only be closed when the
+two agree. None of the three touches `transactions`: the group's money is not
+a student's spending, and the trial balance would be meaningless if it were.
 Shared money lives beside the personal ledger rather than inside it. A **group**
 lists its members (position 0 is always the owner), holds **groupexpenses** whose
 split was resolved on the server and stored as money, and records money changing

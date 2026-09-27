@@ -1,0 +1,19 @@
+{
+  "groups.roleLegend": "O que cada perfil pode fazer aqui:",
+  "groups.role.admin": "Responsável / Administrador",
+  "groups.role.treasurer": "Tesoureiro",
+  "groups.role.auditor": "Auditor",
+  "groups.role.member": "Membro",
+  "groups.roleCan.admin": "Tudo: contas, lançamentos, perfis, os livros e fechar o grupo.",
+  "groups.roleCan.treasurer": "Adiciona contas, quita, registra lançamentos no livro diário e faz a conciliação. Não pode mudar os perfis nem excluir o grupo.",
+  "groups.roleCan.auditor": "Lê tudo e pode marcar uma conta ou um lançamento do livro diário. Não muda nada.",
+  "groups.roleCan.member": "Vê o grupo, suas contas e seu histórico. Não adiciona nada.",
+  "groups.roleFor": "Perfil de {name}",
+  "groups.roleChanged": "{name} agora é {role}.",
+  "groups.roleNoManage": "Só o responsável do grupo pode mudar os perfis. Peça a essa pessoa se você precisar de mais.",
+  "groups.ledgerJournal": "Livro diário",
+  "groups.ledgerTrial": "Balanço de verificação",
+  "groups.ledgerReconcile": "Conciliar",
+  "groups.roleNeedsAccount": "Ainda não criou cadastro. O perfil é preenchido assim que a pessoa se cadastrar — dê a ele nessa hora.",
+  "groups.roleAfterSignup": "Perfil após o cadastro"
+}

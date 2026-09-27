@@ -1,0 +1,19 @@
+{
+  "groups.roleLegend": "Что может делать здесь каждая роль:",
+  "groups.role.admin": "Владелец / Администратор",
+  "groups.role.treasurer": "Казначей",
+  "groups.role.auditor": "Ревизор",
+  "groups.role.member": "Участник",
+  "groups.roleCan.admin": "Всё: счета, проводки, роли, бухгалтерские книги и закрытие группы.",
+  "groups.roleCan.treasurer": "Добавляет счета, рассчитывается, вносит проводки в журнал и выполняет сверку. Не может менять роли и удалять группу.",
+  "groups.roleCan.auditor": "Читает всё и может пометить счёт или проводку в журнале. Ничего не меняет.",
+  "groups.roleCan.member": "Видит группу, её счета и её историю. Ничего не добавляет.",
+  "groups.roleFor": "Роль для {name}",
+  "groups.roleChanged": "{name} теперь {role}.",
+  "groups.roleNoManage": "Менять роли может только владелец группы. Если вам нужно больше, спросите у владельца группы.",
+  "groups.ledgerJournal": "Журнал",
+  "groups.ledgerTrial": "Пробный баланс",
+  "groups.ledgerReconcile": "Сверка",
+  "groups.roleNeedsAccount": "Пока без аккаунта. Роль заполняется сразу после регистрации — выдайте её тогда.",
+  "groups.roleAfterSignup": "Роль после регистрации"
+}
