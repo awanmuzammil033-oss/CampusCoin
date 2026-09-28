@@ -138,6 +138,7 @@ export default function Categories() {
   return (
     <Page
       trail={[{ label: t('nav.categories') }]}
+      loading={!data && !error}
       title={t('cat.title')}
       subtitle={t('cat.subtitle')}
     >

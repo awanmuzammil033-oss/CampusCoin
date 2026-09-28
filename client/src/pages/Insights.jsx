@@ -167,6 +167,7 @@ export default function Insights() {
 
   return (
     <Page
+      loading={!rows && !error}
       trail={[
         { label: t('nav.insights') },
         ...(selectedMonth ? [{ label: monthTitle(selectedMonth) }] : []),

@@ -45,6 +45,33 @@ export default function GroupChatPage() {
   const groupId = params.groupId || params.id;
 
   const [data, setData] = useState(null); // { group, rows }
+
+  /**
+   * How many of this person's own writes are in flight right now.
+   *
+   * A number, not a boolean: a message can be going up while a poll tick is being
+   * answered, and a boolean would drop its count and let a background read land
+   * between the two - which is how a message you just sent blinks out and comes
+   * back a few seconds later. A ref, because nothing renders from it.
+   */
+  const writing = useRef(0);
+
+  /** A write is starting: the background poll steps aside until it finishes. */
+  function beginWrite() {
+    writing.current += 1;
+  }
+
+  /**
+   * A write has finished, however it finished.
+   *
+   * The floor at zero is deliberate. A counter that could go negative would make
+   * the guard in load() read "0 > -1", which is true, and the room would never
+   * update again with nothing on screen to say why. Failing open - one lost
+   * increment costs a few seconds of staleness, a stuck counter costs the feature.
+   */
+  function endWrite() {
+    writing.current = Math.max(0, writing.current - 1);
+  }
   const [error, setError] = useState('');
   const [gone, setGone] = useState(false);
 
@@ -64,15 +91,47 @@ export default function GroupChatPage() {
 
   const sheetRef = useRef(null);
 
-  function load() {
+  /**
+   * Read the thread.
+   *
+   * `quiet` is the background poll: a read that was not asked for must not change
+   * what is on screen, so it neither clears an error, nor shows a toast, nor marks
+   * the group as gone. A poll that lands while one of this person's own writes is
+   * still in flight is DROPPED rather than merged - a message that has just been
+   * posted may not blink out because a read that started before it arrived after
+   * it. The next poll picks it up.
+   */
+  function load({ quiet = false } = {}) {
+    if (quiet && writing.current > 0) return Promise.resolve();
+
     return api
       .get(`/api/groups/${groupId}/chat`)
       .then((res) => {
-        setData({ group: res.group || {}, rows: res.rows || [] });
+        const nextRows = res.rows || [];
+        if (quiet && data?.rows) {
+          const oldIds = new Set(data.rows.map((r) => r.id));
+          const newIncoming = nextRows.filter((r) => !oldIds.has(r.id) && !r.isYou);
+          if (newIncoming.length > 0) {
+            const lastMsg = newIncoming[newIncoming.length - 1];
+            const senderName = lastMsg.sender?.name || 'Member';
+            const grpName = res.group?.name || 'Group';
+            push(
+              t('noti.groupMessage', {
+                groupName: grpName,
+                senderName,
+                text: lastMsg.text || (lastMsg.poll ? `Poll: ${lastMsg.poll.purpose || 'New Poll'}` : 'New message'),
+              }),
+              'info'
+            );
+          }
+        }
+        setData({ group: res.group || {}, rows: nextRows });
+        if (quiet) return;
         setError('');
         setGone(false);
       })
       .catch((err) => {
+        if (quiet) return;
         // A 404 or 403 here is the server's way of saying "you are not in this
         // group, or it is gone" — a different answer from "try again in a
         // moment", and one the screen explains in full below, so it is not
@@ -84,8 +143,51 @@ export default function GroupChatPage() {
       });
   }
 
+  /**
+   * How often a quiet read happens, and the reason for the number: seven seconds
+   * is long enough not to be a stream of requests and short enough that a message
+   * still feels like it arrived. A poll that finds nothing changes nothing at all.
+   */
+  const POLL_EVERY_MS = 7000;
+
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupId, push]);
+
+  /**
+   * The poll, and the four things it must not do.
+   *
+   * It runs only while the tab is on screen; it says nothing when it fails; it is
+   * dropped while one of this person's own writes is in flight; and it never moves
+   * the scroll unless the reader was already at the bottom. The interval is
+   * cleared when the room is left, so nothing keeps running behind a page that is
+   * no longer there.
+   */
+  useEffect(() => {
+    let timer = 0;
+
+    const tick = () => {
+      if (document.visibilityState === 'visible' && !document.hidden) {
+        // the reader scrolled up to re-read something: do not follow the thread
+        // down and take their place away from them
+        const near = window.innerHeight + window.scrollY >= document.body.offsetHeight - 120;
+        if (near) load({ quiet: true });
+      }
+      timer = window.setTimeout(tick, POLL_EVERY_MS);
+    };
+
+    timer = window.setTimeout(tick, POLL_EVERY_MS);
+    const wake = () => {
+      // straight back to the tab: one read now, rather than waiting out the timer
+      if (document.visibilityState === 'visible') load({ quiet: true });
+    };
+    document.addEventListener('visibilitychange', wake);
+
+    return () => {
+      window.clearTimeout(timer);
+      document.removeEventListener('visibilitychange', wake);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupId, push]);
 
@@ -120,6 +222,7 @@ export default function GroupChatPage() {
       return;
     }
     setSending(true);
+    beginWrite();
     try {
       const res = await api.post(`/api/groups/${groupId}/chat/messages`, { text: body });
       setText('');
@@ -128,6 +231,7 @@ export default function GroupChatPage() {
     } catch (err) {
       setSendError(err.message);
     } finally {
+      endWrite();
       setSending(false);
     }
   }
@@ -147,6 +251,7 @@ export default function GroupChatPage() {
     const next = current === yes ? null : yes;
     if (busyId) return;
     setBusyId(messageId);
+    beginWrite();
     try {
       const res = await api.patch(`/api/groups/${groupId}/chat/polls/${messageId}/respond`, { yes: next });
       setData((prev) =>
@@ -160,6 +265,7 @@ export default function GroupChatPage() {
     } catch (err) {
       push(err.message, 'error');
     } finally {
+      endWrite();
       setBusyId('');
     }
   }
@@ -173,6 +279,7 @@ export default function GroupChatPage() {
   async function postPoll(values) {
     setPosting(true);
     setPostError('');
+    beginWrite();
     try {
       const res = await api.post(`/api/groups/${groupId}/chat/polls`, {
         category: draft.category,
@@ -189,6 +296,7 @@ export default function GroupChatPage() {
     } catch (err) {
       setPostError(err.message);
     } finally {
+      endWrite();
       setPosting(false);
     }
   }
@@ -198,6 +306,7 @@ export default function GroupChatPage() {
     if (!target) return;
     setRemovingBusy(true);
     setRemoveError('');
+    beginWrite();
     try {
       await api.del(`/api/groups/${groupId}/chat/messages/${target.id}`);
       setRemoving(null);
@@ -206,6 +315,7 @@ export default function GroupChatPage() {
     } catch (err) {
       setRemoveError(err.message);
     } finally {
+      endWrite();
       setRemovingBusy(false);
     }
   }

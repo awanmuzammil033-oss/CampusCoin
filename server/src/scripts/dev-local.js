@@ -65,8 +65,8 @@ function maskUri(uri) {
 /** True when a mongod answers a driver-level ping on our URI right now. */
 async function dbAnswers() {
   const conn = mongoose.createConnection(MONGODB_URI, {
-    serverSelectionTimeoutMS: 1500,
-    connectTimeoutMS: 1500,
+    serverSelectionTimeoutMS: 4000,
+    connectTimeoutMS: 4000,
   });
   conn.on('error', () => {}); // the caller only wants the yes/no answer
   try {
@@ -83,6 +83,17 @@ async function dbAnswers() {
 
 async function startDatabase() {
   try {
+    // If a stale mongod.lock exists from a previous crash/abrupt exit, check if DB answers.
+    // If it doesn't answer, remove the lock so MongoMemoryServer can start cleanly.
+    const lockPath = fileURLToPath(new URL('../../../db/data/mongod.lock', import.meta.url));
+    const fs = await import('node:fs/promises');
+    try {
+      const lockStat = await fs.stat(lockPath);
+      if (lockStat && !(await dbAnswers())) {
+        await fs.unlink(lockPath).catch(() => {});
+      }
+    } catch {}
+
     return await MongoMemoryServer.create({
       instance: { dbPath, port: dbPort, storageEngine: 'wiredTiger' },
     });

@@ -100,7 +100,7 @@ export default function Bookmarks() {
   ];
 
   return (
-    <Page trail={[{ label: t('nav.bookmarks') }]} title={t('bkm.pageTitle')} subtitle={t('bkm.pageSubtitle')}>
+    <Page loading={loading} trail={[{ label: t('nav.bookmarks') }]} title={t('bkm.pageTitle')} subtitle={t('bkm.pageSubtitle')}>
       {error && (
         <div className="field-error mb-3" role="alert">
           <Icon name="warning" />

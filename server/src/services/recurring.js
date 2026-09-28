@@ -43,12 +43,31 @@ async function generateRule(user, rule) {
   const today = startOfDay(new Date());
   const start = startOfDay(rule.startDate);
   const end = rule.endDate ? startOfDay(rule.endDate) : today;
-  const cursor = rule.lastGeneratedOn ? addDays(startOfDay(rule.lastGeneratedOn), 1) : start;
+  // Where the series continues, NOT the day after the last charge. Those are
+  // different things: a monthly bill on the 1st used to resume on the 2nd, find
+  // nothing there, and log a second charge - and then a third on the next run,
+  // one per day, until the day job had charged a monthly subscription twenty-eight
+  // times in a month. nextDate is the function that knows a recurrence, and
+  // calling it also re-aligns a cursor that an older bad run already pushed off
+  // the schedule. It is declared below this function; that is safe because
+  // function declarations are hoisted, and it must not become a const.
+  const cursor = rule.lastGeneratedOn ? nextDate(rule, startOfDay(rule.lastGeneratedOn)) : start;
+  // NEW-6: a pause the person set from the renewal screen. Dates before it are
+  // skipped, not deferred — the cursor still moves past them, so the skipped
+  // charges are never backfilled when the pause ends. A rule without a pause
+  // is walked exactly as before.
+  const paused = rule.pausedUntil ? startOfDay(rule.pausedUntil) : null;
 
   let created = 0;
   let next = cursor;
 
   while (next <= today && next <= end) {
+    if (paused && next < paused) {
+      rule.lastGeneratedOn = next;
+      next = nextDate(rule, next);
+      continue;
+    }
+
     const { default: Transaction } = await import('../models/Transaction.js');
     const exists = await Transaction.exists({
       user: user._id,

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import Login from './Login.jsx';
 import Register from './Register.jsx';
 import AdminLogin from './AdminLogin.jsx';
+import ForgotPassword from './ForgotPassword.jsx';
 import { useAuth } from '../auth.jsx';
 import { useLocale } from '../locale.jsx';
 import LocalePickers from '../components/LocalePickers.jsx';
@@ -11,7 +12,6 @@ import Icon from '../components/Icon.jsx';
 import HeroWaves from '../components/art/HeroWaves.jsx';
 import HeroOrbs from '../components/art/HeroOrbs.jsx';
 import MoneyJourney from '../components/landing/MoneyJourney.jsx';
-import FinancialWeather from '../components/landing/FinancialWeather.jsx';
 import WhatIfLab from '../components/landing/WhatIfLab.jsx';
 import HeroShowcase from '../components/art/HeroShowcase.jsx';
 import FaqArt from '../components/art/FaqArt.jsx';
@@ -74,6 +74,13 @@ const PHONE_LEGEND = [
   { key: 'home.catOther', pct: 9, color: '#64748b', icon: 'dots' },
 ];
 
+const STAT_ITEMS = [
+  { id: 'stat1', icoClass: 's1', icon: 'bolt', valKey: 'home.stat1a', subKey: 'home.stat1b' },
+  { id: 'stat2', icoClass: 's2', icon: 'calendar', valKey: 'home.stat2a', subKey: 'home.stat2b' },
+  { id: 'stat3', icoClass: 's3', icon: 'grid', valKey: 'home.stat3a', subKey: 'home.stat3b' },
+  { id: 'stat4', icoClass: 's4', icon: 'shield', valKey: 'home.stat4a', subKey: 'home.stat4b' },
+];
+
 /**
  * The form that stands in for the landing page, inside the landing page.
  *
@@ -91,40 +98,70 @@ function AuthPanel({ which, onClose, onSwitch }) {
 
   if (which === 'register') return <Register {...shared} />;
   if (which === 'admin') return <AdminLogin {...shared} />;
+  if (which === 'forgot-password' || which === 'forgot') return <ForgotPassword {...shared} />;
   return <Login {...shared} />;
 }
 
-export default function Home() {
+export default function Home({ view } = {}) {
   const { t } = useLocale();
   const { user, loading, logout } = useAuth() || {};
   const [active, setActive] = useState('top');
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  /* The sign-in panel, held in the URL so Back and a refresh behave.
-     `null` means the landing page; anything else is the form to show. */
-  const [params, setParams] = useSearchParams();
-  const panel = params.get('panel');
+  const [params] = useSearchParams();
+  const queryPanel = params.get('panel');
 
-  /** Open a form in place of the landing content. */
+  // Determine panel from view prop, path, or query parameter
+  let panel = view;
+  if (!panel) {
+    if (location.pathname === '/login') panel = 'login';
+    else if (location.pathname === '/register') panel = 'register';
+    else if (location.pathname === '/forgot-password') panel = 'forgot-password';
+    else if (location.pathname === '/control/login') panel = 'admin';
+    else if (queryPanel) {
+      if (queryPanel === 'admin' || queryPanel === 'admin-login') panel = 'admin';
+      else if (queryPanel === 'register') panel = 'register';
+      else if (queryPanel === 'forgot-password' || queryPanel === 'forgot') panel = 'forgot-password';
+      else panel = 'login';
+    }
+  }
+
+  /** Scroll to top when view/route changes */
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [panel, location.pathname]);
+
+  /** Open a form by navigating to its canonical route */
   function openPanel(which) {
-    setParams({ panel: which });
+    if (which === 'register') navigate('/register');
+    else if (which === 'admin') navigate('/control/login');
+    else if (which === 'forgot-password' || which === 'forgot') navigate('/forgot-password');
+    else navigate('/login');
   }
 
-  /** Close it and put the landing page back, exactly as it was. */
+  /** Close it and navigate back to landing home */
   function closePanel() {
-    setParams({}, { replace: false });
+    navigate('/');
   }
 
-  /**
-   * A cross-link inside a form - "create an account", the staff door - asks for a
-   * path. When the form is on the landing page that path is turned into a panel
-   * instead of a navigation, so the reader never leaves the page.
-   */
+  /** Cross-linking between forms */
   function switchTo(path) {
-    const map = { '/login': 'login', '/register': 'register', '/control/login': 'admin' };
-    if (map[path]) openPanel(map[path]);
+    if (path === '/register' || path === 'register') navigate('/register');
+    else if (path === '/control/login' || path === '/?panel=admin' || path === 'admin') navigate('/control/login');
+    else if (path === '/forgot-password' || path === 'forgot-password' || path === 'forgot') navigate('/forgot-password');
+    else navigate('/login');
   }
   const [showTop, setShowTop] = useState(false);
   const [stuck, setStuck] = useState(false);
+  const [showSitemap, setShowSitemap] = useState(false);
+
+  /* Close sitemap modal on Escape */
+  useEffect(() => {
+    function onKey(e) { if (e.key === 'Escape') setShowSitemap(false); }
+    if (showSitemap) document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [showSitemap]);
 
   /* Scroll reveal: everything marked .lp-reveal rises the first time it enters
      the viewport. This RE-RUNS when a form is opened or closed, because the
@@ -230,30 +267,15 @@ export default function Home() {
           {NAV.map((item) => (
             <a
               key={item.id}
-              href={`#${item.id}`}
-              className={`lp-nav-link${active === item.id ? ' active' : ''}`}
-              aria-current={active === item.id ? 'true' : undefined}
+              href={panel ? `/#${item.id}` : `#${item.id}`}
+              className={`lp-nav-link${active === item.id && !panel ? ' active' : ''}`}
+              aria-current={active === item.id && !panel ? 'true' : undefined}
               onClick={(e) => {
-                // With a form open there are no sections to scroll to yet, so the
-                // panel closes first and the scroll happens on the next frame.
                 if (panel) {
                   e.preventDefault();
-                  closePanel();
-                  window.requestAnimationFrame(() => {
-                    const target = document.getElementById(item.id);
-                    if (target) {
-                      window.scrollTo({
-                        top: item.id === 'top' ? 0 : target.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET,
-                        behavior: 'smooth',
-                      });
-                    }
-                  });
+                  navigate('/#' + item.id);
                   return;
                 }
-                // The header is fixed, so a plain anchor would put the section's
-                // heading underneath it. Land on the section's own offset
-                // instead, and mark the link the reader is on for anything that
-                // is not CSS (a screen reader, a print stylesheet).
                 const el = document.getElementById(item.id);
                 if (!el) return;
                 e.preventDefault();
@@ -269,6 +291,27 @@ export default function Home() {
         </nav>
 
         <div className="lp-nav-right">
+          {/* Sitemap trigger */}
+          <button
+            type="button"
+            className="lp-nav-sitemap-btn"
+            onClick={() => setShowSitemap(true)}
+            aria-label={t('home.sitemap')}
+            title={t('home.sitemap')}
+          >
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" width="18" height="18">
+              <rect x="1" y="2" width="5" height="4" rx="1" fill="currentColor" opacity=".9"/>
+              <rect x="7.5" y="2" width="5" height="4" rx="1" fill="currentColor" opacity=".65"/>
+              <rect x="14" y="2" width="5" height="4" rx="1" fill="currentColor" opacity=".4"/>
+              <rect x="1" y="8" width="5" height="4" rx="1" fill="currentColor" opacity=".7"/>
+              <rect x="7.5" y="8" width="5" height="4" rx="1" fill="currentColor" opacity=".9"/>
+              <rect x="14" y="8" width="5" height="4" rx="1" fill="currentColor" opacity=".55"/>
+              <rect x="1" y="14" width="5" height="4" rx="1" fill="currentColor" opacity=".45"/>
+              <rect x="7.5" y="14" width="5" height="4" rx="1" fill="currentColor" opacity=".6"/>
+              <rect x="14" y="14" width="5" height="4" rx="1" fill="currentColor" opacity=".85"/>
+            </svg>
+            <span className="lp-nav-sitemap-label">{t('home.sitemap')}</span>
+          </button>
           <ThemeToggle className="icon-btn lp-nav-icon" />
           <LocalePickers variant="nav" />
           {loading ? null : user ? (
@@ -291,20 +334,15 @@ export default function Home() {
             </>
           ) : (
             <>
-              {/* Both open here, not on another page. Buttons, not links: a
-                  link would promise a URL, and there is not one - the panel is
-                  a state of this page, and a link that pretends otherwise is a
-                  broken promise the moment somebody middle-clicks it. */}
-              <button
-                type="button"
-                className="lp-nav-link lp-nav-signin"
-                onClick={() => openPanel('login')}
+              <Link
+                to="/login"
+                className={`lp-nav-link lp-nav-signin${panel === 'login' ? ' active' : ''}`}
               >
                 {t('auth.signIn')}
-              </button>
-              <button type="button" className="btn btn-grad btn-sm" onClick={() => openPanel('register')}>
+              </Link>
+              <Link to="/register" className="btn btn-grad btn-sm">
                 {t('home.getStarted')}
-              </button>
+              </Link>
             </>
           )}
         </div>
@@ -358,23 +396,31 @@ export default function Home() {
           <HeroShowcase className="lp-reveal" />
         </section>
 
-        {/* ---------------------------- stats band --------------------------- */}
-        <section className="lp2-stats lp-reveal" aria-label={t('home.stat3b')}>
-          <div className="lp2-stat">
-            <span className="lp2-stat-ico s1"><Icon name="bolt" /></span>
-            <div><strong>{t('home.stat1a')}</strong><span>{t('home.stat1b')}</span></div>
-          </div>
-          <div className="lp2-stat">
-            <span className="lp2-stat-ico s2"><Icon name="calendar" /></span>
-            <div><strong>{t('home.stat2a')}</strong><span>{t('home.stat2b')}</span></div>
-          </div>
-          <div className="lp2-stat">
-            <span className="lp2-stat-ico s3"><Icon name="grid" /></span>
-            <div><strong>{t('home.stat3a')}</strong><span>{t('home.stat3b')}</span></div>
-          </div>
-          <div className="lp2-stat">
-            <span className="lp2-stat-ico s4"><Icon name="shield" /></span>
-            <div><strong>{t('home.stat4a')}</strong><span>{t('home.stat4b')}</span></div>
+        {/* ── stats band with continuous scrolling marquee — overlaps the bottom of the hero ── */}
+        <section className="lp2-stats lp2-stats-bar lp2-stats-overlap lp-reveal" aria-label={t('home.stat3b')}>
+          <div className="lp2-stats-marquee">
+            <div className="lp2-stats-track">
+              {STAT_ITEMS.map((st) => (
+                <div key={`st1-${st.id}`} className="lp2-stat-card">
+                  <span className={`lp2-stat-ico ${st.icoClass}`}><Icon name={st.icon} /></span>
+                  <div className="lp2-stat-text">
+                    <strong>{t(st.valKey)}</strong>
+                    <span>{t(st.subKey)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="lp2-stats-track" aria-hidden="true">
+              {STAT_ITEMS.map((st) => (
+                <div key={`st2-${st.id}`} className="lp2-stat-card">
+                  <span className={`lp2-stat-ico ${st.icoClass}`}><Icon name={st.icon} /></span>
+                  <div className="lp2-stat-text">
+                    <strong>{t(st.valKey)}</strong>
+                    <span>{t(st.subKey)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -640,16 +686,8 @@ export default function Home() {
         
 
         {/* -------------------------- how it works --------------------------- */}
-        {/* ------------------------- financial weather --------------------- */}
-        <section id="weather" className="lp2-section lp2-weather-section lp-reveal" aria-labelledby="weather-heading">
-          <div className="lp2-weather-head">
-            <span className="lp-eyebrow">{t('home.weather.eyebrow')}</span>
-            <h2 id="weather-heading">{t('home.weather.title')}</h2>
-            <p>{t('home.weather.sub')}</p>
-          </div>
-          <FinancialWeather />
-        </section>
-<section id="journey" className="lp2-section lp2-journey-section lp-reveal" aria-labelledby="journey-heading">
+        {/* Money Weather section removed — cleaner flow */}
+        <section id="journey" className="lp2-section lp2-journey-section lp-reveal" aria-labelledby="journey-heading">
           <div className="lp2-journey-head">
             <span className="lp-eyebrow">{t('home.journey.eyebrow')}</span>
             <h2 id="journey-heading">{t('home.journey.title')}</h2>
@@ -669,25 +707,27 @@ export default function Home() {
         
 
         <section id="how" className="lp-how lp2-section" aria-labelledby="how-heading">
-          <span className="lp2-eyebrow">{t('home.nav.how')}</span>
-          <h2 id="how-heading">{t('home.howTitle')}</h2>
-          <ol className="lp-steps">
-            <li className="lp-step lp-reveal" style={{ transitionDelay: '60ms' }}>
-              <span className="lp-step-num n1" aria-hidden="true">1</span>
-              <h3>{t('home.step1Title')}</h3>
-              <p>{t('home.step1Text')}</p>
-            </li>
-            <li className="lp-step lp-reveal" style={{ transitionDelay: '140ms' }}>
-              <span className="lp-step-num n2" aria-hidden="true">2</span>
-              <h3>{t('home.step2Title')}</h3>
-              <p>{t('home.step2Text')}</p>
-            </li>
-            <li className="lp-step lp-reveal" style={{ transitionDelay: '220ms' }}>
-              <span className="lp-step-num n3" aria-hidden="true">3</span>
-              <h3>{t('home.step3Title')}</h3>
-              <p>{t('home.step3Text')}</p>
-            </li>
-          </ol>
+          <div className="lp2-how-text">
+            <span className="lp2-eyebrow">{t('home.nav.how')}</span>
+            <h2 id="how-heading">{t('home.howTitle')}</h2>
+            <ol className="lp-steps">
+              <li className="lp-step lp-reveal" style={{ transitionDelay: '60ms' }}>
+                <span className="lp-step-num n1" aria-hidden="true">1</span>
+                <h3>{t('home.step1Title')}</h3>
+                <p>{t('home.step1Text')}</p>
+              </li>
+              <li className="lp-step lp-reveal" style={{ transitionDelay: '140ms' }}>
+                <span className="lp-step-num n2" aria-hidden="true">2</span>
+                <h3>{t('home.step2Title')}</h3>
+                <p>{t('home.step2Text')}</p>
+              </li>
+              <li className="lp-step lp-reveal" style={{ transitionDelay: '220ms' }}>
+                <span className="lp-step-num n3" aria-hidden="true">3</span>
+                <h3>{t('home.step3Title')}</h3>
+                <p>{t('home.step3Text')}</p>
+              </li>
+            </ol>
+          </div>
         </section>
 
         {/* ------------------------------- faq ------------------------------- */}
@@ -718,7 +758,7 @@ export default function Home() {
         </section>
 
         {/* -------------------------- closing banner ------------------------- */}
-        <section className="lp2-cta lp-reveal">
+        <section className="lp2-cta lp2-cta-spaced lp-reveal">
           <span className="lp2-cta-coin" aria-hidden="true">
             <span className="brand-mark">C</span>
           </span>
@@ -734,78 +774,152 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Sitemap (SRS §1.9): real links, grouped, keyboard-navigable. */}
-        <section className="sitemap-block card" aria-labelledby="sitemap-heading">
-          <h2 id="sitemap-heading">{t('home.sitemap')}</h2>
-          <p className="muted">{t('home.sitemapSubtitle')}</p>
-          <nav aria-label={t('home.sitemap')} className="sitemap-grid">
-            <div>
-              <h3>{t('nav.section.account')}</h3>
-              <ul>
-                <li><button type="button" className="linklike" onClick={() => openPanel('register')}>{t('home.link.register')}</button></li>
-                <li><button type="button" className="linklike" onClick={() => openPanel('login')}>{t('auth.signIn')}</button></li>
-                <li><Link to="/forgot-password">{t('home.link.resetPassword')}</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3>{t('nav.section.money')}</h3>
-              <ul>
-                <li><Link to="/dashboard">{t('nav.dashboard')}</Link></li>
-                <li><Link to="/transactions">{t('nav.transactions')}</Link></li>
-                <li><Link to="/transactions/new">{t('home.link.addIncomeExpense')}</Link></li>
-                <li><Link to="/transactions/import">{t('home.link.importCsv')}</Link></li>
-                <li><Link to="/recurring">{t('home.link.recurringEntries')}</Link></li>
-                <li><Link to="/categories">{t('nav.categories')}</Link></li>
-                <li><Link to="/budgets">{t('nav.budgets')}</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3>{t('nav.section.tools')}</h3>
-              <ul>
-                <li><Link to="/savings-options">{t('nav.savingsOptions')}</Link></li>
-                <li><Link to="/grow-money">{t('nav.growMoney')}</Link></li>
-                <li><Link to="/side-income">{t('nav.sideIncome')}</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3>{t('nav.section.standout')}</h3>
-              <ul>
-                <li><Link to="/groups">{t('nav.groups')}</Link></li>
-                <li><Link to="/wishlist">{t('nav.wishlist')}</Link></li>
-                <li><Link to="/vault">{t('nav.vault')}</Link></li>
-                <li><Link to="/dashboard">{t('home.link.quickText')}</Link></li>
-                <li><Link to="/dashboard">{t('home.link.survival')}</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3>{t('nav.section.understand')}</h3>
-              <ul>
-                <li><Link to="/reports">{t('nav.reports')}</Link></li>
-                <li><Link to="/insights">{t('home.link.monthlyInsights')}</Link></li>
-                <li><Link to="/tips">{t('home.link.savingTips')}</Link></li>
-                <li><Link to="/bookmarks">{t('home.link.bookmarksNotes')}</Link></li>
-                <li><Link to="/notifications">{t('topbar.notifications')}</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3>{t('home.section.settings')}</h3>
-              <ul>
-                <li><Link to="/profile">{t('home.link.profile')}</Link></li>
-                <li><Link to="/profile">{t('home.link.theme')}</Link></li>
-                <li><Link to="/profile">{t('home.link.textSize')}</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3>{t('home.section.staff')}</h3>
-              <ul>
-                <li><button type="button" className="linklike" onClick={() => openPanel('admin')}>{t('home.link.adminSignIn')}</button></li>
-              </ul>
-            </div>
-          </nav>
-        </section>
+        {/* Sitemap is now in the modal — section removed from page body */}
           </>
         )}
       </main>
+
+      {/* ========================= SITEMAP MODAL ========================= */}
+      {showSitemap && (
+        <div
+          className="sm-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="sm-modal-title"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowSitemap(false); }}
+        >
+          <div className="sm-modal">
+            {/* header bar */}
+            <div className="sm-header">
+              <div className="sm-header-left">
+                <span className="sm-header-icon" aria-hidden="true">
+                  <svg viewBox="0 0 20 20" fill="none" width="22" height="22">
+                    <rect x="1" y="2" width="5" height="4" rx="1" fill="currentColor"/>
+                    <rect x="7.5" y="2" width="5" height="4" rx="1" fill="currentColor" opacity=".7"/>
+                    <rect x="14" y="2" width="5" height="4" rx="1" fill="currentColor" opacity=".4"/>
+                    <rect x="1" y="8" width="5" height="4" rx="1" fill="currentColor" opacity=".65"/>
+                    <rect x="7.5" y="8" width="5" height="4" rx="1" fill="currentColor"/>
+                    <rect x="14" y="8" width="5" height="4" rx="1" fill="currentColor" opacity=".55"/>
+                    <rect x="1" y="14" width="5" height="4" rx="1" fill="currentColor" opacity=".4"/>
+                    <rect x="7.5" y="14" width="5" height="4" rx="1" fill="currentColor" opacity=".6"/>
+                    <rect x="14" y="14" width="5" height="4" rx="1" fill="currentColor"/>
+                  </svg>
+                </span>
+                <div>
+                  <h2 id="sm-modal-title" className="sm-title">{t('home.sitemap')}</h2>
+                  <p className="sm-subtitle">{t('home.sitemapSubtitle')}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="sm-close"
+                onClick={() => setShowSitemap(false)}
+                aria-label="Close"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" width="20" height="20" aria-hidden="true">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* link grid */}
+            <nav aria-label={t('home.sitemap')} className="sm-grid">
+              <div className="sm-group">
+                <h3 className="sm-group-title">
+                  <span className="sm-dot" style={{background:'#059669'}} />
+                  {t('nav.section.account')}
+                </h3>
+                <ul>
+                  <li><Link to="/register" onClick={() => setShowSitemap(false)}>{t('home.link.register')}</Link></li>
+                  <li><Link to="/login" onClick={() => setShowSitemap(false)}>{t('auth.signIn')}</Link></li>
+                  <li><Link to="/forgot-password" onClick={() => setShowSitemap(false)}>{t('home.link.resetPassword')}</Link></li>
+                </ul>
+              </div>
+              <div className="sm-group">
+                <h3 className="sm-group-title">
+                  <span className="sm-dot" style={{background:'#2563eb'}} />
+                  {t('nav.section.money')}
+                </h3>
+                <ul>
+                  <li><Link to="/dashboard" onClick={() => setShowSitemap(false)}>{t('nav.dashboard')}</Link></li>
+                  <li><Link to="/transactions" onClick={() => setShowSitemap(false)}>{t('nav.transactions')}</Link></li>
+                  <li><Link to="/transactions/new" onClick={() => setShowSitemap(false)}>{t('home.link.addIncomeExpense')}</Link></li>
+                  <li><Link to="/transactions/import" onClick={() => setShowSitemap(false)}>{t('home.link.importCsv')}</Link></li>
+                  <li><Link to="/recurring" onClick={() => setShowSitemap(false)}>{t('home.link.recurringEntries')}</Link></li>
+                  <li><Link to="/categories" onClick={() => setShowSitemap(false)}>{t('nav.categories')}</Link></li>
+                  <li><Link to="/budgets" onClick={() => setShowSitemap(false)}>{t('nav.budgets')}</Link></li>
+                </ul>
+              </div>
+              <div className="sm-group">
+                <h3 className="sm-group-title">
+                  <span className="sm-dot" style={{background:'#f59e0b'}} />
+                  {t('nav.section.tools')}
+                </h3>
+                <ul>
+                  <li><Link to="/savings-options" onClick={() => setShowSitemap(false)}>{t('nav.savingsOptions')}</Link></li>
+                  <li><Link to="/grow-money" onClick={() => setShowSitemap(false)}>{t('nav.growMoney')}</Link></li>
+                  <li><Link to="/side-income" onClick={() => setShowSitemap(false)}>{t('nav.sideIncome')}</Link></li>
+                </ul>
+              </div>
+              <div className="sm-group">
+                <h3 className="sm-group-title">
+                  <span className="sm-dot" style={{background:'#7c3aed'}} />
+                  {t('nav.section.standout')}
+                </h3>
+                <ul>
+                  <li><Link to="/groups" onClick={() => setShowSitemap(false)}>{t('nav.groups')}</Link></li>
+                  <li><Link to="/wishlist" onClick={() => setShowSitemap(false)}>{t('nav.wishlist')}</Link></li>
+                  <li><Link to="/vault" onClick={() => setShowSitemap(false)}>{t('nav.vault')}</Link></li>
+                  <li><Link to="/dashboard" onClick={() => setShowSitemap(false)}>{t('home.link.quickText')}</Link></li>
+                  <li><Link to="/dashboard" onClick={() => setShowSitemap(false)}>{t('home.link.survival')}</Link></li>
+                </ul>
+              </div>
+              <div className="sm-group">
+                <h3 className="sm-group-title">
+                  <span className="sm-dot" style={{background:'#0ea5e9'}} />
+                  {t('nav.section.understand')}
+                </h3>
+                <ul>
+                  <li><Link to="/reports" onClick={() => setShowSitemap(false)}>{t('nav.reports')}</Link></li>
+                  <li><Link to="/insights" onClick={() => setShowSitemap(false)}>{t('home.link.monthlyInsights')}</Link></li>
+                  <li><Link to="/tips" onClick={() => setShowSitemap(false)}>{t('home.link.savingTips')}</Link></li>
+                  <li><Link to="/bookmarks" onClick={() => setShowSitemap(false)}>{t('home.link.bookmarksNotes')}</Link></li>
+                  <li><Link to="/notifications" onClick={() => setShowSitemap(false)}>{t('topbar.notifications')}</Link></li>
+                </ul>
+              </div>
+              <div className="sm-group">
+                <h3 className="sm-group-title">
+                  <span className="sm-dot" style={{background:'#6b7280'}} />
+                  {t('home.section.settings')}
+                </h3>
+                <ul>
+                  <li><Link to="/profile" onClick={() => setShowSitemap(false)}>{t('home.link.profile')}</Link></li>
+                  <li><Link to="/profile" onClick={() => setShowSitemap(false)}>{t('home.link.theme')}</Link></li>
+                  <li><Link to="/profile" onClick={() => setShowSitemap(false)}>{t('home.link.textSize')}</Link></li>
+                </ul>
+              </div>
+              <div className="sm-group">
+                <h3 className="sm-group-title">
+                  <span className="sm-dot" style={{background:'#ef4444'}} />
+                  {t('home.section.staff')}
+                </h3>
+                <ul>
+                  <li><Link to="/control/login" onClick={() => setShowSitemap(false)}>{t('home.link.adminSignIn')}</Link></li>
+                </ul>
+              </div>
+            </nav>
+
+            {/* footer strip */}
+            <div className="sm-footer">
+              <Link className="brand" to="/" onClick={() => setShowSitemap(false)}>
+                <span className="brand-mark" aria-hidden="true">C</span>
+                <span className="brand-name">{t('app.name')}</span>
+              </Link>
+              <span className="sm-esc-hint">Press <kbd>Esc</kbd> to close</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ------------------------------ footer ------------------------------- */}
       <footer className="lp2-footer">

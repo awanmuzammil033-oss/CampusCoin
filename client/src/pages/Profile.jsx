@@ -130,7 +130,7 @@ export default function Profile() {
     setSigningOut(true);
     try {
       await logout();
-      navigate('/login');
+      navigate('/?panel=login');
     } catch (err) {
       push(err.message, 'error');
       setSigningOut(false);

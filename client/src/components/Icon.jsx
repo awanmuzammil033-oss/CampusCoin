@@ -1,93 +1,108 @@
+import React from 'react';
+import * as FcIcons from 'react-icons/fc';
+import { HiBell, HiMicrophone, HiEye, HiPencilSquare, HiInformationCircle, HiGift, HiCreditCard, HiShieldCheck } from 'react-icons/hi2';
+import { MdQrCodeScanner } from 'react-icons/md';
+
 /**
- * Icon — one place that decides what every glyph in the app looks like.
- *
- * The glyphs are colour emoji again, which is what the app shipped with
- * before the vector pass and what the design review asked to keep: they carry
- * their own colours, so they read on the light landing and on the dark one
- * alike (a vector inherits the page's text colour, and on the dark landing that
- * made every pastel chip disappear).
- *
- * The names are the stable part. `wallet`, `bulb`, `shield` and friends are
- * referenced from the sidebar, the cards, the topbar, the admin panel and the
- * landing page, so renaming one is a single edit here and nothing else has to
- * move. A name that is missing falls back to the info glyph rather than
- * rendering an empty box.
- *
- * Usage:
- *   <Icon name="bulb" />                 same size as the text around it
- *   <Icon name="bulb" size={18} />        fixed pixels
- *   <Icon name="bulb" glyph="🎓" />       a different emoji where the meaning differs
- *   <Icon name="shield" title="Private" /> announced instead of hidden
+ * Icon — renders accurate, vibrant SVG icons across the app.
  */
-const EMOJI = {
-  /* ---------------------------------------------------- navigation / chrome */
-  home: '🏠', house: '🏠', receipt: '🧾', repeat: '🔁', calendar: '📅',
-  tag: '🏷️', target: '🎯', chart: '📊', chartUp: '📈',
-  sun: '☀️', moon: '🌙', bulb: '💡', bookmark: '🔖', pin: '📌',
-  // "Insights" was sun-behind-cloud before the vector pass, not the theme sun
-  insightWeather: '🌤️',
-  settings: '⚙️', user: '👤', users: '👥', grid: '🟩', list: '≡',
-  plus: '➕', minus: '−', check: '✓', close: '✕',
-  chevronDown: '▾', chevronRight: '›',
-  arrowRight: '→', arrowLeft: '←', arrowUp: '↑',
-  play: '▶', search: '🔍', filter: '🔻', menu: '☰', dots: '⋯', more: '⋯',
+const ICON_MAP = {
+  /* navigation / chrome */
+  home: FcIcons.FcHome, house: FcIcons.FcHome, receipt: FcIcons.FcDebt, repeat: FcIcons.FcSynchronize, calendar: FcIcons.FcCalendar,
+  tag: FcIcons.FcGrid, target: FcIcons.FcBullish, chart: FcIcons.FcBarChart, chartUp: FcIcons.FcPositiveDynamic,
+  sun: FcIcons.FcIdea, moon: FcIcons.FcNightLandscape, bulb: FcIcons.FcIdea, bookmark: FcIcons.FcBookmark, pin: FcIcons.FcBookmark,
+  insightWeather: FcIcons.FcLightAtTheEndOfTunnel,
+  settings: FcIcons.FcSettings, user: FcIcons.FcBusinessman, users: FcIcons.FcConferenceCall, grid: FcIcons.FcGrid, list: FcIcons.FcList,
+  plus: FcIcons.FcPlus, minus: FcIcons.FcMinus, check: FcIcons.FcCheckmark, close: FcIcons.FcCancel,
+  chevronDown: FcIcons.FcDown, chevronRight: FcIcons.FcRight,
+  arrowRight: FcIcons.FcRight, arrowLeft: FcIcons.FcLeft, arrowUp: FcIcons.FcUp, arrowDown: FcIcons.FcDown,
+  play: FcIcons.FcStart, search: FcIcons.FcSearch, filter: FcIcons.FcFilledFilter, menu: FcIcons.FcMenu, dots: FcIcons.FcMenu, more: FcIcons.FcMenu,
 
-  /* -------------------------------------------------------------- money */
-  wallet: '💰', coin: '🪙', coins: '🪙', coinsAlt: '🪙',
-  card: '💳', cash: '💵', bank: '🏦', piggy: '🐷',
-  trendUp: '↑', trendDown: '↓', trendFlat: '→', scale: '⚖️', percent: '%',
-  // the converter button. Both of these are old, widely available emoji on
-  // purpose: a missing glyph in the navbar would be the first thing a judge
-  // noticed, and a newer pictograph is exactly the kind that goes tofu.
-  exchange: '💱', swap: '🔄',
-  // "put it back" - an old emoji on purpose, for the same reason as the two
-  // above: a glyph a judge's font is missing is worse than a plain one
-  undo: '↩️',
-  // the jar history needed a down arrow and there was no name for it: the row
-  // rendered an empty box rather than an arrow
-  arrowDown: '⬇',
+  /* money & tools */
+  wallet: FcIcons.FcPaid, coin: FcIcons.FcCurrencyExchange, coins: FcIcons.FcDonate, coinsAlt: FcIcons.FcDonate,
+  card: (props) => <HiCreditCard style={{ color: '#10b981', ...props.style }} {...props} />,
+  cash: FcIcons.FcMoneyTransfer, bank: FcIcons.FcSafe, piggy: FcIcons.FcDonate,
+  trendUp: FcIcons.FcPositiveDynamic, trendDown: FcIcons.FcNegativeDynamic, trendFlat: FcIcons.FcNeutralTrading, scale: FcIcons.FcRules, percent: FcIcons.FcSalesPerformance,
+  exchange: FcIcons.FcCurrencyExchange, swap: FcIcons.FcSynchronize, undo: FcIcons.FcUndo,
+  vault: FcIcons.FcSafe,
 
-  /* ------------------------------------------- categories (student life) */
-  cup: '☕', bus: '🚌', book: '📚', books: '📚', gift: '🎁', film: '🎞️',
-  gamepad: '🎮', award: '🏆', briefcase: '💼', plusCircle: '➕',
-  shirt: '👕', health: '❤️', phone: '📱', laptop: '💻',
-  burger: '🍔', pizza: '🍕',
+  /* categories (student life) */
+  categories: FcIcons.FcGrid,
+  cup: FcIcons.FcIcons8Cup, bus: FcIcons.FcAutomotive, book: FcIcons.FcReading, books: FcIcons.FcReadingEbook,
+  gift: (props) => <HiGift style={{ color: '#ec4899', ...props.style }} {...props} />,
+  film: FcIcons.FcFilm, gamepad: FcIcons.FcSportsMode, award: FcIcons.FcDiploma1, briefcase: FcIcons.FcBriefcase, plusCircle: FcIcons.FcPlus,
+  shirt: FcIcons.FcCloth, health: FcIcons.FcLike, phone: FcIcons.FcCellPhone, laptop: FcIcons.FcDisplay,
+  burger: FcIcons.FcShop, pizza: FcIcons.FcShop,
 
-  /* ------------------------------------------------------ status / feedback */
-  shield: '🛡️', lock: '🔒', unlock: '🔓', eye: '👁', eyeOff: '🚫',
-  bell: '🔔', info: 'ℹ️', warning: '⚠️', checkCircle: '✔', ban: '⛔',
-  hourglass: '⏳', clock: '🕐', send: '✉', download: '⬇', upload: '⬆',
-  file: '📄', fileCsv: '📄', image: '⬇', history: '📜',
-  trash: '🗑', pencil: '✏️', copy: '📋',
-  logout: '🚪', login: '🔑', door: '🚪',
-  globe: '🌐', language: '🗂️', palette: '🎨', fontSize: 'A',
+  /* status / feedback & actions */
+  shield: (props) => <HiShieldCheck style={{ color: '#059669', ...props.style }} {...props} />,
+  lock: FcIcons.FcLock, unlock: FcIcons.FcUnlock, eyeOff: FcIcons.FcPrivacy,
+  warning: FcIcons.FcDisclaimer, checkCircle: FcIcons.FcApproval, ban: FcIcons.FcCancel,
+  hourglass: FcIcons.FcClock, clock: FcIcons.FcClock, send: FcIcons.FcRight, download: FcIcons.FcDownload, upload: FcIcons.FcUpload,
+  file: FcIcons.FcFile, fileCsv: FcIcons.FcDataSheet, image: FcIcons.FcPicture, history: FcIcons.FcTimeline,
+  trash: FcIcons.FcFullTrash, copy: FcIcons.FcMindMap,
+  logout: FcIcons.FcLeave, login: FcIcons.FcKey, door: FcIcons.FcLeave,
+  globe: FcIcons.FcGlobe, language: FcIcons.FcGlobe, palette: FcIcons.FcEditImage, fontSize: FcIcons.FcAlphabeticalSortingAz,
+  cloud: FcIcons.FcLightAtTheEndOfTunnel, storm: FcIcons.FcDislike, partly: FcIcons.FcIdea, cart: FcIcons.FcShop, jar: FcIcons.FcDonate, flag: FcIcons.FcBullish,
 
-  /* --------------------------------------------------------- brand / misc */
-  bolt: '⚡', noBank: '🏦', student: '👩‍🎓', megaphone: '📢',
-  clipboard: '📝', key: '🔑', note: '📝', inbox: '📥', rocket: '🚀',
-  trophy: '🏆', wave: '🌊', hand: '👋', layers: '🗂️',
-  sparkle: '✨', sparkles: '✨', question: '❓', help: '❓',
-  mic: '🎤', micLive: '🎙', stop: '⏹', record: '⏺',
-  // the scan button: a camera, because a QR square is one of the glyphs that
-  // goes missing on somebody else's machine and arrives as an empty box
-  scan: '📷',
+  /* brand / misc */
+  bolt: FcIcons.FcElectricity, noBank: FcIcons.FcSafe, student: FcIcons.FcGraduationCap, megaphone: FcIcons.FcSpeaker,
+  clipboard: FcIcons.FcTodoList, key: FcIcons.FcKey, note: FcIcons.FcDocument, inbox: FcIcons.FcOpenedFolder, rocket: FcIcons.FcEnteringHeavenAlive,
+  trophy: FcIcons.FcDiploma2, wave: FcIcons.FcStatistics, hand: FcIcons.FcCollaboration, layers: FcIcons.FcStackOfPhotos,
+  sparkle: FcIcons.FcIdea, sparkles: FcIcons.FcIdea, question: FcIcons.FcQuestions, help: FcIcons.FcQuestions,
+  stop: FcIcons.FcCancel, record: FcIcons.FcVideoCall,
+
+  /* specialized custom vector icons */
+  scan: (props) => <MdQrCodeScanner style={{ color: '#14b8a6', ...props.style }} {...props} />,
+  bell: (props) => <HiBell style={{ color: '#f59e0b', ...props.style }} {...props} />,
+  mic: (props) => <HiMicrophone style={{ color: '#2563eb', ...props.style }} {...props} />,
+  micLive: (props) => <HiMicrophone style={{ color: '#ef4444', ...props.style }} {...props} />,
+  eye: (props) => <HiEye style={{ color: '#0284c7', ...props.style }} {...props} />,
+  pencil: (props) => <HiPencilSquare style={{ color: '#059669', ...props.style }} {...props} />,
+  info: (props) => <HiInformationCircle style={{ color: '#3b82f6', ...props.style }} {...props} />,
 };
 
-export const ICON_NAMES = Object.keys(EMOJI);
+export const ICON_NAMES = Object.keys(ICON_MAP);
 
 export default function Icon({ name, size, className = '', glyph, title, style, ...rest }) {
-  const ch = glyph || EMOJI[name] || EMOJI.info;
+  if (glyph) {
+    return (
+      <span
+        className={`cc-emoji${className ? ` ${className}` : ''}`}
+        style={size ? { fontSize: `${size}px`, ...style } : style}
+        role={title ? 'img' : undefined}
+        aria-label={title || undefined}
+        aria-hidden={title ? undefined : 'true'}
+        {...rest}
+      >
+        {glyph}
+      </span>
+    );
+  }
+
+  const IconComponent = ICON_MAP[name] || ICON_MAP.info;
+  const iconSize = size ? `${size}px` : '1.2em';
+
   return (
     <span
-      className={`cc-emoji${className ? ` ${className}` : ''}`}
+      className={`cc-fc-icon${className ? ` ${className}` : ''}`}
       data-icon={name}
-      style={size ? { fontSize: `${size}px`, ...style } : style}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        verticalAlign: 'middle',
+        fontSize: size ? `${size}px` : undefined,
+        ...style,
+      }}
       role={title ? 'img' : undefined}
       aria-label={title || undefined}
       aria-hidden={title ? undefined : 'true'}
       {...rest}
     >
-      {ch}
+      <IconComponent size={iconSize} />
     </span>
   );
 }
+
+

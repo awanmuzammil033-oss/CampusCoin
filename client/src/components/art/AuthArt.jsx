@@ -1,301 +1,338 @@
-import Icon from '../Icon.jsx';
-
 /**
- * AuthArt — the illustration on the left of the three form pages.
+ * AuthArt — Sleek, futuristic fintech glassmorphism illustrations for
+ * Login, Register, Admin, and Password Reset screens.
  *
- * Style: flat vector, warm and colourful, with a person in it — the same kind
- * of picture the rest of the site uses (see the campus scene on the landing
- * page), not a set of grey geometry. The first pass here was boxes and bars in
- * the theme colours; it read as a placeholder next to a real illustration, so
- * the scenes were redrawn as people doing the thing the page is about.
- *
- * Every shape is a vector with its own colour, so the drawing does not change
- * when the site flips to dark theme.
+ * Designed to seamlessly blend with CampusCoin's Obsidian & Emerald design system:
+ * - Glowing 3D shields and security badges
+ * - Luminous holographic student cards and charts
+ * - Mint and solar-amber accents
+ * - Zero awkward cartoon human figures
  */
-const SKIN = '#f3c9a2';
-const SKIN_DARK = '#e0ab7f';
-const HAIR = '#3b2f2a';
-const SHIRT = '#14b8a8';
-const SHIRT_DARK = '#0f8f83';
-const PANTS = '#33465c';
-const MINT = '#34d399';
-const MINT_LIGHT = '#a7f3d0';
-const AMBER = '#fbbf24';
-const AMBER_DARK = '#f59e0b';
-const CORAL = '#fb7185';
-const PAPER = '#ffffff';
-const LINE = '#dcd7cd';
 
-/** A potted plant, reused by all three scenes. */
-function Plant({ x, y, scale = 1 }) {
+export function LoginArt() {
   return (
-    <g transform={`translate(${x} ${y}) scale(${scale})`}>
-      <path d="M22 40c0-16 8-26 18-30-6 10-8 20-8 30z" fill="#22c55e" />
-      <path d="M40 40c2-18 12-28 24-32-10 10-14 20-14 32z" fill="#16a34a" />
-      <path d="M30 42c-14-4-20-14-20-26 12 4 20 12 22 26z" fill="#4ade80" />
-      <path d="M14 42h40l-4 30a4 4 0 0 1-4 3.5H22a4 4 0 0 1-4-3.5z" fill={AMBER} />
-      <path d="M11 38h46v8H11z" fill={AMBER_DARK} />
-    </g>
-  );
-}
+    <>
+      <defs>
+        <radialGradient id="login-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#10b981" stopOpacity="0.32" />
+          <stop offset="60%" stopColor="#059669" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="#04241d" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="shield-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#34d399" />
+          <stop offset="50%" stopColor="#10b981" />
+          <stop offset="100%" stopColor="#065f46" />
+        </linearGradient>
+        <linearGradient id="gold-coin" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#fef08a" />
+          <stop offset="40%" stopColor="#f59e0b" />
+          <stop offset="100%" stopColor="#b45309" />
+        </linearGradient>
+        <linearGradient id="card-glass" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#1e3a34" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#0d231e" stopOpacity="0.85" />
+        </linearGradient>
+        <filter id="auth-shadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="#04241d" floodOpacity="0.6" />
+        </filter>
+        <filter id="auth-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="0" stdDeviation="10" floodColor="#34d399" floodOpacity="0.5" />
+        </filter>
+      </defs>
 
-function Coins({ x, y, scale = 1 }) {
-  return (
-    <g transform={`translate(${x} ${y}) scale(${scale})`}>
-      <ellipse cx="0" cy="26" rx="17" ry="6" fill={AMBER_DARK} />
-      <ellipse cx="0" cy="22" rx="17" ry="6" fill={AMBER} />
-      <ellipse cx="20" cy="10" rx="13" ry="5" fill={AMBER_DARK} />
-      <ellipse cx="20" cy="7" rx="13" ry="5" fill={AMBER} />
-      <text x="20" y="10" textAnchor="middle" fontSize="9" fontWeight="700" fill="#7c4a03">$</text>
-    </g>
-  );
-}
+      {/* Ambient background glow */}
+      <circle cx="210" cy="170" r="150" fill="url(#login-glow)" />
 
-function Sparkles({ x, y, scale = 1 }) {
-  return (
-    <g transform={`translate(${x} ${y}) scale(${scale})`} fill={AMBER}>
-      <path d="M0 14c1.4 7 3 8.6 10 10-7 1.4-8.6 3-10 10-1.4-7-3-8.6-10-10 7-1.4 8.6-3 10-10Z" />
-      <path d="M22 20c.9 4.4 1.9 5.4 6.3 6.3-4.4.9-5.4 1.9-6.3 6.3-.9-4.4-1.9-5.4-6.3-6.3 4.4-.9 5.4-1.9 6.3-6.3Z" opacity="0.65" />
-    </g>
-  );
-}
+      {/* Outer ambient decorative orbits */}
+      <circle cx="210" cy="170" r="130" fill="none" stroke="rgba(78, 222, 163, 0.12)" strokeWidth="1.5" strokeDasharray="6 8" />
+      <circle cx="210" cy="170" r="95" fill="none" stroke="rgba(78, 222, 163, 0.08)" strokeWidth="1" />
 
-/** Head + hair, reused so every face in the app looks like the same family. */
-function Head({ x, y, r = 24, long = false }) {
-  return (
-    <g>
-      <circle cx={x} cy={y} r={r} fill={SKIN} />
-      <path
-        d={`M${x - r} ${y + 2}c0-${r + 2} ${r * 0.42}-${r + 6} ${r}-${r + 6}s${r} ${r * 0.4} ${r} ${r + 6}c-4-7-10-11-19-11-8 0-14 4-19 11z`}
-        fill={HAIR}
-      />
-      {long && (
+      {/* Floating glass verification panel (back) */}
+      <g transform="translate(60, 60)" filter="url(#auth-shadow)">
+        <rect width="180" height="74" rx="18" fill="url(#card-glass)" stroke="rgba(78, 222, 163, 0.35)" strokeWidth="1.5" />
+        <circle cx="36" cy="37" r="18" fill="rgba(16, 185, 129, 0.25)" stroke="#34d399" strokeWidth="1.5" />
+        <path d="M28 37l5 5 11-11" fill="none" stroke="#4edea3" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="66" y="26" width="86" height="8" rx="4" fill="#eafff5" opacity="0.95" />
+        <rect x="66" y="42" width="56" height="6" rx="3" fill="#6ee7b7" opacity="0.7" />
+      </g>
+
+      {/* Center 3D Security Shield */}
+      <g transform="translate(160, 110)" filter="url(#auth-shadow)">
+        {/* Shield background */}
         <path
-          d={`M${x - r - 1} ${y - 4}c-3 16-2 28 2 40h${r * 2 + 4}c4-12 5-25 2-40-4 8-10 12-20 12-8 0-13-4-16-12z`}
-          fill={HAIR}
+          d="M50 10 L94 30 C94 68 76 100 50 114 C24 100 6 68 6 30 Z"
+          fill="url(#shield-grad)"
+          stroke="#a7f3d0"
+          strokeWidth="2.5"
+          filter="url(#auth-glow)"
         />
-      )}
-      <circle cx={x - r * 0.35} cy={y + 2} r="2" fill="#2b211c" />
-      <circle cx={x + r * 0.35} cy={y + 2} r="2" fill="#2b211c" />
-      <path d={`M${x - 5} ${y + 10}q5 4 10 0`} stroke="#b4795a" strokeWidth="2" fill="none" strokeLinecap="round" />
-    </g>
-  );
-}
-
-function LoginArt() {
-  return (
-    <>
-      <circle cx="206" cy="170" r="152" fill="#ffe9d2" />
-      <circle cx="322" cy="96" r="26" fill={AMBER} opacity="0.5" />
-      <Sparkles x={330} y={44} />
-
-      {/* speech bubble: welcome back */}
-      <g>
-        <rect x="20" y="34" width="164" height="66" rx="20" fill={PAPER} stroke={LINE} strokeWidth="2" />
-        <path d="M62 100l-8 18 24-18z" fill={PAPER} stroke={LINE} strokeWidth="2" />
-        <circle cx="56" cy="66" r="16" fill={MINT} />
-        <path d="m48 66 6 6 11-12" stroke="#fff" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        <rect x="84" y="56" width="82" height="9" rx="4.5" fill="#d7d3cb" />
-        <rect x="84" y="76" width="56" height="9" rx="4.5" fill="#e7e3db" />
+        {/* Inner shield contour */}
+        <path
+          d="M50 20 L84 36 C84 68 68 94 50 104 C32 94 16 68 16 36 Z"
+          fill="none"
+          stroke="rgba(255, 255, 255, 0.4)"
+          strokeWidth="1.5"
+        />
+        {/* Shield Lock core */}
+        <rect x="36" y="54" width="28" height="24" rx="6" fill="#ffffff" />
+        <path d="M42 54V44a8 8 0 0 1 16 0v10" fill="none" stroke="#ffffff" strokeWidth="3.5" strokeLinecap="round" />
+        <circle cx="50" cy="65" r="3" fill="#065f46" />
+        <path d="M50 67v5" stroke="#065f46" strokeWidth="2.5" strokeLinecap="round" />
       </g>
 
-      {/* student, phone in hand */}
-      <g>
-        <ellipse cx="200" cy="300" rx="96" ry="11" fill="#0f766e" opacity="0.12" />
-        <Head x={196} y={140} r={25} long />
-        <path d="M170 178c0-16 12-26 26-26s26 10 26 26v46h-52z" fill={SHIRT} />
-        <path d="M170 178c4 14 14 20 26 20s22-6 26-20v-2c-6 8-14 12-26 12s-20-4-26-12z" fill={SHIRT_DARK} />
-        <path d="M186 224h20v8h-20z" fill={SKIN_DARK} />
-        <rect x="178" y="230" width="21" height="56" rx="10" fill={PANTS} />
-        <rect x="206" y="230" width="21" height="56" rx="10" fill={PANTS} />
-        <rect x="174" y="282" width="28" height="12" rx="6" fill="#1f2937" />
-        <rect x="203" y="282" width="28" height="12" rx="6" fill="#1f2937" />
-        {/* arm + phone */}
-        <path d="M226 196c14 4 22 12 24 22l-14 6c-2-8-8-13-18-16z" fill={SKIN} />
-        <g transform="rotate(-8 252 176)">
-          <rect x="232" y="140" width="40" height="66" rx="9" fill={PAPER} stroke={LINE} strokeWidth="2" />
-          <rect x="238" y="148" width="28" height="46" rx="5" fill={MINT_LIGHT} />
-          <path d="m244 170 6 6 11-12" stroke={SHIRT_DARK} strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-          <rect x="244" y="186" width="16" height="4" rx="2" fill="#9ca3af" />
-          <circle cx="252" cy="199" r="2.6" fill="#9ca3af" />
+      {/* Floating secondary badge (right) */}
+      <g transform="translate(260, 180)" filter="url(#auth-shadow)">
+        <rect width="130" height="54" rx="14" fill="url(#card-glass)" stroke="rgba(251, 191, 36, 0.4)" strokeWidth="1.5" />
+        <circle cx="28" cy="27" r="14" fill="rgba(245, 158, 11, 0.2)" stroke="#fbbf24" strokeWidth="1.5" />
+        <text x="28" y="32" textAnchor="middle" fontSize="13" fontWeight="800" fill="#fbbf24">🔒</text>
+        <rect x="50" y="20" width="64" height="6" rx="3" fill="#fff" opacity="0.9" />
+        <rect x="50" y="31" width="42" height="5" rx="2.5" fill="#fde68a" opacity="0.75" />
+      </g>
+
+      {/* Floating 3D Gold Coins */}
+      <g transform="translate(90, 240)" filter="url(#auth-shadow)">
+        {/* Bottom coin */}
+        <ellipse cx="26" cy="36" rx="26" ry="11" fill="#78350f" />
+        <ellipse cx="26" cy="30" rx="26" ry="11" fill="url(#gold-coin)" />
+        <ellipse cx="26" cy="30" rx="20" ry="8" fill="none" stroke="#fef08a" strokeWidth="1.5" strokeDasharray="3 2" />
+        <text x="26" y="34" textAnchor="middle" fontSize="13" fontWeight="900" fill="#78350f">C</text>
+
+        {/* Top overlapping coin */}
+        <g transform="translate(24, -14)">
+          <ellipse cx="20" cy="24" rx="20" ry="9" fill="#78350f" />
+          <ellipse cx="20" cy="19" rx="20" ry="9" fill="url(#gold-coin)" />
+          <ellipse cx="20" cy="19" rx="15" ry="6.5" fill="none" stroke="#fef08a" strokeWidth="1.2" strokeDasharray="3 2" />
+          <text x="20" y="23" textAnchor="middle" fontSize="11" fontWeight="900" fill="#78350f">$</text>
         </g>
       </g>
 
-      <Plant x={310} y={196} scale={0.95} />
-      <Coins x={62} y={252} />
+      {/* Sparkling particle stars */}
+      <g fill="#4edea3">
+        <circle cx="340" cy="80" r="3.5" filter="url(#auth-glow)" />
+        <circle cx="80" cy="160" r="2.5" opacity="0.8" />
+        <circle cx="290" cy="260" r="3" opacity="0.9" filter="url(#auth-glow)" />
+      </g>
+      <g fill="#fbbf24">
+        <polygon points="350,110 352,116 358,118 352,120 350,126 348,120 342,118 348,116" opacity="0.85" />
+        <polygon points="70,100 71,104 75,105 71,106 70,110 69,106 65,105 69,104" opacity="0.75" />
+      </g>
     </>
   );
 }
 
-function RegisterArt() {
+export function RegisterArt() {
   return (
     <>
-      <circle cx="210" cy="168" r="152" fill="#e0f2fe" />
-      <circle cx="86" cy="96" r="22" fill={CORAL} opacity="0.35" />
-      <Sparkles x={318} y={40} scale={0.9} />
+      <defs>
+        <radialGradient id="reg-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.30" />
+          <stop offset="50%" stopColor="#10b981" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="#04241d" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="card-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#0f766e" />
+          <stop offset="45%" stopColor="#044d3f" />
+          <stop offset="100%" stopColor="#022a22" />
+        </linearGradient>
+        <linearGradient id="chip-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#fef08a" />
+          <stop offset="100%" stopColor="#d97706" />
+        </linearGradient>
+      </defs>
 
-      {/* welcome ribbon */}
-      <g>
-        <rect x="228" y="30" width="150" height="52" rx="18" fill={PAPER} stroke={LINE} strokeWidth="2" />
-        <path d="M262 82l-8 16 22-16z" fill={PAPER} stroke={LINE} strokeWidth="2" />
-        <circle cx="258" cy="56" r="15" fill={CORAL} />
-        <path d="M258 47.5c-3 4.4-5 6.6-5 9.6a5 5 0 0 0 10 0c0-3-2-5.2-5-9.6z" fill="#fff" />
-        <rect x="284" y="48" width="80" height="9" rx="4.5" fill="#d7d3cb" />
-        <rect x="284" y="66" width="52" height="9" rx="4.5" fill="#e7e3db" />
+      {/* Ambient background glow */}
+      <circle cx="210" cy="170" r="150" fill="url(#reg-glow)" />
+      <circle cx="210" cy="170" r="125" fill="none" stroke="rgba(45, 212, 191, 0.15)" strokeWidth="1.5" strokeDasharray="8 6" />
+
+      {/* 3D Student Smart Card (perspective tilt) */}
+      <g transform="translate(100, 75) rotate(-6)" filter="url(#auth-shadow)">
+        {/* Card Body */}
+        <rect width="230" height="145" rx="18" fill="url(#card-grad)" stroke="rgba(78, 222, 163, 0.4)" strokeWidth="1.8" />
+
+        {/* Decorative holographic wave */}
+        <path d="M0 60 Q 60 40, 115 70 T 230 65 L 230 145 L 0 145 Z" fill="rgba(16, 185, 129, 0.12)" />
+        <path d="M0 90 Q 70 70, 130 95 T 230 90 L 230 145 L 0 145 Z" fill="rgba(56, 189, 248, 0.10)" />
+
+        {/* Card Header */}
+        <circle cx="32" cy="32" r="14" fill="rgba(255, 255, 255, 0.15)" />
+        <text x="32" y="37" textAnchor="middle" fontSize="13" fontWeight="900" fill="#a7f3d0">C</text>
+        <text x="56" y="32" fontSize="12" fontWeight="800" fill="#eafff5" letterSpacing="0.05em">CAMPUS COIN</text>
+        <text x="56" y="44" fontSize="8" fontWeight="600" fill="#6ee7b7" letterSpacing="0.08em">STUDENT PASS</text>
+
+        {/* EMV Chip */}
+        <rect x="24" y="60" width="34" height="26" rx="5" fill="url(#chip-grad)" stroke="#b45309" strokeWidth="0.8" />
+        <line x1="24" y1="73" x2="58" y2="73" stroke="#92400e" strokeWidth="0.8" />
+        <line x1="41" y1="60" x2="41" y2="86" stroke="#92400e" strokeWidth="0.8" />
+
+        {/* Card Number / Details */}
+        <rect x="24" y="104" width="130" height="7" rx="3.5" fill="#eafff5" opacity="0.85" />
+        <rect x="24" y="120" width="60" height="6" rx="3" fill="#6ee7b7" opacity="0.7" />
+
+        {/* Contactless symbol */}
+        <path d="M196 30 a12 12 0 0 1 0 16" fill="none" stroke="#6ee7b7" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M202 26 a18 18 0 0 1 0 24" fill="none" stroke="#6ee7b7" strokeWidth="1.8" strokeLinecap="round" />
       </g>
 
-      {/* new graduate */}
-      <g>
-        <ellipse cx="196" cy="302" rx="98" ry="11" fill="#0f766e" opacity="0.12" />
-        <Head x={196} y={150} r={25} />
-        {/* mortarboard */}
-        <path d="M196 106l46 20-46 20-46-20z" fill="#1f2a44" />
-        <path d="M164 132h64v10h-64z" fill="#111a2e" />
-        <path d="M242 126v22" stroke="#111a2e" strokeWidth="3" strokeLinecap="round" />
-        <circle cx="242" cy="151" r="5" fill={AMBER} />
-        {/* gown */}
-        <path d="M168 190c0-18 13-30 28-30s28 12 28 30v54h-56z" fill={SHIRT} />
-        <path d="M186 240h20l10 58h-40z" fill={SHIRT_DARK} />
-        <rect x="176" y="296" width="22" height="10" rx="5" fill="#1f2937" />
-        <rect x="194" y="296" width="22" height="10" rx="5" fill="#1f2937" />
-        {/* form card + arm */}
-        <path d="M226 206c14 2 22 8 26 16l-13 8c-3-6-9-10-17-12z" fill={SKIN} />
-        <g transform="rotate(-7 250 190)">
-          <rect x="222" y="156" width="60" height="70" rx="10" fill={PAPER} stroke={LINE} strokeWidth="2" />
-          <rect x="232" y="168" width="40" height="8" rx="4" fill={MINT} />
-          <rect x="232" y="184" width="28" height="6" rx="3" fill="#d7d3cb" />
-          <rect x="232" y="196" width="34" height="6" rx="3" fill="#e7e3db" />
-          <circle cx="252" cy="214" r="2.6" fill={AMBER} />
-        </g>
+      {/* Floating Student Free Badge (bottom right) */}
+      <g transform="translate(240, 205)" filter="url(#auth-shadow)">
+        <rect width="140" height="52" rx="16" fill="url(#card-glass)" stroke="rgba(52, 211, 153, 0.45)" strokeWidth="1.5" />
+        <circle cx="28" cy="26" r="14" fill="rgba(16, 185, 129, 0.3)" stroke="#34d399" strokeWidth="1.2" />
+        <text x="28" y="31" textAnchor="middle" fontSize="13" fontWeight="900" fill="#4edea3">🎓</text>
+        <text x="50" y="24" fontSize="11" fontWeight="800" fill="#ffffff">100% Free</text>
+        <text x="50" y="37" fontSize="9" fontWeight="600" fill="#a7f3d0">Student Account</text>
       </g>
 
-      <Plant x={44} y={196} scale={0.95} />
-      <Coins x={300} y={262} />
+      {/* Floating Sparkles & Coins */}
+      <g transform="translate(60, 220)" filter="url(#auth-shadow)">
+        <ellipse cx="26" cy="30" rx="22" ry="10" fill="#78350f" />
+        <ellipse cx="26" cy="25" rx="22" ry="10" fill="url(#gold-coin)" />
+        <ellipse cx="26" cy="25" rx="16" ry="7" fill="none" stroke="#fef08a" strokeWidth="1.2" strokeDasharray="3 2" />
+        <text x="26" y="29" textAnchor="middle" fontSize="12" fontWeight="900" fill="#78350f">C</text>
+      </g>
+
+      <circle cx="340" cy="70" r="3" fill="#38bdf8" filter="url(#auth-glow)" />
+      <circle cx="70" cy="180" r="3.5" fill="#34d399" filter="url(#auth-glow)" />
+      <polygon points="320,180 322,185 327,187 322,189 320,194 318,189 313,187 318,185" fill="#fde68a" />
     </>
   );
 }
 
-function AdminArt() {
+export function AdminArt() {
   return (
     <>
-      <circle cx="210" cy="170" r="152" fill="#ede9fe" />
-      <circle cx="96" cy="80" r="24" fill={AMBER} opacity="0.4" />
-      <Sparkles x={318} y={48} scale={0.85} />
+      <defs>
+        <radialGradient id="admin-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#6366f1" stopOpacity="0.30" />
+          <stop offset="60%" stopColor="#10b981" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="#04241d" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="bar-1" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stopColor="#059669" />
+          <stop offset="100%" stopColor="#34d399" />
+        </linearGradient>
+        <linearGradient id="bar-2" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stopColor="#0284c7" />
+          <stop offset="100%" stopColor="#38bdf8" />
+        </linearGradient>
+        <linearGradient id="bar-3" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stopColor="#d97706" />
+          <stop offset="100%" stopColor="#fbbf24" />
+        </linearGradient>
+        <linearGradient id="bar-4" x1="0%" y1="100%" x2="0%" y2="0%">
+          <stop offset="0%" stopColor="#7c3aed" />
+          <stop offset="100%" stopColor="#a78bfa" />
+        </linearGradient>
+      </defs>
 
-      {/* the dashboard itself */}
-      <g>
-        <rect x="196" y="70" width="188" height="132" rx="16" fill={PAPER} stroke={LINE} strokeWidth="2" />
-        <rect x="212" y="86" width="60" height="8" rx="4" fill={MINT} />
-        <rect x="212" y="100" width="38" height="6" rx="3" fill="#d7d3cb" />
-        <g>
-          <rect x="214" y="164" width="16" height="24" rx="4" fill={MINT} />
-          <rect x="238" y="150" width="16" height="38" rx="4" fill="#38bdf8" />
-          <rect x="262" y="140" width="16" height="48" rx="4" fill={AMBER} />
-          <rect x="286" y="158" width="16" height="30" rx="4" fill={CORAL} />
+      {/* Ambient background glow */}
+      <circle cx="210" cy="170" r="150" fill="url(#admin-glow)" />
+
+      {/* Glass Analytics Console */}
+      <g transform="translate(80, 80)" filter="url(#auth-shadow)">
+        <rect width="260" height="160" rx="20" fill="url(#card-glass)" stroke="rgba(99, 102, 241, 0.4)" strokeWidth="1.8" />
+
+        {/* Console Header Bar */}
+        <rect x="20" y="20" width="80" height="8" rx="4" fill="#e0e7ff" opacity="0.9" />
+        <circle cx="220" cy="24" r="5" fill="#34d399" filter="url(#auth-glow)" />
+        <circle cx="236" cy="24" r="5" fill="#fbbf24" />
+
+        {/* Bar Chart Bars */}
+        <g transform="translate(24, 60)">
+          {/* Baseline */}
+          <line x1="0" y1="70" x2="140" y2="70" stroke="rgba(255, 255, 255, 0.15)" strokeWidth="1.5" />
+
+          {/* Bars */}
+          <rect x="10" y="32" width="22" height="38" rx="6" fill="url(#bar-1)" />
+          <rect x="42" y="18" width="22" height="52" rx="6" fill="url(#bar-2)" />
+          <rect x="74" y="8" width="22" height="62" rx="6" fill="url(#bar-3)" />
+          <rect x="106" y="24" width="22" height="46" rx="6" fill="url(#bar-4)" />
         </g>
-        <circle cx="332" cy="164" r="24" fill="none" stroke={LINE} strokeWidth="7" />
-        <path d="M332 140a24 24 0 0 1 21 36" stroke={MINT} strokeWidth="7" fill="none" strokeLinecap="round" />
-        <rect x="212" y="120" width="96" height="7" rx="3.5" fill="#e7e3db" />
-        <rect x="212" y="134" width="72" height="7" rx="3.5" fill="#eef0ee" />
+
+        {/* Circular Progress Gauge */}
+        <g transform="translate(195, 95)">
+          <circle cx="26" cy="26" r="24" fill="none" stroke="rgba(255, 255, 255, 0.08)" strokeWidth="6" />
+          <circle
+            cx="26"
+            cy="26"
+            r="24"
+            fill="none"
+            stroke="#4edea3"
+            strokeWidth="6"
+            strokeDasharray="150"
+            strokeDashoffset="38"
+            strokeLinecap="round"
+            transform="rotate(-90 26 26)"
+          />
+          <text x="26" y="30" textAnchor="middle" fontSize="11" fontWeight="800" fill="#ffffff">99%</text>
+        </g>
       </g>
 
-      {/* staff member beside the board */}
-      <g>
-        <ellipse cx="132" cy="300" rx="82" ry="10" fill="#0f766e" opacity="0.12" />
-        <Head x={124} y={150} r={24} />
-        <path d="M98 190c0-17 12-28 26-28s26 11 26 28v54H98z" fill="#6366f1" />
-        <path d="M98 190c4 13 13 19 26 19s22-6 26-19c-6 8-14 12-26 12s-20-4-26-12z" fill="#4f46e5" />
-        <rect x="104" y="242" width="19" height="50" rx="9" fill={PANTS} />
-        <rect x="130" y="242" width="19" height="50" rx="9" fill={PANTS} />
-        <rect x="100" y="288" width="26" height="11" rx="5.5" fill="#1f2937" />
-        <rect x="127" y="288" width="26" height="11" rx="5.5" fill="#1f2937" />
-        {/* arm pointing at the board */}
-        <path d="M148 200c16 0 28-6 38-16l9 11c-12 13-28 21-47 21z" fill={SKIN} />
-        <circle cx="196" cy="182" r="7" fill={SKIN} />
+      {/* Floating 3D Golden Admin Key & Shield */}
+      <g transform="translate(50, 195)" filter="url(#auth-shadow)">
+        <rect width="130" height="52" rx="14" fill="url(#card-glass)" stroke="rgba(251, 191, 36, 0.5)" strokeWidth="1.5" />
+        <circle cx="28" cy="26" r="14" fill="rgba(245, 158, 11, 0.25)" stroke="#fbbf24" strokeWidth="1.2" />
+        <text x="28" y="31" textAnchor="middle" fontSize="13" fontWeight="900" fill="#fbbf24">🔑</text>
+        <text x="50" y="23" fontSize="11" fontWeight="800" fill="#ffffff">Staff Portal</text>
+        <text x="50" y="36" fontSize="9" fontWeight="600" fill="#fde68a">256-Bit Encrypted</text>
       </g>
 
-      {/* shield + key, the two things the staff door is about */}
-      <g transform="translate(28 152)">
-        <path d="M22 0 44 8v14c0 14-9 24-22 28-13-4-22-14-22-28V8z" fill={MINT} />
-        <path d="m14 24 6 6 12-13" stroke="#fff" strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      </g>
-      <Plant x={300} y={214} scale={0.8} />
+      <circle cx="340" cy="90" r="3.5" fill="#818cf8" filter="url(#auth-glow)" />
+      <polygon points="75,65 77,70 82,71 77,73 75,78 73,73 68,71 73,70" fill="#34d399" />
     </>
   );
 }
 
-/**
- * The reset page's scene: a student at a mailbox with a six-digit code on a
- * phone, a key turning back the other way. It is the one form page that is
- * about getting *into* an account, so the picture says the same thing the copy
- * does — a code arrives, the student types it, the door opens again.
- */
-function ResetArt() {
+export function ResetArt() {
   return (
     <>
-      <circle cx="210" cy="172" r="152" fill="#e0f2fe" />
-      <circle cx="86" cy="96" r="26" fill={MINT_LIGHT} opacity="0.7" />
-      <circle cx="344" cy="120" r="18" fill={CORAL} opacity="0.35" />
+      <defs>
+        <radialGradient id="reset-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.28" />
+          <stop offset="50%" stopColor="#10b981" stopOpacity="0.14" />
+          <stop offset="100%" stopColor="#04241d" stopOpacity="0" />
+        </radialGradient>
+      </defs>
 
-      {/* the mailbox on its post, with a letter coming out of it */}
-      <g>
-        <ellipse cx="150" cy="318" rx="92" ry="10" fill="#0f766e" opacity="0.12" />
-        <rect x="146" y="230" width="12" height="78" rx="5" fill="#9a6b3f" />
-        <path d="M104 176h92a10 10 0 0 1 10 10v34a16 16 0 0 1-16 16h-80a16 16 0 0 1-16-16v-34a10 10 0 0 1 10-10z" fill={CORAL} />
-        <path d="M94 186h112l-8 16h-96z" fill="#f472b6" />
-        <rect x="136" y="212" width="30" height="8" rx="4" fill={PAPER} />
-        <path d="M138 176V160a12 12 0 0 1 12-12h16" stroke={CORAL} strokeWidth="8" fill="none" strokeLinecap="round" />
-        {/* the letter, half out */}
-        <g transform="rotate(-14 176 132)">
-          <rect x="150" y="112" width="52" height="36" rx="4" fill={PAPER} stroke={LINE} strokeWidth="2" />
-          <path d="M150 114l26 20 26-20" stroke={LINE} strokeWidth="2" fill="none" />
-        </g>
-        <path d="M188 214l8 8 14-16" stroke={PAPER} strokeWidth="3.4" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      {/* Ambient background glow */}
+      <circle cx="210" cy="170" r="150" fill="url(#reset-glow)" />
+      <circle cx="210" cy="170" r="115" fill="none" stroke="rgba(56, 189, 248, 0.15)" strokeWidth="1.5" strokeDasharray="6 8" />
+
+      {/* Floating 3D Vault Lock Dial */}
+      <g transform="translate(145, 95)" filter="url(#auth-shadow)">
+        {/* Outer Ring */}
+        <circle cx="65" cy="65" r="62" fill="url(#card-glass)" stroke="rgba(78, 222, 163, 0.4)" strokeWidth="2.5" />
+        <circle cx="65" cy="65" r="50" fill="none" stroke="rgba(255, 255, 255, 0.15)" strokeWidth="1.5" strokeDasharray="5 4" />
+
+        {/* Center Golden Dial */}
+        <circle cx="65" cy="65" r="32" fill="url(#gold-coin)" stroke="#fef08a" strokeWidth="2" filter="url(#auth-glow)" />
+        <circle cx="65" cy="65" r="14" fill="#78350f" />
+        <rect x="63" y="38" width="4" height="12" rx="2" fill="#ffffff" />
+
+        {/* Glowing keyhole */}
+        <circle cx="65" cy="63" r="3.5" fill="#fef08a" />
+        <polygon points="63,64 67,64 66,71 64,71" fill="#fef08a" />
       </g>
 
-      {/* the phone in the student's hand, showing the code */}
-      <g transform="rotate(-8 300 172)">
-        <rect x="266" y="112" width="68" height="112" rx="12" fill="#1f2937" />
-        <rect x="272" y="122" width="56" height="86" rx="6" fill="#dbeafe" />
-        <rect x="282" y="134" width="36" height="8" rx="4" fill="#93c5fd" />
-        <g fill={AMBER}>
-          <circle cx="288" cy="164" r="9" />
-          <circle cx="311" cy="164" r="9" />
-          <circle cx="288" cy="188" r="9" />
-          <circle cx="311" cy="188" r="9" />
-        </g>
-        <g fill="#7c4a03" fontSize="12" fontWeight="700" textAnchor="middle">
-          <text x="288" y="168">1</text>
-          <text x="311" y="168">4</text>
-          <text x="288" y="192">8</text>
-          <text x="311" y="192">2</text>
-        </g>
-        <rect x="288" y="214" width="24" height="4" rx="2" fill="#cbd5e1" />
+      {/* Floating Verification Code Card */}
+      <g transform="translate(240, 70)" filter="url(#auth-shadow)">
+        <rect width="130" height="54" rx="14" fill="url(#card-glass)" stroke="rgba(56, 189, 248, 0.4)" strokeWidth="1.5" />
+        <circle cx="26" cy="27" r="13" fill="rgba(56, 189, 248, 0.25)" stroke="#38bdf8" strokeWidth="1.2" />
+        <text x="26" y="31" textAnchor="middle" fontSize="12" fill="#38bdf8">✉️</text>
+        <rect x="48" y="20" width="68" height="6" rx="3" fill="#ffffff" opacity="0.9" />
+        <rect x="48" y="31" width="46" height="5" rx="2.5" fill="#7dd3fc" opacity="0.75" />
       </g>
 
-      {/* the student: looking at the phone, key in the other hand */}
-      <g>
-        <Head x={214} y={214} r={26} long />
-        <rect x="200" y="238" width="28" height="18" rx="8" fill={SKIN_DARK} />
-        <path d="M172 288c0-19 14-32 32-32s32 13 32 32v22h-64z" fill={SHIRT} />
-        <path d="M172 288c5 15 15 22 32 22s27-7 32-22c-7 9-17 14-32 14s-25-5-32-14z" fill={SHIRT_DARK} />
-        <rect x="180" y="304" width="20" height="26" rx="9" fill={PANTS} />
-        <rect x="208" y="304" width="20" height="26" rx="9" fill={PANTS} />
-        <rect x="176" y="326" width="27" height="12" rx="6" fill="#1f2937" />
-        <rect x="205" y="326" width="27" height="12" rx="6" fill="#1f2937" />
-        {/* arm up to the phone */}
-        <path d="M236 280c16-6 26-16 32-30l14 8c-8 18-20 30-40 36z" fill={SKIN} />
-        {/* the other hand holding a key */}
-        <g transform="translate(166 268) rotate(-18)">
-          <circle cx="0" cy="0" r="11" fill="none" stroke={AMBER_DARK} strokeWidth="6" />
-          <rect x="9" y="-3" width="34" height="6" rx="3" fill={AMBER_DARK} />
-          <rect x="26" y="2" width="6" height="9" rx="2" fill={AMBER_DARK} />
-          <rect x="36" y="2" width="6" height="7" rx="2" fill={AMBER_DARK} />
-        </g>
+      {/* Floating Safe Recovery Badge */}
+      <g transform="translate(70, 205)" filter="url(#auth-shadow)">
+        <rect width="140" height="50" rx="14" fill="url(#card-glass)" stroke="rgba(52, 211, 153, 0.4)" strokeWidth="1.5" />
+        <circle cx="26" cy="25" r="13" fill="rgba(16, 185, 129, 0.25)" stroke="#34d399" strokeWidth="1.2" />
+        <path d="M21 25l3.5 3.5 7.5-7.5" fill="none" stroke="#4edea3" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        <text x="48" y="22" fontSize="11" fontWeight="800" fill="#ffffff">Instant Reset</text>
+        <text x="48" y="35" fontSize="9" fontWeight="600" fill="#a7f3d0">Encrypted Email OTP</text>
       </g>
 
-      <Sparkles x={330} y={244} scale={0.9} />
-      <Plant x={300} y={244} scale={0.75} />
+      <circle cx="340" cy="180" r="3" fill="#38bdf8" filter="url(#auth-glow)" />
+      <polygon points="90,90 92,94 96,95 92,96 90,100 88,96 84,95 88,94" fill="#fbbf24" />
     </>
   );
 }

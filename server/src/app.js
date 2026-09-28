@@ -28,10 +28,26 @@ import quickTextRoutes from './routes/quickText.js';
 import survivalRoutes from './routes/survival.js';
 import groupsRoutes from './routes/groups.js';
 import qrpayRoutes from './routes/qrpay.js';
+import walletRoutes from './routes/wallets.js';
 import groupChatRoutes from './routes/groupChat.js';
 import groupLedgerRoutes from './routes/groupLedger.js';
 import wishlistRoutes from './routes/wishlist.js';
 import vaultRoutes from './routes/vault.js';
+import subscriptionRoutes from './routes/subscriptions.js';
+
+// NEW-1: a queued export of the whole account, and the deletion grace period.
+import exportRoutes from './routes/dataExport.js';
+import deletionRoutes from './routes/accountDeletion.js';
+// NEW-5: the day-by-day calendar of one month, with the bands the server cut.
+import heatmapRoutes from './routes/spendingHeatmap.js';
+// NEW-7: a one-person invite code. The group half and the public half are one
+// file and two exports - they share a service, and the public read must not be
+// able to reach the student door the group half sits behind.
+import groupInviteRoutes, { publicInvites } from './routes/groupInvites.js';
+// NEW-8: one month of totals, shared with one named person, and taken back.
+import guardianRoutes from './routes/guardian.js';
+// NEW-10: a code of your own, and what it earned.
+import referralRoutes from './routes/referrals.js';
 import fxRoutes from './routes/fx.js';
 import growMoneyRoutes from './routes/growMoney.js';
 import savingsOptionsRoutes from './routes/savingsOptions.js';
@@ -49,7 +65,17 @@ app.set('trust proxy', 1); // correct client IPs behind the host's proxy in prod
 app.use(helmet({ contentSecurityPolicy: false })); // SPA serves its own markup and scripts
 app.use(
   cors({
-    origin: isProd ? env.appUrl : [env.appUrl, 'http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: isProd
+      ? env.appUrl
+      : [
+          env.appUrl,
+          'http://localhost:5173',
+          'http://127.0.0.1:5173',
+          'http://localhost:5174',
+          'http://127.0.0.1:5174',
+          'http://localhost:5175',
+          'http://127.0.0.1:5175',
+        ],
     credentials: true,
   })
 );
@@ -78,6 +104,8 @@ app.use('/api', suggestionRoutes);
 app.use('/api/insights', insightRoutes);
 // a scanned payment code: read it, price it, and record it as an expense
 app.use('/api/qr', qrpayRoutes);
+// the pockets the money is actually in, and the movements between them
+app.use('/api/wallets', walletRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
 app.use('/api/quick-text', quickTextRoutes);
 app.use('/api/survival', survivalRoutes);
@@ -89,6 +117,22 @@ app.use('/api/groups/:id/chat', groupChatRoutes);
 // proves it does, and the bank reconciliation that explains the difference
 app.use('/api/groups/:id/ledger', groupLedgerRoutes);
 app.use('/api/vault', vaultRoutes);
+app.use('/api/subscriptions', subscriptionRoutes);
+
+// NEW-1. The deletion router mounts at /api rather than at a prefix of its own:
+// it carries both halves of one state machine, the student door and the staff
+// door, and one mount is what keeps those two paths from drifting apart.
+app.use('/api', deletionRoutes);
+app.use('/api/export', exportRoutes);
+// NEW-5.
+app.use('/api/heatmap', heatmapRoutes);
+// NEW-7. The nested half first, then the public read. The public one is mounted
+// at a flat path precisely so it cannot inherit the group router middleware.
+app.use('/api/groups/:id/invites', groupInviteRoutes);
+app.use('/api/invites', publicInvites);
+// NEW-8 and NEW-10.
+app.use('/api/guardian', guardianRoutes);
+app.use('/api/referrals', referralRoutes);
 app.use('/api/fx', fxRoutes);
 app.use('/api/grow-money', growMoneyRoutes);
 // Reference data, not personal records: readable signed out, written by staff.

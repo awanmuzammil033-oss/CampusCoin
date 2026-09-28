@@ -190,6 +190,7 @@ export default function RecurringPage() {
 
   return (
     <Page
+      loading={!rows && !error}
       trail={[{ label: t('nav.recurring') }]}
       title={t('rec.title')}
       subtitle={t('rec.subtitle')}

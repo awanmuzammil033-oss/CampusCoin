@@ -295,6 +295,7 @@ export default function Reports() {
 
   return (
     <Page
+      loading={!data && !error}
       trail={[
         { label: t('nav.reports') },
         { label: monthLabel(month) },

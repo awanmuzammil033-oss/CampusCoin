@@ -1,0 +1,33 @@
+{
+  "ref.title": "Invite a friend",
+  "ref.subtitle": "Share your link. A reward is yours when a friend signs up with it and logs their first entry.",
+  "ref.linkLabel": "Your invite link",
+  "ref.copyLink": "Copy link",
+  "ref.codeLabel": "Your code",
+  "ref.copyCode": "Copy code",
+  "ref.copied": "Copied",
+  "ref.copyError": "Could not copy that. Select the text and copy it yourself.",
+  "ref.share": "Share",
+  "ref.share.body": "{name} is on Campus Coin and keeps their spending straight with it. Want to try? {link}",
+
+  "ref.rewardCount": "{earned} of {cap} rewards earned",
+  "ref.capReached": "All {cap} rewards earned. Your link still works for anyone who joins — there is simply nothing more to earn from it.",
+
+  "ref.joined": "Who joined",
+  "ref.joinedNone": "Nobody yet. Share the link above, and whoever signs up with it appears here.",
+  "ref.joinedOn": "Joined {date}",
+  "ref.rowRewarded": "Reward earned",
+  "ref.rowWaiting": "No entry yet",
+  "ref.pending.one": "{count} friend has joined but has not logged an entry yet.",
+  "ref.pending.other": "{count} friends have joined but have not logged an entry yet.",
+
+  "ref.why": "Why the first entry matters.",
+  "ref.whyBody": "Signing up is one line of typing; logging an entry is what the app is for, so that is what a reward waits for.",
+
+  "ref.invite.notFound": "That invite link is not one of ours. You can still create an account.",
+  "ref.invite.tooMany": "Too many tries from this network. Give it a minute and try again.",
+  "ref.invite.from": "{name} invited you to Campus Coin",
+  "ref.invite.keep": "Sign up with their link and it is remembered on your account — nothing else to do.",
+  "ref.invite.signup": "Create your account",
+  "ref.invite.haveAccount": "Already have an account?"
+}

@@ -58,8 +58,10 @@ export default function ControlLayout() {
               to={item.to}
               end={item.end}
               className={({ isActive }) => `nav-link-cc ${isActive ? 'active' : ''}`}
+              title={t(item.label)}
+              aria-label={t(item.label)}
             >
-              <span className="nav-ico"><Icon name={item.icon} /></span>
+              <span className="nav-ico"><Icon name={item.icon} title={t(item.label)} /></span>
               <span className="nav-label">{t(item.label)}</span>
             </NavLink>
           ))}

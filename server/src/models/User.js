@@ -41,6 +41,84 @@ const userSchema = new mongoose.Schema(
     recoveryEmailChosen: { type: Boolean, default: false },
 
     role: { type: String, enum: ['student', 'admin'], default: 'student' },
+
+    /* ------------------------------------------------------------- NEW-1 --
+     * Account deletion, with a grace period. All three parts travel together and
+     * are absent until somebody asks, which is the state every account that
+     * already exists is in.
+     *
+     * The grace period is the point of the feature, so the day is STORED rather
+     * than derived from a setting: `scheduledFor` is written once, when the request
+     * is made. A student who asks to leave, changes their mind, and asks again
+     * must not find the clock restarted by the second request.
+     *
+     * `anonymisedAt` is set by the work, never by the request, so its presence is
+     * proof the anonymising happened rather than a promise that it will.
+     * `formerName` is kept so a group this person was in can show "Former member"
+     * instead of a blank row or a stranger's name.
+     */
+    deletion: {
+      type: new mongoose.Schema(
+        {
+          requestedAt: { type: Date, default: null },
+          scheduledFor: { type: Date, default: null },
+          reason: { type: String, trim: true, maxlength: 300, default: '' },
+          anonymisedAt: { type: Date, default: null },
+          formerName: { type: String, trim: true, maxlength: 100, default: '' },
+        },
+        { _id: false }
+      ),
+      default: undefined,
+    },
+
+    /* ------------------------------------------------------------ NEW-10 --
+     * The person's own referral code, and the person who brought them.
+     *
+     * A CODE rather than a link, because the link is built from it: /r/<code> is
+     * the whole of what gets shared, and the code is what lets it be read with no
+     * account and no network round trip. Uppercase and unambiguous on purpose: a
+     * code containing a 0 next to an O is a support ticket the first time somebody
+     * reads it out.
+     *
+     * `referredBy` is set ONCE, at sign-up, and never again. A field that can be
+     * rewritten is a field that can be farmed.
+     */
+    referralCode: {
+      type: String,
+      // undefined, NOT null, and that is load-bearing. A sparse index skips the
+      // documents where the field is absent; a null default makes Mongoose WRITE
+      // the field on every document instead, so sparse skips nothing and every
+      // account without a code collides on the same null. That is not theoretical:
+      // it refused the second registration in this app's own test suite.
+      default: undefined,
+      // unique so two accounts can never be handed the same code - a shared link
+      // that opens the wrong person's account is the whole failure here.
+      unique: true,
+      sparse: true,
+    },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    referredAt: { type: Date, default: null },
+
+    /* ------------------------------------------------------------- NEW-8 --
+     * The student's guardian, and the fact that they were asked.
+     *
+     * A guardian summary sends a copy of somebody's spending to a person who did
+     * not choose to receive it, so the consent is stored WITH the address and the
+     * moment it was given, never implied by the address being there. The service
+     * refuses to issue a link without `consentedAt`, which is what makes that
+     * field's existence the permission rather than a note.
+     */
+    guardian: {
+      type: new mongoose.Schema(
+        {
+          email: { type: String, trim: true, lowercase: true, maxlength: 100, default: '' },
+          consentedAt: { type: Date, default: null },
+          lastIssuedAt: { type: Date, default: null },
+        },
+        { _id: false }
+      ),
+      default: undefined,
+    },
     isActive: { type: Boolean, default: true }, // admins can disable an account (ADM-3)
 
     academicYear: { type: String, trim: true, maxlength: 30, default: '' },

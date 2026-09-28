@@ -21,6 +21,8 @@ Legend: **R** = required · **U** = unique · type shown as MongoDB/BSON type.
 | `passwordHash` | String | ✔ | | bcrypt hash, `select:false` (never read by default) |
 | `role` | String | | | enum `student` \| `admin`, default `student` |
 | `isActive` | Boolean | | | default `true`; admins flip it to disable an account (ADM-3) |
+| `pausedUntil` | Date | null | a pause that ends by itself (NEW-6). The generator **skips** occurrences before this date and still moves its cursor past them, so a pause does not queue the charges up for the day it ends |
+| `reminderDays` | Number | null | 0–30: how many days before the next charge to warn. null means "use the reader's default" |
 | `academicYear` | String | | | max 30, default `""` |
 | `monthlyAllowanceBaseline` | Decimal128 | | | nullable |
 | `monthlySavingsGoal` | Decimal128 | | | nullable |
@@ -85,6 +87,7 @@ strictly positive — `type` carries the sign's meaning.
 | `user` | ObjectId | ✔ | | refs `users` |
 | `category` | ObjectId | ✔ | | refs `categories` |
 | `amount` | Decimal128 | ✔ | | > 0, two decimals |
+| `wallet` | ObjectId → `wallets` | null | which pocket the entry went through. Says **where**, never **what for** — the category does that. Optional and never guessed by the server: an entry with no wallet is honestly "not filed to a pocket" rather than quietly put in the wrong one |
 | `type` | String | ✔ | | enum `income` \| `expense`, must equal `category.type` |
 | `description` | String | | | max 255, default `""` |
 | `suggestedCategory` | ObjectId \| null | | | category the suggestion assistant proposed while typing; the person always decides |
@@ -186,6 +189,30 @@ category. System and announcement notices are excluded on purpose.
 | `month` | Date \| null | | | 1st of the month for budget alerts |
 | `isRead` | Boolean | | | default `false` |
 | `createdAt` / `updatedAt` | Date | ✔ | | schema timestamps |
+
+**Renewal notices (NEW-6).** Two further kinds, `renewal_reminder` and the
+reserved `renewal_charged`, alongside `budget_near`, `budget_exceeded`, `system`
+and `announcement`. They carry three extra fields:
+
+| Field | Type | Notes |
+|---|---|---|
+| `rule` | ObjectId → `recurringrules` | which entry this is about |
+| `dueOn` | Date | the day of the charge it is warning about |
+| `messageKey` | String | null | the dictionary key the client renders |
+| `data` | Object | null | the values substituted into it |
+
+**A partial unique index on `{ user: 1, kind: 1, rule: 1, dueOn: 1 }`**, restricted
+to the two renewal kinds, is what makes a reminder fire **once**: the insert is
+attempted on every read and a duplicate is rejected by the database with error
+11000, which the service treats as a success. Nothing is pre-checked, so a race
+between two requests cannot produce two bell entries.
+
+`messageKey` and `data` exist because the house rule is that the server never
+writes a sentence the reader will see — but the `message` field is a required
+string in this model, and the two budget kinds fill it with English. For the
+renewal kinds the client renders `messageKey`, and `message` holds a short
+English fallback for anything reading the raw field. That is why those two kinds
+work in all fourteen languages and the two budget kinds do not.
 
 **Indexes**
 
@@ -643,7 +670,81 @@ still open.
 `status = "draft"`: one open session per group, enforced by the database rather
 than by trusting each caller to look first.
 
-## 25. Relationships
+## 25. `wallets`
+
+One pocket the money is actually in: notes, a bank account, a mobile wallet. It
+answers **where**, never **what for** and never **how much** — the category on a
+transaction already says what the money was for, and the two are independent (the
+same category can be paid from cash in one entry and from a mobile wallet in the
+next).
+
+| Field | Type | Notes |
+|---|---|---|
+| `user` | ObjectId → `users` | required |
+| `name` | String | 1–40 characters, the reader's own words for it |
+| `kind` | Enum | `cash` | `bank` | `mobile` — closed, because the icon and the wording for each are in the dictionary |
+| `hint` | String | up to 4 digits, a nickname for telling two bank accounts apart; never an account number |
+| `openingBalance` | Decimal128 | null | what the pocket started with. **null means "never set"**, which the screen says differently from zero |
+| `icon`, `tone` | String | presentation only |
+| `isDefault` | Boolean | where a new entry is filed when nobody picks one. Exactly one per person; `services/wallets.js` is the only writer |
+| `isActive` | Boolean | **archived, never deleted** — a wallet's transactions still point at it |
+| `createdAt`, `updatedAt` | Date | |
+
+**There is no balance column, and that is the point.** The current figure is
+derived on every read:
+
+```
+balance = opening
+        + income filed to this wallet
+        - expenses filed to this wallet
+        - transfers OUT of this wallet
+        + transfers IN to this wallet
+```
+
+A stored balance is a number that can be wrong and cannot prove it is right. A
+derived one cannot be wrong at rest, and the four sums are all in whole cents so
+the arithmetic cannot drift a hundredth of a unit per read.
+
+**Indexes** — `{ user: 1, isActive: 1, createdAt: 1 }` for the list, and a
+**partial** unique index on `{ user: 1, name: 1 }` where `isActive = true`: two
+live wallets cannot share a name, which is kinder than two identical rows on a
+picker that somebody will try to create by accident.
+
+## 26. `wallettransfers`
+
+**A transfer is not a transaction, and this collection is the reason why.**
+
+Moving money between two of the reader's own wallets is one event with two sides,
+and neither side is income or an expense. The obvious implementation — an expense
+out of one wallet and an income into another — puts money into the income report
+that was never earned and into the expense report that was never spent, and eats
+the budget for that category. Every one of those is a number somebody would then
+act on. So the movement is stored here instead, and because it was never in
+`transactions`, **every report in this app is correct by construction rather
+than by remembering a filter.**
+
+| Field | Type | Notes |
+|---|---|---|
+| `user` | ObjectId → `users` | required |
+| `from`, `to` | ObjectId → `wallets` | both required; the service refuses `from === to` |
+| `amount` | Decimal128 | always positive — which way it goes is `from` → `to`, never a sign |
+| `date` | Date | UTC midnight, like every other date here |
+| `note` | String | why the money moved, for the history row |
+| `createdAt`, `updatedAt` | Date | |
+
+There is **no `type` and no `category`** on a transfer, on purpose. A transfer has
+no category, and inventing one would let a movement be counted in a category's
+spending — the exact bug this collection exists to prevent.
+
+One document rather than a pair: the two sides happen at the same instant, and two
+documents could disagree with each other, which is the one thing a double entry
+must never do.
+
+**Indexes** — `{ user: 1, date: -1 }` for the movements list, plus
+`{ user: 1, from: 1, date: -1 }` and `{ user: 1, to: 1, date: -1 }` for one
+wallet's own history from either end.
+
+## 27. Relationships
 
 | From | Field | To | Meaning |
 |---|---|---|---|
@@ -672,6 +773,10 @@ than by trusting each caller to look first.
 | `wishitems` | `user` | `users` | the owner of the wish |
 | `jarmovements` | `user` / `wishItem` | `users` / `wishitems` | one movement, optionally for one wish |
 
+| `transactions` | `wallet` | `wallets` | which pocket the entry went through (nullable, and never guessed by the server) |
+| `wallettransfers` | `user` | `users` | the movement belongs to exactly one account |
+| `wallettransfers` | `from` / `to` | `wallets` | a movement names two wallets, and the service refuses the same wallet on both sides |
+| `notifications` | `rule` | `recurringrules` | a renewal notice is bound to the rule and the charge day (nullable) |
 ### Text ER description
 
 One **user** (student or administrator) owns many **transactions**, and each

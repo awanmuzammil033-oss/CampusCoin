@@ -140,6 +140,7 @@ function GroupList({ onOpen }) {
 
   return (
     <Page
+      loading={!rows && !error}
       trail={[{ label: t('groups.title') }]}
       title={t('groups.title')}
       subtitle={t('groups.subtitle')}

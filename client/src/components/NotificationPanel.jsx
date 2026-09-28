@@ -31,6 +31,7 @@ import { uiLang, dayLabel } from '../dates.js';
 function shapeOf(row) {
   const isCampus = String(row.id).startsWith('ann-');
   if (isCampus) return { icon: 'megaphone', tone: 'campus', canToggle: false };
+  if (row.data?.groupId || row.messageKey === 'noti.groupMessage') return { icon: 'users', tone: 'income', canToggle: true };
   if (row.kind === 'budget_exceeded') return { icon: 'ban', tone: 'danger', canToggle: true };
   if (row.kind === 'budget_near') return { icon: 'warning', tone: 'warn', canToggle: true };
   return { icon: 'info', tone: 'plain', canToggle: true };
@@ -132,13 +133,31 @@ function Row({ row, onToggle }) {
   const { icon, tone, canToggle } = shapeOf(row);
   const when = timeAgo(row.createdAt, t);
 
+  /**
+   * A notice that carries a dictionary KEY is rendered from it, so it reads in the
+   * language the reader picked - which is the only reason the renewal reminder
+   * works in fourteen languages at all.
+   *
+   * The raw `message` is the fallback for the two budget-alert kinds, which
+   * predate this and still write an English sentence and carry no key. They keep
+   * working exactly as they did.
+   *
+   * The guard is that `t()` gives the KEY BACK when a key is in neither the active
+   * language nor English (see locale.jsx), so a key nobody translated falls back to
+   * a real sentence rather than printing a dotted identifier in the bell. That
+   * behaviour is load-bearing and is the reason this is a comparison rather than a
+   * truthiness test.
+   */
+  const placed = row.messageKey ? t(row.messageKey, row.data) : '';
+  const notice = placed && placed !== row.messageKey ? placed : row.message;
+
   const body = (
     <>
       <span className={`cc-note-ico cc-note-${tone}`} aria-hidden="true">
         <Icon name={icon} size={17} />
       </span>
       <span className="cc-note-text">
-        <span className="cc-note-msg">{row.message}</span>
+        <span className="cc-note-msg">{notice}</span>
         <span className="cc-note-when">
           {when}
           {row.source === 'campus' && <span className="cc-note-tag">{t('noti.campusTag')}</span>}
@@ -176,6 +195,12 @@ function Row({ row, onToggle }) {
             <Icon name={row.isRead ? 'undo' : 'check'} size={15} />
           </button>
         </span>
+      )}
+
+      {canToggle && row.data?.groupId && (
+        <Link className="cc-note-go" to={`/groups/${row.data.groupId}/chat`} aria-label="Open group chat" title="Open group chat">
+          <Icon name="arrowRight" size={15} />
+        </Link>
       )}
 
       {canToggle && (row.kind === 'budget_near' || row.kind === 'budget_exceeded') && (

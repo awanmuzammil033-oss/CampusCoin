@@ -211,6 +211,7 @@ export default function WishlistPage() {
 
   return (
     <Page
+      loading={!data && !error}
       trail={[{ label: t('wishlist.title') }]}
       title={t('wishlist.title')}
       subtitle={t('wishlist.subtitle')}

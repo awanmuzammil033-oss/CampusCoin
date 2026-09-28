@@ -83,6 +83,7 @@ export default function Dashboard() {
   return (
     <Page
       trail={[{ label: t('nav.dashboard') }]}
+      loading={loading}
       title={
         <>
           {t('dash.hi', { name: firstName })} <Icon name="hand" size={22} />

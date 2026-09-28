@@ -6,6 +6,7 @@ import RecentActivity from '../models/RecentActivity.js';
 import { toDec, toNum, isPositiveAmount } from '../utils/money.js';
 import { checkBudgetAlerts } from './alerts.js';
 import { flagTransaction } from './anomaly.js';
+import { ownWallet, defaultWallet } from './wallets.js';
 
 /**
  * Every write to a transaction passes through here (TXN-1/4/6).
@@ -25,9 +26,16 @@ export async function createTransaction(user, input) {
   const error = validate(input);
   if (error) throw badRequest(error);
 
+  // The wallet is optional and is NEVER guessed. Somebody's cash purchase must
+  // not be quietly filed to their bank account because nobody picked a wallet:
+  // a balance that is quietly wrong is worse than one that is honestly
+  // incomplete, and the screen can always say "not filed to a pocket".
+  const wallet = input.walletId ? await ownWallet(user, input.walletId) : null;
+
   const txn = await Transaction.create({
     user: user._id,
     category: category._id,
+    wallet: wallet ? wallet._id : null,
     amount: toDec(input.amount),
     type: input.type,
     description: String(input.description || '').trim().slice(0, 255),
@@ -65,6 +73,10 @@ async function learnIfCorrected(user, txn, suggestedId, chosenId) {
 }
 
 export async function updateTransaction(user, txnId, input) {
+  // a re-file, if there is one: validated exactly like a new entry
+  if (input.walletId !== undefined && input.walletId !== null && input.walletId !== '') {
+    input = { ...input, wallet: (await ownWallet(user, input.walletId))._id };
+  }
   const txn = await ownTransaction(user, txnId);
   const before = snapshot(txn);
 
@@ -80,6 +92,9 @@ export async function updateTransaction(user, txnId, input) {
   if (error) throw badRequest(error);
 
   txn.category = category._id;
+  // the merge above copies only the fields it names, so the pocket has to be
+  // moved here or the edit silently does nothing
+  if (input.wallet !== undefined) txn.wallet = input.wallet || null;
   txn.amount = toDec(merged.amount);
   txn.type = merged.type;
   txn.description = String(merged.description || '').trim().slice(0, 255);
@@ -247,6 +262,9 @@ function snapshot(txn, categoryName) {
     type: txn.type,
     category: txn.category.toString(),
     categoryName: categoryName || undefined,
+    // the pocket as well: "which wallet" is half of what an entry is, and a
+    // history that cannot show it is half a record
+    wallet: txn.wallet ? txn.wallet.toString() : null,
     description: txn.description,
     date: txn.date.toISOString().slice(0, 10),
   };

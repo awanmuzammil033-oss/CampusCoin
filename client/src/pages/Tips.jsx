@@ -136,6 +136,7 @@ export default function Tips() {
 
   return (
     <Page
+      loading={!rows && !error}
       trail={[{ label: t('nav.tips') }]}
       title={t('tip.title')}
       subtitle={t('tip.subtitle')}

@@ -36,6 +36,21 @@ const transactionSchema = new mongoose.Schema(
   {
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
+
+    /**
+     * Which pocket this entry went through (NEW-11). It says WHERE, never WHAT
+     * FOR: the category already says that, and the two are independent - one
+     * expense can be paid from cash and the next from the same mobile wallet.
+     *
+     * Nothing about a wallet enters any total. A report sums `amount` by
+     * `type`, so filing an entry to a wallet cannot move a figure anywhere -
+     * which is what lets this be one optional field on a model every report
+     * already reads, instead of a change to every report.
+     *
+     * Null means "not filed to a pocket", which is the honest state for an entry
+     * logged before wallets existed.
+     */
+    wallet: { type: mongoose.Schema.Types.ObjectId, ref: 'Wallet', default: null },
     amount: { type: mongoose.Schema.Types.Decimal128, required: true },
     type: { type: String, enum: ['income', 'expense'], required: true },
     description: { type: String, trim: true, maxlength: 255, default: '' },
@@ -60,11 +75,14 @@ const transactionSchema = new mongoose.Schema(
 transactionSchema.index({ user: 1, date: -1 });
 transactionSchema.index({ user: 1, category: 1, date: -1 });
 transactionSchema.index({ user: 1, isDeleted: 1, date: -1 });
+// one wallet's own history, newest first - the same shape as the list above
+transactionSchema.index({ user: 1, wallet: 1, date: -1 });
 
 transactionSchema.methods.toPublic = function toPublic() {
   return {
     id: this._id.toString(),
     category: this.category,
+    wallet: this.wallet ? this.wallet.toString() : null,
     amount: this.amount,
     type: this.type,
     description: this.description,

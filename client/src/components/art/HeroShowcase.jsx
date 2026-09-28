@@ -311,55 +311,7 @@ export default function HeroShowcase({ className = '' }) {
             <span className="pp-tab">⋯<em>{t('home.mockMore')}</em></span>
           </div>
 
-          {/* The converter, floating over the balance card. It is a picture of
-              the real drawer, inside the phone's role="img", and every word on
-              it is the word the live drawer uses. */}
-          <div className="lp2-pop" style={POP_STYLE}>
-            <div className="cc-drawer-body">
-              <span className="cc-drawer-title">
-                <Icon name="exchange" size={17} /> {t('conv.title')}
-              </span>
 
-              <span className="cc-drawer-label">{t('conv.amount')}</span>
-              <span className="input num cc-drawer-amount">1,240.50</span>
-
-              <div className="cc-drawer-pair">
-                <span className="cc-drawer-side">
-                  <span>{t('conv.from')}</span>
-                  <span className="input">🇺🇸 USD $</span>
-                </span>
-
-                <span className="btn btn-ghost cc-drawer-swap">
-                  <Icon name="swap" size={15} />
-                </span>
-
-                <span className="cc-drawer-side">
-                  <span>{t('conv.to')}</span>
-                  <span className="input">🇵🇰 PKR ₨</span>
-                  {/* PKR is not on the live feed — the app prices it from its
-                      dated table and says so, in the list and in the note. */}
-                  <small className="cc-drawer-code">· {t('conv.referenceMark')}</small>
-                </span>
-              </div>
-
-              <div className="cc-drawer-result">
-                <strong className="num">348,630.12 PKR</strong>
-                <span className="smallish muted">
-                  {t('conv.rateLine', { from: 'USD', rate: '281.04', to: 'PKR' })}
-                </span>
-              </div>
-
-              <p className="cc-drawer-note smallish muted">
-                <Icon name="info" size={13} /> {t('conv.mixedNote')}
-              </p>
-
-              <div className="cc-drawer-apply">
-                <span className="btn btn-primary w-100">
-                  <Icon name="checkCircle" size={15} /> {t('conv.applyAll')}
-                </span>
-              </div>
-            </div>
-          </div>
 
           {/* The coin. A dashed inner ring is what makes the slow turn readable;
               a plain disc would just spin in place and look broken. */}
@@ -422,23 +374,7 @@ export default function HeroShowcase({ className = '' }) {
         <svg viewBox="0 0 60 34" className="lp2-hand-arrow"><path d="M2 4 C 22 2, 46 8, 54 26 M46 24 l9 4 -3 -10" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /></svg>
       </div>
 
-      <div
-        className="lp2-hand lp2-note-a"
-        aria-hidden="true"
-        style={{
-          insetInlineStart: '1%',
-          top: '-12px',
-          transform: 'rotate(4deg)',
-          // The hero is a fixed deep green whatever the theme is, and .lp2-hand's
-          // --lp-hand token is a dark ink meant for the light sections — it would
-          // vanish here. `inherit` picks up the hero's own text colour instead,
-          // so the note is always legible without a second colour literal.
-          color: 'inherit',
-        }}
-      >
-        {t('home.mockTotal')}
-        <svg viewBox="0 0 60 34" className="lp2-hand-arrow"><path d="M2 4 C 22 2, 46 8, 54 26 M46 24 l9 4 -3 -10" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" /></svg>
-      </div>
+
     </div>
   );
 }

@@ -12,6 +12,8 @@ import {
   sendMail,
 } from '../services/accounts.js';
 import { linkGroupsForEmail } from '../services/groups.js';
+import { ensureWallets } from '../services/wallets.js';
+import { readReferralFromSignup, attachReferral } from '../services/referrals.js';
 import env from '../config/env.js';
 
 const router = Router();
@@ -69,7 +71,25 @@ router.post('/register', accountLimiter, async (req, res, next) => {
     // runs the same repair for accounts that predate it, so a group can never
     // stay unlinked (see services/groups.js → linkGroupsForEmail).
     await linkGroupsForEmail(user);
+    // NEW-10: a code carried on an invite link, read ONCE here and never
+    // again. Every refusal - unknown code, own address, an inviter whose
+    // account is younger than a day - ends with no inviter rather than an
+    // error, because a referral must never be able to fail a sign-up, and
+    // because a code that does not resolve is not information anybody can
+    // act on. `attachReferral` matches only while `referredBy` is still null,
+    // so the first inviter is the only one this account can ever have.
+    const referral = await readReferralFromSignup(req.body.referralCode, {
+      email: cleanEmail,
+      recoveryEmail: cleanRecovery,
+    });
+    if (referral.inviter) {
+      await attachReferral(referral.inviter, user).catch(() => {});
+    }
+    // NEW-11: the three pockets a student actually has, so the very first
+    // entry they log has somewhere to say it came from. Never fatal.
+    await ensureWallets(user).catch(() => {});
 
+    await regenerateSession(req);
     startSession(req, user);
     res.status(201).json({ user: user.toPublic() });
   } catch (err) {
@@ -107,6 +127,9 @@ router.post('/login', loginLimiter, async (req, res, next) => {
     // BEFORE the session is written so the sign-in flow below is left exactly as
     // it was (see services/groups.js → linkGroupsForEmail).
     await linkGroupsForEmail(user);
+    // NEW-11: the three pockets a student actually has, so the very first
+    // entry they log has somewhere to say it came from. Never fatal.
+    await ensureWallets(user).catch(() => {});
 
     await regenerateSession(req);
     startSession(req, user);

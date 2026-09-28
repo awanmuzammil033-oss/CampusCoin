@@ -201,6 +201,9 @@ export function present(txn) {
     suggestedCategory: txn.suggestedCategory || null,
     suggestionSource: txn.suggestionSource || null,
     recurringRule: txn.recurringRule || null,
+    // which pocket it went through, so the row can say so. A projection
+    // only: no total on this page changes because of it.
+    wallet: txn.wallet ? txn.wallet.toString() : null,
     // what a scanned payment was BEFORE it became an expense, so the row can say
     // where the number came from - the same receipt the single-entry shape has
     scan: txn.scan

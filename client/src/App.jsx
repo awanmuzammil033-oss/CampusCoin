@@ -1,4 +1,4 @@
-﻿import { lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 import { useAuth } from './auth.jsx';
@@ -7,6 +7,7 @@ import { ToastProvider } from './components/Toast.jsx';
 import PublicShell from './components/PublicShell.jsx';
 import Layout from './components/Layout.jsx';
 import Icon from './components/Icon.jsx';
+import { PageLoader, PageSkeleton } from './components/PageProgress.jsx';
 
 import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
@@ -22,7 +23,12 @@ const TransactionForm = lazy(() => import('./pages/TransactionForm.jsx'));
 const TransactionHistory = lazy(() => import('./pages/TransactionHistory.jsx'));
 const DeletedBin = lazy(() => import('./pages/DeletedBin.jsx'));
 const ImportCsv = lazy(() => import('./pages/ImportCsv.jsx'));
+const WalletsPage = lazy(() => import('./pages/WalletsPage.jsx'));
 const RecurringPage = lazy(() => import('./pages/RecurringPage.jsx'));
+const SubscriptionsPage = lazy(() => import('./pages/SubscriptionsPage.jsx'));
+const YourDataPage = lazy(() => import('./pages/YourDataPage.jsx'));
+const GuardianViewPage = lazy(() => import('./pages/GuardianViewPage.jsx'));
+const JoinGroupPage = lazy(() => import('./pages/JoinGroupPage.jsx'));
 const Categories = lazy(() => import('./pages/Categories.jsx'));
 const Budgets = lazy(() => import('./pages/Budgets.jsx'));
 const Reports = lazy(() => import('./pages/Reports.jsx'));
@@ -73,33 +79,52 @@ function RequireAdmin({ children }) {
 }
 
 function CenteredSpinner({ label }) {
-  return (
-    <div className="auth-wrap" role="status" aria-live="polite">
-      <div className="d-flex align-items-center gap-2 muted">
-        <span className="spinner" aria-hidden="true" />
-        {label}
-      </div>
-    </div>
-  );
+  return <PageLoader label={label} />;
+}
+
+/**
+ * For the reference pages that are readable without an account:
+ * - Signed-in student  → full Layout (sidebar + bottom tabs + FAB)
+ * - Guest / admin      → lightweight PublicShell
+ */
+function SmartShell({ children }) {
+  const { user, loading } = useAuth();
+  const { t } = useLocale();
+  if (loading) return <CenteredSpinner label={t('app.checkingSession')} />;
+  if (user && user.role === 'student') return <Layout>{children}</Layout>;
+  return <PublicShell>{children}</PublicShell>;
 }
 
 function Screen({ children }) {
-  const { t } = useLocale();
   return (
-    <Suspense fallback={<CenteredSpinner label={t('ui.loading')} />}>{children}</Suspense>
+    <Suspense fallback={<PageLoader />}>{children}</Suspense>
+  );
+}
+
+function TransitionRoutes({ children }) {
+  const location = useLocation();
+
+  // Simply render the routes at the real location with no artificial delay.
+  // The Suspense fallback inside <Screen> already handles lazy-chunk loading.
+  // Adding our own timers on top was causing a 650ms wait on EVERY navigation,
+  // including fast redirects like /login → landing page.
+  return (
+    <Routes location={location}>
+      {children}
+    </Routes>
   );
 }
 
 export default function App() {
   return (
     <ToastProvider>
-      <Routes>
-        {/* public */}
+      <TransitionRoutes>
+        {/* public / auth routes */}
         <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/control/login" element={<AdminLogin />} />
+        <Route path="/login" element={<Home view="login" />} />
+        <Route path="/register" element={<Home view="register" />} />
+        <Route path="/forgot-password" element={<Home view="forgot-password" />} />
+        <Route path="/control/login" element={<Home view="admin" />} />
         {/* Reference libraries: readable before signing in, because a student
             comparing a rate should not have to make an account first. They sit
             outside the signed-in shell, so PublicShell supplies the header and
@@ -108,7 +133,7 @@ export default function App() {
           path="/savings-options"
           element={
             <Screen>
-              <PublicShell><SavingsOptionsPage /></PublicShell>
+              <SmartShell><SavingsOptionsPage /></SmartShell>
             </Screen>
           }
         />
@@ -116,11 +141,27 @@ export default function App() {
           path="/side-income"
           element={
             <Screen>
-              <PublicShell><SideIncomePage /></PublicShell>
+              <SmartShell><SideIncomePage /></SmartShell>
             </Screen>
           }
         />
 
+        {/* NEW-7: an invite code's link. A stranger must be able to READ the
+            preview, so this is outside RequireStudent - the join itself is
+            behind the student door on the server, and this page cannot join
+            anybody into anything by being visited. */}
+        <Route path="/join/:token" element={<Screen><JoinGroupPage /></Screen>} />
+        {/* NEW-8: the shared month. Deliberately outside SmartShell (it would hand
+            the guardian the student's own signed-in app) and outside PublicShell
+            (it would offer a sign-up prompt, which is the one thing a page about
+            somebody else's money must not do). GuardianViewPage renders its own
+            bare frame. */}
+        <Route path="/guardian/:token" element={<Screen><GuardianViewPage /></Screen>} />
+        {/* NEW-10: a friend's referral link. It opens the register panel, because
+            the person it was sent to does not have an account yet. The CODE still
+            has to reach the form's POST body, and that form is a reserved file -
+            see the report rather than working around it. */}
+        <Route path="/r/:code" element={<Home view="register" />} />
         {/* administrator panel â€” separate area, separate guard */}
         <Route
           path="/control"
@@ -150,7 +191,11 @@ export default function App() {
         <Route path="/transactions/deleted" element={<Screen><RequireStudent><DeletedBin /></RequireStudent></Screen>} />
         <Route path="/transactions/:id/edit" element={<Screen><RequireStudent><TransactionForm /></RequireStudent></Screen>} />
         <Route path="/transactions/:id/history" element={<Screen><RequireStudent><TransactionHistory /></RequireStudent></Screen>} />
-        <Route path="/recurring" element={<Screen><RequireStudent><RecurringPage /></RequireStudent></Screen>} />
+        <Route path="/wallets" element={<Screen><RequireStudent><WalletsPage /></RequireStudent></Screen>} />
+        {/* NEW-1 + NEW-8 + NEW-10: the four account cards, on a page of their own. */}
+        <Route path="/your-data" element={<Screen><RequireStudent><YourDataPage /></RequireStudent></Screen>} />
+  <Route path="/recurring" element={<Screen><RequireStudent><RecurringPage /></RequireStudent></Screen>} />
+  <Route path="/subscriptions" element={<Screen><RequireStudent><SubscriptionsPage /></RequireStudent></Screen>} />
         <Route path="/categories" element={<Screen><RequireStudent><Categories /></RequireStudent></Screen>} />
         <Route path="/budgets" element={<Screen><RequireStudent><Budgets /></RequireStudent></Screen>} />
         <Route path="/reports" element={<Screen><RequireStudent><Reports /></RequireStudent></Screen>} />
@@ -193,7 +238,7 @@ export default function App() {
         <Route path="/notifications" element={<Screen><RequireStudent><NotificationsPage /></RequireStudent></Screen>} />
 
         <Route path="*" element={<NotFound />} />
-      </Routes>
+      </TransitionRoutes>
     </ToastProvider>
   );
 }

@@ -20,7 +20,7 @@ import { useLocale } from '../locale.jsx';
  * project's own demo) the server hands it back with the response and the page
  * shows it, so the flow can be finished and shown without a mail account.
  */
-export default function ForgotPassword() {
+export default function ForgotPassword({ embedded = false, onClose, onSwitch } = {}) {
   const { t } = useLocale();
   const navigate = useNavigate();
 
@@ -34,6 +34,27 @@ export default function ForgotPassword() {
   const [unknown, setUnknown] = useState(false);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+
+  const host = {
+    wrapper: embedded ? ' auth-wrap--embedded' : '',
+    back: embedded ? (
+      <button type="button" className="btn btn-ghost btn-sm auth-back" onClick={onClose}>
+        <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
+      </button>
+    ) : (
+      <Link to="/" className="btn btn-ghost btn-sm auth-back">
+        <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
+      </Link>
+    ),
+    switchTo: (target, label) =>
+      embedded ? (
+        <button type="button" className="linklike" onClick={() => onSwitch && onSwitch(target)}>
+          {label}
+        </button>
+      ) : (
+        <Link to={target}>{label}</Link>
+      ),
+  };
 
   async function requestCode(e) {
     e.preventDefault();
@@ -66,7 +87,7 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="auth-wrap">
+    <div className={`auth-wrap${host.wrapper}`}>
       <div className="auth-split">
         {/* Left: the picture, hidden below 1000px so the form owns a phone. */}
         <aside className="auth-art-col">
@@ -83,11 +104,7 @@ export default function ForgotPassword() {
         </aside>
 
         <div className="card auth-card">
-          <div className="auth-top">
-            <Link to="/" className="btn btn-ghost btn-sm auth-back">
-              <Icon name="arrowLeft" size={15} /> {t('auth.backToSite')}
-            </Link>
-          </div>
+          <div className="auth-top">{host.back}</div>
           <div className="auth-brand">
             <span className="brand-mark" aria-hidden="true">C</span>
           </div>
@@ -130,7 +147,7 @@ export default function ForgotPassword() {
               </form>
 
               <p className="smallish text-center mt-4 mb-0">
-                <Link to="/login">{t('auth.backToSignIn')}</Link>
+                {host.switchTo('/login', t('auth.backToSignIn'))}
               </p>
             </>
           )}
@@ -242,7 +259,14 @@ export default function ForgotPassword() {
               <h1 className="text-center" style={{ marginBottom: 4 }}>{t('reset.doneTitle')}</h1>
               <p className="muted text-center">{t('reset.doneBody')}</p>
               <div className="d-flex justify-content-center gap-2">
-                <button type="button" className="btn btn-primary" onClick={() => navigate('/login')}>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => {
+                    if (embedded && onSwitch) onSwitch('/login');
+                    else navigate('/?panel=login');
+                  }}
+                >
                   {t('auth.backToSignIn')}
                 </button>
                 <Link className="btn btn-ghost" to="/profile">

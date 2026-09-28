@@ -234,11 +234,34 @@ test('survival mode works out one number and shows the working', async () => {
   assert.ok(Array.isArray(plan.advice) && plan.advice.length > 0);
 });
 
-/** A date a few days ahead this month, as an ISO string the API accepts. */
-function soon(dayOffset = 3) {
+/** Today at noon UTC: a date the API accepts, with no time-of-day in it. */
+function todayUtc() {
   const d = new Date();
-  d.setUTCDate(d.getUTCDate() + dayOffset);
-  return d.toISOString();
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 12, 0, 0)).toISOString();
+}
+
+/**
+ * A date a few days ahead that is ALWAYS still inside this calendar month.
+ *
+ * It returns null on the one day a month where nothing can: the last day, where
+ * every date "a few days ahead" is in the next month. The caller then asserts the
+ * other honest answer rather than a number that cannot be true today.
+ *
+ * Noon UTC, so the date never lands ambiguously on a midnight boundary - the
+ * ledger stores calendar dates at UTC midnight and a rule that starts at 23:00 is
+ * stored as a different day than one that starts at 12:00 on a machine in
+ * another zone.
+ */
+function laterThisMonth(dayOffset = 3) {
+  const now = new Date();
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth();
+  const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  const day = Math.min(now.getUTCDate() + dayOffset, lastDay);
+
+  // strictly after today: a charge due today is not "still to come"
+  if (day <= now.getUTCDate()) return null;
+  return new Date(Date.UTC(year, month, day, 12, 0, 0)).toISOString();
 }
 
 test('a recurring bill still to come is held back before the daily number', async () => {
@@ -247,21 +270,31 @@ test('a recurring bill still to come is held back before the daily number', asyn
   await withCsrf(user, agent.post('/api/transactions')).send({
     type: 'income', amount: '1000', categoryId: allowance._id.toString(), date: todayStr, description: 'allowance',
   });
+  const startDate = laterThisMonth(3);
   const rule = await withCsrf(user, agent.post('/api/recurring')).send({
     type: 'expense',
     amount: '300',
     categoryId: transport._id.toString(),
     frequency: 'monthly',
-    startDate: soon(3),
+    startDate,
     description: 'monthly bus pass',
   });
   assert.equal(rule.status, 201, JSON.stringify(rule.body));
 
   const res = await withCsrf(user, agent.patch('/api/survival')).send({ enabled: true });
   const plan = res.body.plan;
-  assert.equal(plan.committedTotal, 300, 'the bill due before month end is held back');
-  assert.equal(plan.freeMoney, 700);
-  assert.equal(plan.dailyBudget, Math.round((700 / plan.daysLeft) * 100) / 100);
+
+  if (startDate) {
+    assert.equal(plan.committedTotal, 300, 'the bill due before month end is held back');
+    assert.equal(plan.freeMoney, 700);
+    assert.equal(plan.dailyBudget, Math.round((700 / plan.daysLeft) * 100) / 100);
+  } else {
+    // the last day of the month: there is no "before month end" left to charge in,
+    // so nothing may be held back. The same rule, seen from the other side - and
+    // the only answer that can be true on this date.
+    assert.equal(plan.committedTotal, 0, 'a bill that can only land next month is not held back');
+    assert.equal(plan.freeMoney, 1000, 'so the whole allowance is free to spend');
+  }
 });
 
 test('a weekly bill counts once per remaining week', async () => {
@@ -272,7 +305,7 @@ test('a weekly bill counts once per remaining week', async () => {
     amount: '20',
     categoryId: food._id.toString(),
     frequency: 'weekly',
-    startDate: soon(0),
+    startDate: todayUtc(),
     description: 'weekly laundry',
   });
   assert.equal(bill.status, 201, JSON.stringify(bill.body));
@@ -305,12 +338,13 @@ test('income still to land this month is money in hand, and next month is not', 
 test('a balance below the committed bills is reported as a shortfall, not a plan', async () => {
   const agent = newAgent();
   const user = await registerStudent(agent);
+  const startDate = laterThisMonth(3);
   const rule = await withCsrf(user, agent.post('/api/recurring')).send({
     type: 'expense',
     amount: '900',
     categoryId: transport._id.toString(),
     frequency: 'monthly',
-    startDate: soon(3),
+    startDate,
     description: 'rent share',
   });
   assert.equal(rule.status, 201, JSON.stringify(rule.body));
@@ -318,10 +352,18 @@ test('a balance below the committed bills is reported as a shortfall, not a plan
   const res = await withCsrf(user, agent.patch('/api/survival')).send({ enabled: true });
   const plan = res.body.plan;
   assert.equal(plan.balance, 0);
-  assert.equal(plan.shortfall, 900);
-  assert.equal(plan.tight, true);
-  assert.equal(plan.dailyBudget, 0);
-  assert.ok(plan.advice.some((a) => a.key === 'short'));
+
+  if (startDate) {
+    assert.equal(plan.shortfall, 900);
+    assert.equal(plan.tight, true);
+    assert.equal(plan.dailyBudget, 0);
+    assert.ok(plan.advice.some((a) => a.key === 'short'));
+  } else {
+    // nothing is committed on the last day of the month, so there is nothing to be
+    // short of: reporting a shortfall here would invent a bill that is not coming
+    assert.equal(plan.committedTotal, 0);
+    assert.equal(plan.shortfall, 0, 'and a shortfall is never reported for a bill that is not coming');
+  }
 });
 
 test('the switch needs a real boolean', async () => {

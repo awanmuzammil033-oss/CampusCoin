@@ -1,0 +1,79 @@
+{
+  "sub.title": "Renewals",
+  "sub.subtitle": "What is about to charge you, and when each one last did.",
+  "sub.loading": "Checking what is due…",
+  "sub.refresh": "Check again",
+
+  "sub.monthlyLabel": "Every month, all of them",
+  "sub.monthlyNote": "What the list below adds up to.",
+  "sub.activeLabel": "Still charging",
+  "sub.pausedLabel": "Paused",
+  "sub.due7Label": "In the next 7 days",
+  "sub.due30Label": "In the next 30 days",
+
+  "sub.count.one": "{n} subscription",
+  "sub.count.other": "{n} subscriptions",
+  "sub.filterAll": "All categories",
+  "sub.filterAria": "Filter by category",
+
+  "sub.emptyTitle": "Nothing charges you on a schedule",
+  "sub.emptyBody": "Set up a recurring entry for a streaming app, the gym or a phone plan and this screen fills itself in with the day each one is due.",
+  "sub.emptyBtn": "Add a recurring entry",
+
+  "sub.frequencyWeekly": "every week",
+  "sub.frequencyMonthly": "every month",
+  "sub.eachAmount": "{amount} each time",
+  "sub.nextToday": "Charges today",
+  "sub.nextTomorrow": "Charges tomorrow",
+  "sub.nextIn": "Charges in {n} days",
+  "sub.nextOn": "Charges on {date}",
+  "sub.nextNone": "No charge scheduled",
+  "sub.pausedUntil": "Paused until {date}",
+  "sub.pausedResumes": "Charges again from {date}",
+  "sub.cancelledNote": "Cancelled — nothing more will be charged",
+  "sub.categoryUnknown": "No category",
+  "sub.neverCharged": "no charge logged yet",
+  "sub.monthsCharged.one": "{n} month paid",
+  "sub.monthsCharged.other": "{n} months paid",
+
+  "sub.vaultVerdict": "From the vault",
+  "sub.vaultLink": "See the vault",
+
+  "sub.pauseTitle": "Pause this subscription?",
+  "sub.pauseBody": "\"{name}\" makes no charge for {days} days — charges come back on {date}. Cancel it instead if you want the money to stay gone.",
+  "sub.pauseDays": "Days to pause",
+  "sub.pauseDone": "\"{name}\" is paused until {date}.",
+  "sub.resumeDone": "\"{name}\" will charge again on {date}.",
+
+  "sub.reminderLabel": "Warn me",
+  "sub.reminderOff": "On the day",
+  "sub.reminderIn": "{n} days before",
+  "sub.reminderDefault": "Default — {n} days before",
+
+  "sub.notify.daysLeft": "{name} is due in {days} days — {amount} will leave your account. Cancel or pause it before then.",
+
+  "sub.orderNote": "Soonest charge first, and anything with no charge coming at the bottom.",
+  "sub.lastOn": "Last charge on {date}",
+  "sub.emptyFiltered": "Nothing in this category is on a schedule",
+  "sub.emptyFilteredBody": "Pick another category above to see the rest. Reminders still run for every entry you own, not only the ones on this screen.",
+
+  "sub.pauseBodyNoDate": "\"{name}\" makes no charge for {days} days, and the charges in that time are skipped rather than held over. The date it charges again from is written on the row as soon as you confirm.",
+  "sub.pauseDaysNeed": "Put a whole number of days in the box to go on.",
+
+  "sub.cancelTitle": "Cancel this subscription?",
+  "sub.cancelBody": "\"{name}\" stops here. {amount} will not be logged again, and any warning about a charge that has not happened yet goes with it.",
+  "sub.cancelKeeps": "This is not an undo: the entry stays cancelled and is not offered again here. What it has already charged stays in your list with its history, and the payment itself only stops with the company.",
+  "sub.cancelled": "\"{name}\" is cancelled. What it already charged stays in your history.",
+
+  "sub.resumeDoneNoDate": "\"{name}\" is not paused any more. Nothing further is scheduled for it.",
+  "sub.gone": "This entry is no longer here, so nothing was changed.",
+
+  "sub.errorTitle": "Your renewals could not be read",
+  "sub.retry": "Try again",
+
+  "sub.checked.one": "{n} charge due in the next {days} days",
+  "sub.checked.other": "{n} charges due in the next {days} days",
+  "sub.nothingDue": "None of them is due in the next {days} days",
+  "sub.remindersSent.one": "{n} warning added",
+  "sub.remindersSent.other": "{n} warnings added"
+}

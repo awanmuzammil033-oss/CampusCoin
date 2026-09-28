@@ -20,6 +20,14 @@ const ruleSchema = new mongoose.Schema(
     endDate: { type: Date, default: null },
     lastGeneratedOn: { type: Date, default: null },
     isActive: { type: Boolean, default: true },
+    // A pause that ends by itself (NEW-6). Anything due on or before this day
+    // is skipped by the generator, and the renewal screen stays quiet until it
+    // has passed — a holiday, a semester break, a month without the gym.
+    pausedUntil: { type: Date, default: null },
+    // How many days before the next charge this person wants to be warned.
+    // null means "use the default", so a later change of default is felt by
+    // everybody who never chose for themselves.
+    reminderDays: { type: Number, default: null, min: 0, max: 30 },
   },
   { timestamps: true }
 );

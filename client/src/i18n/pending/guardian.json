@@ -1,0 +1,66 @@
+{
+  "guard.card.title": "Guardian summary",
+  "guard.card.subtitle": "Share one month of totals with one person, and take it back whenever you like.",
+  "guard.card.loading": "Loading the cardâ€¦",
+  "guard.card.statusNone": "Nobody has been set up yet.",
+  "guard.card.statusOn": "Set up for {email}. You agreed to this on {when}.",
+  "guard.card.emailLabel": "Their email address",
+  "guard.card.emailHelp": "Nobody is emailed for you â€” you send the link yourself, and you can take it back at any time.",
+
+  "guard.consent.line": "Tick this to share one month of totals with the person whose address is above: what was spent in each category, how much of each budget is used, and your savings goal. They will not see a single entry, shop, receipt, date, note, or anything else on your account.",
+  "guard.consent.tick": "I have read this and agree to share it",
+  "guard.consent.blocked": "Tick the agreement above before a link can be made.",
+
+  "guard.issue.button": "Make the link",
+  "guard.issue.buttonAgain": "Make a new link",
+  "guard.issue.notConsented": "Tick the agreement above before a link can be made.",
+  "guard.issue.emailMissing": "Enter the email address of the person you want to share this with.",
+  "guard.issue.emailInvalid": "That does not look like an email address.",
+  "guard.issue.emailTooLong": "That email address is too long.",
+  "guard.issue.emailOwn": "That is your own address. This summary is meant for somebody else.",
+
+  "guard.issued.title": "Your link is ready",
+  "guard.issued.once": "The link is shown once and cannot be shown again. Copy it now.",
+  "guard.issued.linkLabel": "The link to send",
+  "guard.issued.copy": "Copy the link",
+  "guard.issued.copied": "Copied.",
+  "guard.issued.month": "It shows {month}, the month you are in now.",
+
+  "guard.revoke.ask": "Take it back",
+  "guard.revoke.confirm": "Yes â€” kill the link now",
+  "guard.revoke.help": "This kills the link immediately and forgets the address. It cannot be undone.",
+
+  "guard.preview.label": "What your guardian will see",
+  "guard.toast.issued": "The link is ready.",
+  "guard.toast.revoked": "The link is dead and the address is gone.",
+
+  "guard.summary.heading": "Spending summary",
+  "guard.summary.forWhom": "for {name}",
+  "guard.summary.currency": "All amounts are in {currency}, the currency this account is kept in.",
+  "guard.summary.frozen": "These figures are for {month}, the month the link was made. The page does not follow the calendar: next month it will still show {month}.",
+  "guard.summary.disclaimer": "This is a summary, not the whole picture: three totals for one month. For anything more â€” what was bought, when, or with whom â€” ask {name}.",
+
+  "guard.section.categories": "What was spent, by category",
+  "guard.section.categoriesNote": "Totals for the whole month. No dates, and no individual entries.",
+  "guard.section.budgets": "How the budgets are doing",
+  "guard.section.budgetsNote": "The share of each budget that has been used. The limit itself is not shared.",
+  "guard.section.savings": "Savings goal",
+
+  "guard.category.col": "Category",
+  "guard.category.colAmount": "Spent",
+  "guard.empty.categories": "Nothing was spent this month.",
+  "guard.empty.budgets": "No budget was set for this month.",
+
+  "guard.savings.barLabel": "Savings goal",
+  "guard.savings.noGoal": "No savings goal has been set, so there is nothing to compare against.",
+  "guard.savings.nothingSaved": "Nothing was saved this month â€” more came out than came in.",
+  "guard.savings.short": "{saved} saved so far this month, towards a goal of {goal}.",
+  "guard.savings.met": "The goal of {goal} was reached this month, with {saved} left over.",
+
+  "guard.view.loading": "Opening the summaryâ€¦",
+  "guard.view.errorTitle": "The summary did not open",
+  "guard.view.goneBody": "It has expired, or the person who made it has taken it back. Ask them for a new link if you need to see it again.",
+  "guard.view.readOnly": "Read-only. Nothing on this page can be changed, and it is not an account â€” there is nothing to sign in to.",
+
+  "guard.link.gone": "This link cannot be opened."
+}

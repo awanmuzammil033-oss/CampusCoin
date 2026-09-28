@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 import GroupMessage from '../models/GroupMessage.js';
+import Notification from '../models/Notification.js';
 import { loadGroupFor } from './groups.js';
 import { toDec, toNum, isPositiveAmount } from '../utils/money.js';
 
@@ -77,14 +78,40 @@ export async function postMessage(user, groupId, payload = {}) {
   if (!text) throw badRequest('Write something before sending it.');
   if (text.length > MAX_TEXT) throw badRequest(`A message can be at most ${MAX_TEXT} characters long.`);
 
+  const senderIdx = group.memberIndexOf(user._id);
   const message = await GroupMessage.create({
     group: group._id,
     kind: 'text',
     text,
-    senderIndex: group.memberIndexOf(user._id),
+    senderIndex: senderIdx,
   });
 
-  return toPublicMessage(message, group, group.memberIndexOf(user._id));
+  // Notify other group members who have an account
+  try {
+    const sender = group.members[senderIdx];
+    const senderName = sender?.name || user.name || 'Member';
+    const preview = text.length > 60 ? `${text.slice(0, 57)}...` : text;
+    const recipients = (group.members || [])
+      .filter((m, i) => i !== senderIdx && m.user)
+      .map((m) => m.user);
+
+    for (const recipientId of recipients) {
+      Notification.create({
+        user: recipientId,
+        kind: 'system',
+        message: `New message in "${group.name}" from ${senderName}: ${preview}`,
+        messageKey: 'noti.groupMessage',
+        data: {
+          groupId: group._id.toString(),
+          groupName: group.name,
+          senderName,
+          text: preview,
+        },
+      }).catch(() => {});
+    }
+  } catch {}
+
+  return toPublicMessage(message, group, senderIdx);
 }
 
 /**
@@ -110,26 +137,44 @@ export async function postPoll(user, groupId, payload = {}) {
     time: cardTime(payload.time),
     rate: toDec(payload.rate),
     note: limited(payload.note, MAX_NOTE, 'The note can be at most 200 characters long.'),
-    // One row per member, every one of them PENDING. A card is meant to show
-    // who has not answered yet, and that is only possible if "has not answered"
-    // is stored rather than inferred from an absent row.
-    //
-    // A member added later does NOT get a row on this card: the card is a
-    // snapshot of who was asked, and growing old cards would quietly change
-    // what a question from last week is asking of today's group. They can still
-    // tick the cards posted from the day they joined.
     responses: group.members.map((_, memberIndex) => ({ memberIndex, yes: null, at: null })),
   };
 
+  const senderIdx = group.memberIndexOf(user._id);
   const message = await GroupMessage.create({
     group: group._id,
     kind: 'poll',
     text: '',
-    senderIndex: group.memberIndexOf(user._id),
+    senderIndex: senderIdx,
     poll,
   });
 
-  return toPublicMessage(message, group, group.memberIndexOf(user._id));
+  // Notify other group members
+  try {
+    const sender = group.members[senderIdx];
+    const senderName = sender?.name || user.name || 'Member';
+    const pollDesc = payload.purpose || payload.location || payload.category;
+    const recipients = (group.members || [])
+      .filter((m, i) => i !== senderIdx && m.user)
+      .map((m) => m.user);
+
+    for (const recipientId of recipients) {
+      Notification.create({
+        user: recipientId,
+        kind: 'system',
+        message: `New poll in "${group.name}" from ${senderName}: ${pollDesc}`,
+        messageKey: 'noti.groupMessage',
+        data: {
+          groupId: group._id.toString(),
+          groupName: group.name,
+          senderName,
+          text: `Poll: ${pollDesc}`,
+        },
+      }).catch(() => {});
+    }
+  } catch {}
+
+  return toPublicMessage(message, group, senderIdx);
 }
 
 /**

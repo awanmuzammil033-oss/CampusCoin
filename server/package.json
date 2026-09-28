@@ -26,11 +26,14 @@
     "mongoose": "^8.8.0",
     "multer": "^2.4.0",
     "nodemailer": "^6.9.15",
-    "pdfkit": "^0.15.1"
+    "pdfkit": "^0.15.1",
+    "qrcode": "^1.5.4",
+    "yazl": "^3.3.1"
   },
   "devDependencies": {
     "mongodb-memory-server": "^10.1.2",
     "nodemon": "^3.1.7",
-    "supertest": "^7.0.0"
+    "supertest": "^7.0.0",
+    "yauzl": "^3.4.0"
   }
 }

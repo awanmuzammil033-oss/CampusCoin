@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import Page from '../components/Page.jsx';
+import WhatIfSimulator from '../components/WhatIfSimulator.jsx';
 import Modal from '../components/Modal.jsx';
 import FormField from '../components/FormField.jsx';
 import EmptyState from '../components/EmptyState.jsx';
@@ -154,6 +155,7 @@ export default function Budgets() {
   return (
     <Page
       trail={[{ label: t('nav.budgets') }]}
+      loading={!rows && !error}
       title={t('nav.budgets')}
       subtitle={t('bud.subtitle', { month: monthLabel(month) })}
       actions={
@@ -288,6 +290,13 @@ export default function Budgets() {
           </EmptyState>
         </div>
       )}
+
+
+      {/* What the same month would add up to if these cuts were kept every month.
+        It sits between the table and the manual form on purpose: the planner's
+        whole output is a rewrite of the table above it, and giving it its own
+        route would mean leaving the limits to plan against them. */}
+      <WhatIfSimulator month={month} onWritten={load} />
 
       <form className="card mt-3" onSubmit={addBudget} noValidate>
         <div className="card-title">

@@ -17,3 +17,10 @@ db/data/
 .DS_Store
 Thumbs.db
 *.log
+# The folder a test run extracts the mongod binary into. It is ~64MB and is
+# never source. The shape rule below covers any temp folder a future test
+# points inside the repository, so the binary cannot land in a commit by
+# accident - which is the failure `git add -A` turns into a 64MB diff.
+.tmp-mine/
+server/tests/temp-*/
+server/tests/.tmp*/

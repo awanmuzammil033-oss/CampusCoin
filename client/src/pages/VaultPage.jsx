@@ -134,7 +134,7 @@ export default function VaultPage() {
   const shown = flagged.slice(0, 3);
 
   return (
-    <Page trail={[{ label: t('vault.title') }]} title={t('vault.title')} subtitle={t('vault.subtitle')}>
+    <Page loading={!report && !error} trail={[{ label: t('vault.title') }]} title={t('vault.title')} subtitle={t('vault.subtitle')}>
       {error && (
         <div className="field-error mb-3" role="alert">
           <Icon name="warning" />

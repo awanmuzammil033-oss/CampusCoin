@@ -1,6 +1,11 @@
 import mongoose from 'mongoose';
 
 import Group from '../models/Group.js';
+// from the NEUTRAL module, not from services/accountDeletion.js: that module
+// reaches config/env.js, which reads MONGODB_URI once at load time, and the test
+// harness sets that variable at runtime - so this import broke every suite that
+// imports this file. See constants/formerMember.js for the whole story.
+import { isFormerMember } from '../constants/formerMember.js';
 import GroupExpense from '../models/GroupExpense.js';
 import GroupSettlement from '../models/GroupSettlement.js';
 import User from '../models/User.js';
@@ -901,10 +906,21 @@ function toPublicGroup(group, user) {
 }
 
 function toPublicMember(member, index, group) {
+  // NEW-1: a member who closed their account. The row stays (the books have to
+  // stay auditable) but the name is a sentinel, and the client turns this marker
+  // into `del.formerMember` rather than printing the sentinel. Computed from the
+  // row rather than stored, so it is right for a group that predates the deletion
+  // feature as well as one written after it.
+  const gone = isFormerMember(member);
+
   return {
     index,
     user: member.user ? member.user.toString() : null,
-    name: member.name,
+    // empty when the person is gone, with the flag beside it: the client
+    // shows del.formerMember, and a blank name is never better than the
+    // sentinel it replaced
+    name: gone ? '' : member.name,
+    isFormerMember: gone,
     email: member.email || '',
     addedAt: member.addedAt ? new Date(member.addedAt).toISOString() : null,
     // position 0 is the owner by construction — see models/Group.js

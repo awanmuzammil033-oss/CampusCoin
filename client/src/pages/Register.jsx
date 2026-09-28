@@ -20,6 +20,7 @@ export default function Register({ embedded = false, onClose, onSwitch } = {}) {
   const [form, setForm] = useState({ name: '', email: '', recoveryEmail: '', password: '', confirm: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [busy, setBusy] = useState(false);
 
   const strength = passwordStrength(form.password);
@@ -33,13 +34,14 @@ export default function Register({ embedded = false, onClose, onSwitch } = {}) {
   async function onSubmit(e) {
     e.preventDefault();
     setError('');
+    setPasswordError('');
 
     if (form.password !== form.confirm) {
       setError(t('auth.passwordMismatch'));
       return;
     }
     if (form.password.length < 8) {
-      setError(t('auth.passwordTooShort'));
+      setPasswordError(t('auth.passwordHelp')); // Use the instruction text as error
       return;
     }
     // the browser's required attribute is not enough on its own for a field
@@ -144,38 +146,16 @@ export default function Register({ embedded = false, onClose, onSwitch } = {}) {
               )}
             </FormField>
 
-            <FormField label={t('auth.email')} htmlFor="email" help={t('auth.emailHelp')}>
+            <FormField label={t('auth.email')} htmlFor="email">
               {(a) => (
                 <input id="email" type="email" className="input" autoComplete="email" required value={form.email} onChange={update('email')} {...a} />
-              )}
-            </FormField>
-
-            {/* Required, not optional: this is the only address a password
-                reset will answer to, and it is kept apart from the sign-in
-                address on purpose (AUTH-5). */}
-            <FormField
-              label={t('reset.recoveryEmail')}
-              htmlFor="recoveryEmail"
-              help={t('reset.recoveryHelpAtSignup')}
-            >
-              {(a) => (
-                <input
-                  id="recoveryEmail"
-                  type="email"
-                  className="input"
-                  autoComplete="email"
-                  required
-                  value={form.recoveryEmail}
-                  onChange={update('recoveryEmail')}
-                  {...a}
-                />
               )}
             </FormField>
 
             <FormField
               label={t('auth.password')}
               htmlFor="password"
-              help={t('auth.passwordHelp')}
+              error={passwordError}
               hint={
                 form.password ? (
                   <span>
@@ -184,7 +164,9 @@ export default function Register({ embedded = false, onClose, onSwitch } = {}) {
                     {' · '}
                     <span className="muted">{t(TIP_KEYS[strength.tipLevel])}</span>
                   </span>
-                ) : undefined
+                ) : (
+                  <span>{t('auth.passwordHelp')}</span>
+                )
               }
             >
               {(a) => (
@@ -196,7 +178,10 @@ export default function Register({ embedded = false, onClose, onSwitch } = {}) {
                     autoComplete="new-password"
                     required
                     value={form.password}
-                    onChange={update('password')}
+                    onChange={(e) => {
+                      update('password')(e);
+                      if (passwordError) setPasswordError('');
+                    }}
                     style={{ paddingRight: 72 }}
                     {...a}
                   />
@@ -227,6 +212,27 @@ export default function Register({ embedded = false, onClose, onSwitch } = {}) {
                 />
               )}
             </FormField>
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <FormField
+                label={t('reset.recoveryEmail')}
+                htmlFor="recoveryEmail"
+                help={t('reset.recoveryHelpAtSignup')}
+              >
+                {(a) => (
+                  <input
+                    id="recoveryEmail"
+                    type="email"
+                    className="input"
+                    autoComplete="email"
+                    required
+                    value={form.recoveryEmail}
+                    onChange={update('recoveryEmail')}
+                    {...a}
+                  />
+                )}
+              </FormField>
+            </div>
           </div>
 
           <button type="submit" className="btn btn-primary w-100" disabled={busy}>

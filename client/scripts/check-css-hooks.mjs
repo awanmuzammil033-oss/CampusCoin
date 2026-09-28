@@ -111,6 +111,11 @@ const ALLOWED = new Map([
   ['cc-msg', 'group chat: a marker on the message list; the bubble is styled by its own class'],
   ['cc-msg-name', 'group chat: a marker; the name is styled by the row around it'],
   ['cc-msg-foot', 'group chat: a marker; the timestamp row is styled by its own class'],
+  // A Bootstrap utility, not one of this sheet's hooks - the same as .btn and
+  // .d-grid, which the app uses for the same reason. Listed with its reason rather
+  // than given a rule, because a rule here would be styling Bootstrap's class in
+  // this project's namespace and would lose the day Bootstrap is upgraded.
+  ['list-unstyled', 'Bootstrap utility (resets list markers/padding on a <ul>), as .btn and .d-grid are'],
   ['cc-msg-del', 'group chat: a marker on the delete control, which is a real .icon-btn'],
   ['cc-poll', 'group chat: a marker on the poll card, which carries .card'],
   ['cc-poll-what', 'group chat: a marker; the question is styled by its own class'],

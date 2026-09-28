@@ -7,6 +7,7 @@ import Icon from '../components/Icon.jsx';
 import VoiceInput from '../components/VoiceInput.jsx';
 import CategoryIcon from '../components/CategoryIcon.jsx';
 import { api, qs } from '../api.js';
+import WalletPicker from '../components/WalletPicker.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { useLocale } from '../locale.jsx';
 import { ledgerCurrencySymbol } from '../money.js';
@@ -35,6 +36,11 @@ export default function TransactionForm() {
     description: '',
     type: searchParams.get('type') === 'income' ? 'income' : 'expense',
     categoryId: '',
+    // NEW-11: which pocket the entry went through. Empty is a real answer and the
+    // default one - the service never guesses a pocket, because quietly filing
+    // somebody's cash purchase to their bank account makes a balance wrong in a
+    // way nothing on the screen can undo.
+    walletId: '',
     date: todayISO(),
     repeat: false,
     frequency: 'monthly',
@@ -68,6 +74,7 @@ export default function TransactionForm() {
             description: transaction.description || '',
             type: transaction.type,
             categoryId: transaction.category?.id || transaction.category || '',
+            walletId: transaction.wallet || '',
             date: String(transaction.date || '').slice(0, 10),
           }));
           setOverride(true); // an existing entry never gets re-suggested over
@@ -187,6 +194,7 @@ export default function TransactionForm() {
         amount: form.amount,
         type: form.type,
         categoryId: form.categoryId,
+        walletId: form.walletId,
         description: form.description,
         date: form.date,
       };
@@ -384,6 +392,13 @@ export default function TransactionForm() {
               </select>
             )}
           </FormField>
+
+          {/* Beside the category, because they are the same question split in
+              two: what this entry was FOR, and which pocket it went THROUGH. */}
+          <WalletPicker
+            value={form.walletId}
+            onChange={(value) => setForm((f) => ({ ...f, walletId: value }))}
+          />
 
           <FormField label={t('ui.date')} htmlFor="date">
             {(a) => (

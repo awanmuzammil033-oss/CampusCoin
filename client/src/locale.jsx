@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { setApiTranslator } from './api.js';
 import { useAuth } from './auth.jsx';
 import { setDisplayCurrency, setLedgerCurrency } from './money.js';
 import { LANGUAGES } from './data/languages.js';
@@ -174,6 +175,19 @@ export function LocaleProvider({ children }) {
     },
     [language]
   );
+
+  /**
+   * Let api.js speak this reader's language when the server does not answer.
+   *
+   * Registered on every change of `t` rather than once, so switching language
+   * mid-session also switches the sentence a network failure produces - a stale
+   * closure here would tell a student who just chose Urdu that the server is down,
+   * in English.
+   */
+  useEffect(() => {
+    setApiTranslator((key) => t(key));
+    return () => setApiTranslator(null);
+  }, [t]);
 
   // Countable phrases: `plural('dash.incomeCount', n, { n })` picks the key
   // suffix Intl.PluralRules wants for this language (one/few/many/other) and

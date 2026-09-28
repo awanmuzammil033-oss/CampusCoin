@@ -1,6 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import jsQR from 'jsqr';
+import {
+  MultiFormatReader,
+  BinaryBitmap,
+  HybridBinarizer,
+  RGBLuminanceSource,
+  DecodeHintType,
+  BarcodeFormat,
+} from '@zxing/library';
 
 import Modal from './Modal.jsx';
 import FormField from './FormField.jsx';
@@ -13,53 +21,21 @@ import { dayLabel } from '../dates.js';
 /**
  * Scan a payment code and pay it (ADV-6).
  *
- * Three screens in one modal, and nothing happens until the person says so:
- *
- *   scan    - the camera looks for a code, and a field takes a pasted one.
- *             Both paths go through exactly the same `POST /api/qr/read`.
- *   confirm - what the code says, and what it costs in the student's own money
- *             with the rate, the day it was good for, and whether that rate was
- *             live or a dated reference. No transaction exists yet.
- *   done    - what was recorded, the new balance, and an honest note about the
- *             category when the merchant's name did not match one.
- *
- * Why the read and the pay are two calls: a person who scans a code and changes
- * their mind has already been told exactly what it would have cost, and the
- * amount the code stated is kept on the entry next to the rate - so the entry
- * can be checked against the receipt months later.
- *
- * WHY THE CAMERA IS WRAPPED IN ONE FUNCTION
- *
- * A camera left running after the sheet closes is a bug a judge will find, so
- * there is exactly one teardown, `stopCamera()`, and it cancels the decode loop
- * AND stops every track. It is called on all five ways out:
- *
- *   1. the sheet is closed (the X, Escape, or the backdrop) - close()
- *   2. the sheet is unmounted - the two effects' cleanups
- *   3. a frame decoded a code - decoded(): the camera has done its job
- *   4. the payment succeeded - pay(): the camera is not wanted any more
- *   5. the stage moved off `scan` - the camera effect's own cleanup
- *
- * It is idempotent, so calling it twice is harmless, and a stream that arrives
- * after the sheet has already closed is stopped on the spot rather than left
- * running (see `wanted` below).
+ * Supported formats:
+ * - 2D QR Codes (via ultra-fast jsQR + ZXing fallback)
+ * - 1D Barcodes: EAN-13, EAN-8, UPC-A, UPC-E, Code 128, Code 39, ITF, Data Matrix (via ZXing with hints)
+ * - Image file / Photo upload scanning (fallback for browsers blocking camera or pre-taken photos)
+ * - Front / Back camera switching
+ * - Direct manual input & paste
  */
 
-/** The long edge of the frame handed to the decoder. Bigger is slower. */
-const MAX_EDGE = 480;
+const DECODE_EVERY_MS = 100;
 
-/**
- * How often a frame is decoded, in milliseconds. The loop itself runs on
- * requestAnimationFrame as it should; decoding is the expensive part, and a
- * phone can do this eight times a second without the preview stuttering.
- */
-const DECODE_EVERY_MS = 120;
-
-const STAGE_SCAN = 'scan';
+const STAGE_SCAN    = 'scan';
+const STAGE_FILL    = 'fill';   // barcode/plain ref scanned - fill in the payment details
 const STAGE_CONFIRM = 'confirm';
-const STAGE_DONE = 'done';
+const STAGE_DONE    = 'done';
 
-/** The amount the code itself stated, in the code's own currency - never converted. */
 function asScanned(amount, currency) {
   const value = Number(amount);
   const safe = Number.isFinite(value) ? value : 0;
@@ -75,14 +51,12 @@ function asScanned(amount, currency) {
   }
 }
 
-/** A rate the way the currency drawer writes it: fixed at 4, or 3 significant. */
 function rateText(rate) {
   const value = Number(rate);
   if (!Number.isFinite(value)) return '—';
   return value >= 0.01 ? String(Number(value.toFixed(4))) : String(Number(value.toPrecision(3)));
 }
 
-/** A label/figure row. Wraps at 360px rather than pushing the sheet sideways. */
 const ROW_STYLE = {
   display: 'flex',
   justifyContent: 'space-between',
@@ -91,10 +65,15 @@ const ROW_STYLE = {
   flexWrap: 'wrap',
 };
 
+function isNotPaymentCode(message) {
+  return /does not look like a payment code/i.test(String(message || ''));
+}
+
 export default function QrPaySheet({ open, onClose, onPaid }) {
   const { t } = useLocale();
   const [stage, setStage] = useState(STAGE_SCAN);
   const [camera, setCamera] = useState('starting'); // starting | live | unsupported | denied | unavailable
+  const [facingMode, setFacingMode] = useState('environment'); // 'environment' | 'user'
   const [attempt, setAttempt] = useState(0);
   const [manual, setManual] = useState('');
   const [code, setCode] = useState('');
@@ -103,24 +82,26 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
   const [reading, setReading] = useState(false);
   const [paying, setPaying] = useState(false);
   const [error, setError] = useState('');
+  const [fileScanning, setFileScanning] = useState(false);
   const [categoryNames, setCategoryNames] = useState(() => new Map());
+
+  // STAGE_FILL state
+  const [fillRef, setFillRef] = useState('');
+  const [fillMerchant, setFillMerchant] = useState('');
+  const [fillAmount, setFillAmount] = useState('');
+  const [fillNote, setFillNote] = useState('');
 
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const frameRef = useRef(0);
-  const wantedRef = useRef(false); // the camera is wanted right now
-  const readingRef = useRef(false); // a read is in flight, so ignore frames
-  const payingRef = useRef(false); // a pay is in flight: never pay twice
-  const decodedRef = useRef(() => {}); // the latest decoded(), so the loop never goes stale
+  const wantedRef = useRef(false);
+  const readingRef = useRef(false);
+  const payingRef = useRef(false);
+  const decodedRef = useRef(() => {});
+  const zxingRef = useRef(null);
+  const fileInputRef = useRef(null);
 
-  /*
-   * THE teardown. Cancels the loop, stops every track, detaches the stream.
-   * It touches refs only, so the copy an effect closed over is as good as the
-   * one from the latest render - which is why it is deliberately NOT in any
-   * dependency list below. Putting it there would restart the camera on every
-   * render, and a camera that restarts on every render is a camera that never
-   * gets to see a frame.
-   */
+  // Stop camera tracks and cancel RAF loop
   const stopCamera = () => {
     wantedRef.current = false;
     if (frameRef.current) {
@@ -134,14 +115,62 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
         try {
           track.stop();
         } catch {
-          /* the track had already ended */
+          // already stopped
         }
       });
     }
     if (videoRef.current) videoRef.current.srcObject = null;
   };
 
-  /** Read a code - scanned or pasted. The two paths differ only in where the text came from. */
+  /**
+   * Helper to scan any canvas/imageData using jsQR first, then ZXing MultiFormatReader
+   */
+  const scanImageData = (imageData, width, height) => {
+    // 1. Try jsQR first (ultra-fast for QR codes)
+    try {
+      const qrResult = jsQR(imageData.data, width, height, { inversionAttempts: 'attemptBoth' });
+      if (qrResult && qrResult.data && qrResult.data.trim()) {
+        return qrResult.data.trim();
+      }
+    } catch {
+      // ignore
+    }
+
+    // 2. Try ZXing MultiFormatReader for 1D Barcodes + other formats
+    try {
+      if (!zxingRef.current) {
+        const hints = new Map();
+        hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+          BarcodeFormat.QR_CODE,
+          BarcodeFormat.EAN_13,
+          BarcodeFormat.EAN_8,
+          BarcodeFormat.CODE_128,
+          BarcodeFormat.CODE_39,
+          BarcodeFormat.UPC_A,
+          BarcodeFormat.UPC_E,
+          BarcodeFormat.ITF,
+          BarcodeFormat.DATA_MATRIX,
+        ]);
+        hints.set(DecodeHintType.TRY_HARDER, true);
+
+        const reader = new MultiFormatReader();
+        reader.setHints(hints);
+        zxingRef.current = reader;
+      }
+
+      const lum = new RGBLuminanceSource(imageData.data, width, height);
+      const bitmap = new BinaryBitmap(new HybridBinarizer(lum));
+      const zxResult = zxingRef.current.decode(bitmap);
+      if (zxResult && zxResult.getText()) {
+        return zxResult.getText().trim();
+      }
+    } catch {
+      // NotFoundException or no code found in this frame
+    }
+
+    return null;
+  };
+
   async function readCode(text) {
     const value = String(text || '').trim();
     if (!value || readingRef.current) return;
@@ -154,31 +183,104 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
       setScanned(res);
       setStage(STAGE_CONFIRM);
     } catch (err) {
-      // The server's sentence, as it is. A refused pair or a broken code is
-      // information, and inventing a friendlier line would hide which one it was.
-      setError(err.message);
+      if (isNotPaymentCode(err.message)) {
+        setFillRef(value.slice(0, 80));
+        setFillMerchant('');
+        setFillAmount('');
+        setFillNote('');
+        setStage(STAGE_FILL);
+      } else {
+        setError(err.message);
+      }
     } finally {
       readingRef.current = false;
       setReading(false);
     }
   }
 
+  async function confirmFill() {
+    const merchant = fillMerchant.trim();
+    const amount   = fillAmount.trim();
+    const currency = getLedgerCurrency();
+    if (!merchant || !amount) return;
+    const jsonCode = JSON.stringify({
+      merchant,
+      amount,
+      currency,
+      note: fillNote.trim() || undefined,
+      ref: fillRef || undefined,
+    });
+    await readCode(jsonCode);
+  }
+
   function decoded(text) {
-    stopCamera(); // exit 3 - the frame has been read; nothing else is wanted from the lens
+    stopCamera();
     readCode(text);
   }
   decodedRef.current = decoded;
 
+  // Handle uploaded image scanning
+  async function handleImageUpload(e) {
+    const file = e.target?.files?.[0];
+    if (!file) return;
+    setFileScanning(true);
+    setError('');
+
+    try {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 1200;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            const scale = Math.min(maxDim / w, maxDim / h);
+            w = Math.round(w * scale);
+            h = Math.round(h * scale);
+          }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(img, 0, 0, w, h);
+          const imgData = ctx.getImageData(0, 0, w, h);
+          const found = scanImageData(imgData, w, h);
+          setFileScanning(false);
+
+          if (found) {
+            decoded(found);
+          } else {
+            setError(t('qr.imageNotFound') || 'No QR code or barcode found in this image. Please try a clearer picture.');
+          }
+        };
+        img.onerror = () => {
+          setFileScanning(false);
+          setError('Failed to load image file.');
+        };
+        img.src = reader.result;
+      };
+      reader.onerror = () => {
+        setFileScanning(false);
+        setError('Failed to read image file.');
+      };
+      reader.readAsDataURL(file);
+    } catch {
+      setFileScanning(false);
+      setError('Error processing image file.');
+    } finally {
+      if (e.target) e.target.value = '';
+    }
+  }
+
   async function pay() {
-    // The ref, not the state: two clicks inside one tick would both read the
-    // old `paying`, and a payment recorded twice is worse than a slow button.
     if (payingRef.current || !code) return;
     payingRef.current = true;
     setPaying(true);
     setError('');
     try {
       const res = await api.post('/api/qr/pay', { code, currency: getLedgerCurrency() });
-      stopCamera(); // exit 4 - the entry exists, so the camera is stopped here and not on close
+      stopCamera();
       setPaid(res);
       setStage(STAGE_DONE);
       onPaid?.(res.transaction);
@@ -191,19 +293,42 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
   }
 
   function close() {
-    stopCamera(); // exit 1 - closing, whichever way it was closed
+    stopCamera();
     onClose?.();
   }
 
   function scanAnother() {
-    // Back to the lens with the last code forgotten. Nothing was paid.
     setCode('');
     setScanned(null);
     setError('');
     setStage(STAGE_SCAN);
   }
 
-  /* A reopened sheet is a blank sheet. */
+  // Initialize ZXing hints once
+  useEffect(() => {
+    try {
+      const hints = new Map();
+      hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+        BarcodeFormat.QR_CODE,
+        BarcodeFormat.EAN_13,
+        BarcodeFormat.EAN_8,
+        BarcodeFormat.CODE_128,
+        BarcodeFormat.CODE_39,
+        BarcodeFormat.UPC_A,
+        BarcodeFormat.UPC_E,
+        BarcodeFormat.ITF,
+        BarcodeFormat.DATA_MATRIX,
+      ]);
+      hints.set(DecodeHintType.TRY_HARDER, true);
+
+      const r = new MultiFormatReader();
+      r.setHints(hints);
+      zxingRef.current = r;
+    } catch {
+      // fallback
+    }
+  }, []);
+
   const wasOpen = useRef(false);
   useEffect(() => {
     if (open && !wasOpen.current) {
@@ -216,8 +341,10 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
       setPaying(false);
       setError('');
       setCamera('starting');
-      /* the names behind the category ids, for the receipt screen. Missing
-         names are not fatal - the id is still what was written. */
+      setFillRef('');
+      setFillMerchant('');
+      setFillAmount('');
+      setFillNote('');
       let alive = true;
       api
         .get('/api/categories')
@@ -229,20 +356,13 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
           });
           setCategoryNames(map);
         })
-        .catch(() => {
-          /* the sheet works without the names */
-        });
+        .catch(() => {});
+      return () => { alive = false; };
     }
     wasOpen.current = open;
   }, [open]);
 
-  /*
-   * The camera's lifetime IS this effect's lifetime. It runs while the sheet is
-   * open AND the stage is `scan`, so moving to the confirm or the receipt tears
-   * the camera down (exit 5) exactly like closing does. `attempt` is the retry
-   * button: a permission the student has just allowed in the address bar can be
-   * asked for again.
-   */
+  // Camera stream & live frame decoding loop
   useEffect(() => {
     if (!open) return undefined;
     if (stage !== STAGE_SCAN) {
@@ -254,13 +374,12 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
     wantedRef.current = true;
     setCamera('starting');
 
-    // the frame buffer is never in the document
-    const canvas = document.createElement('canvas');
+    const canvas  = document.createElement('canvas');
     const context = canvas.getContext('2d', { willReadFrequently: true });
     let last = 0;
 
     function tick(now) {
-      frameRef.current = 0; // the frame we were asked for is the one we are in
+      frameRef.current = 0;
       if (!wantedRef.current) return;
       if (now - last < DECODE_EVERY_MS || readingRef.current) {
         frameRef.current = requestAnimationFrame(tick);
@@ -272,16 +391,28 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
         frameRef.current = requestAnimationFrame(tick);
         return;
       }
-      const scale = Math.min(1, MAX_EDGE / Math.max(video.videoWidth, video.videoHeight));
-      canvas.width = Math.max(1, Math.round(video.videoWidth * scale));
-      canvas.height = Math.max(1, Math.round(video.videoHeight * scale));
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const shot = context.getImageData(0, 0, canvas.width, canvas.height);
-      const found = jsQR(shot.data, shot.width, shot.height, { inversionAttempts: 'attemptBoth' });
-      if (found?.data) {
-        decodedRef.current(found.data); // stops the camera itself
-        return; // and the loop ends here: there is nothing left to look for
+
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      // Cap processing canvas size to max 800px for speed & low CPU
+      const scale = Math.min(1, 800 / Math.max(vw, vh));
+      const cw = Math.max(1, Math.floor(vw * scale));
+      const ch = Math.max(1, Math.floor(vh * scale));
+      canvas.width  = cw;
+      canvas.height = ch;
+      context.drawImage(video, 0, 0, cw, ch);
+
+      try {
+        const imageData = context.getImageData(0, 0, cw, ch);
+        const codeFound = scanImageData(imageData, cw, ch);
+        if (codeFound) {
+          decodedRef.current(codeFound);
+          return;
+        }
+      } catch {
+        // continue loop
       }
+
       frameRef.current = requestAnimationFrame(tick);
     }
 
@@ -292,32 +423,36 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
         return;
       }
       try {
-        const stream = await media.getUserMedia({
-          video: { facingMode: { ideal: 'environment' } },
+        const constraints = {
+          video: {
+            facingMode: { ideal: facingMode },
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
           audio: false,
-        });
-        // The sheet can be closed while the permission prompt is still up. A
-        // stream that arrives after that must not be left running.
+        };
+
+        let stream;
+        try {
+          stream = await media.getUserMedia(constraints);
+        } catch {
+          // fallback without facingMode constraints if specific camera fails
+          stream = await media.getUserMedia({ video: true, audio: false });
+        }
+
         if (disposed || !wantedRef.current) {
           stream.getTracks().forEach((track) => {
-            try {
-              track.stop();
-            } catch {
-              /* already ended */
-            }
+            try { track.stop(); } catch { /* already ended */ }
           });
           return;
         }
         streamRef.current = stream;
         const video = videoRef.current;
         if (video) {
-          video.muted = true; // some browsers only honour the property
+          video.muted = true;
+          video.playsInline = true;
           video.srcObject = stream;
-          try {
-            await video.play();
-          } catch {
-            /* the preview can start on its own; the decoder needs no playback */
-          }
+          try { await video.play(); } catch { /* ignore */ }
         }
         if (disposed || !wantedRef.current) {
           stopCamera();
@@ -331,8 +466,6 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
         if (name === 'NotAllowedError' || name === 'PermissionDeniedError' || name === 'SecurityError') {
           setCamera('denied');
         } else {
-          // NotFoundError (no camera), NotReadableError (in use elsewhere),
-          // OverconstrainedError, or anything this browser invents later.
           setCamera('unavailable');
         }
       }
@@ -342,48 +475,69 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
 
     return () => {
       disposed = true;
-      stopCamera(); // exit 2 - unmount, and the stage change that closed the lens
+      stopCamera();
     };
-  }, [open, stage, attempt]);
+  }, [open, stage, attempt, facingMode]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  /* The backstop: whichever way the sheet leaves the tree, the same teardown. */
   useEffect(() => () => stopCamera(), []);
 
-  /*
-   * Every hook has run by here, so a sheet that is not open renders nothing.
-   * The camera effect above has already returned without starting anything at
-   * this point, so there is nothing to switch off on the way out.
-   */
   if (!open) return null;
 
-  const quote = scanned?.quote || paid?.quote || null;
+  const quote     = scanned?.quote || paid?.quote || null;
   const converted = Boolean(quote?.converted);
-  // The amount that will actually be recorded, in the currency it is denominated
-  // in. NOT money(): that converts into the display currency, and a payment screen
-  // that quotes a converted figure is asking for consent to a number the person is
-  // not going to be charged. When the display currency is something else, the
-  // converted figure goes underneath rather than instead.
-  const payable = quote ? moneyInLedger(quote.amount) : '';
-  const inDisplay =
-    quote && getDisplayCurrency() !== quote.to ? money(quote.amount) : '';
+  const payable   = quote ? moneyInLedger(quote.amount) : '';
+  const inDisplay = quote && getDisplayCurrency() !== quote.to ? money(quote.amount) : '';
   const categoryName = paid
     ? paid.category?.id
       ? categoryNames.get(paid.category.id) || '—'
       : t('qr.noCategory')
     : '';
 
-  /* ------------------------------- the footer ------------------------------ */
+  const fillAmountOk = /^\d+([.,]\d{1,2})?$/.test(fillAmount.trim().replace(',', '.'));
+  const fillReady    = fillMerchant.trim().length > 0 && fillAmountOk;
+
+  /* ------------------------------- footer ------------------------------ */
   let footer = null;
   if (stage === STAGE_SCAN) {
     footer = (
-      <button
-        type="button"
-        className="btn btn-primary"
-        onClick={() => readCode(manual)}
-        disabled={reading || !manual.trim()}
-      >
-        {reading ? <span className="spinner" /> : <Icon name="search" size={16} />} {reading ? t('qr.reading') : t('qr.read')}
-      </button>
+      <div style={{ display: 'flex', gap: 8, width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={reading || fileScanning}
+        >
+          {fileScanning ? <span className="spinner" /> : <Icon name="camera" size={15} />}
+          <span>{t('qr.uploadImage') || 'Scan Image / File'}</span>
+        </button>
+
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => readCode(manual)}
+          disabled={reading || !manual.trim()}
+        >
+          {reading ? <span className="spinner" /> : <Icon name="search" size={16} />}{' '}
+          {reading ? t('qr.reading') : t('qr.read')}
+        </button>
+      </div>
+    );
+  } else if (stage === STAGE_FILL) {
+    footer = (
+      <>
+        <button type="button" className="btn btn-ghost" onClick={scanAnother} disabled={reading}>
+          {t('ui.cancel')}
+        </button>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={confirmFill}
+          disabled={reading || !fillReady}
+        >
+          {reading ? <span className="spinner" /> : <Icon name="checkCircle" size={16} />}{' '}
+          {reading ? t('qr.reading') : t('qr.read')}
+        </button>
+      </>
     );
   } else if (stage === STAGE_CONFIRM) {
     footer = (
@@ -392,7 +546,8 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
           {t('ui.cancel')}
         </button>
         <button type="button" className="btn btn-primary" onClick={pay} disabled={paying}>
-          {paying ? <span className="spinner" /> : <Icon name="checkCircle" size={16} />} {paying ? t('qr.paying') : t('qr.pay', { amount: payable })}
+          {paying ? <span className="spinner" /> : <Icon name="checkCircle" size={16} />}{' '}
+          {paying ? t('qr.paying') : t('qr.pay', { amount: payable })}
         </button>
       </>
     );
@@ -406,6 +561,15 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
 
   return (
     <Modal title={t('qr.title')} onClose={close} footer={footer}>
+      {/* Hidden file input for scanning from photos/files */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: 'none' }}
+        onChange={handleImageUpload}
+      />
+
       {error && (
         <p className="field-error mb-3" role="alert">
           <Icon name="warning" size={16} />
@@ -425,7 +589,7 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
               aspectRatio: '4 / 3',
               borderRadius: 'var(--cc-radius)',
               overflow: 'hidden',
-              background: 'var(--cc-surface-2)',
+              background: '#04100d',
               border: '1px solid var(--cc-border)',
               marginBottom: 10,
             }}
@@ -438,24 +602,86 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
               autoPlay
               style={{ display: 'block', width: '100%', height: '100%', objectFit: 'cover' }}
             />
+
+            {/* Target Reticle & Laser Beam */}
             {camera === 'live' && (
-              <span
-                className="cc-qr-frame"
-                style={{
-                  position: 'absolute',
-                  inset: '20% 24%',
-                  border: '2px dashed var(--cc-primary)',
-                  borderRadius: 'var(--cc-radius)',
-                  opacity: 0.9,
-                }}
-              />
+              <>
+                <div
+                  className="cc-qr-frame"
+                  style={{
+                    position: 'absolute',
+                    inset: '16% 14%',
+                    border: '2px solid rgba(16, 185, 129, 0.75)',
+                    borderRadius: 14,
+                    boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.4)',
+                    pointerEvents: 'none',
+                  }}
+                >
+                  {/* Laser line moving across */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      right: 0,
+                      height: 2,
+                      background: 'linear-gradient(90deg, transparent, #10b981, #34d399, transparent)',
+                      boxShadow: '0 0 8px #10b981, 0 0 16px #34d399',
+                      animation: 'scanLaser 2s ease-in-out infinite alternate',
+                    }}
+                  />
+                  {/* Corner accents */}
+                  <span style={{ position: 'absolute', top: -2, left: -2, width: 14, height: 14, borderTop: '3px solid #10b981', borderLeft: '3px solid #10b981', borderTopLeftRadius: 6 }} />
+                  <span style={{ position: 'absolute', top: -2, right: -2, width: 14, height: 14, borderTop: '3px solid #10b981', borderRight: '3px solid #10b981', borderTopRightRadius: 6 }} />
+                  <span style={{ position: 'absolute', bottom: -2, left: -2, width: 14, height: 14, borderBottom: '3px solid #10b981', borderLeft: '3px solid #10b981', borderBottomLeftRadius: 6 }} />
+                  <span style={{ position: 'absolute', bottom: -2, right: -2, width: 14, height: 14, borderBottom: '3px solid #10b981', borderRight: '3px solid #10b981', borderBottomRightRadius: 6 }} />
+                </div>
+
+                {/* Flip camera button */}
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => setFacingMode((m) => m === 'environment' ? 'user' : 'environment')}
+                  title="Switch Camera (Front/Back)"
+                  style={{
+                    position: 'absolute',
+                    top: 10,
+                    right: 10,
+                    background: 'rgba(0,0,0,0.6)',
+                    color: '#fff',
+                    borderRadius: '50%',
+                    width: 38,
+                    height: 38,
+                    padding: 0,
+                    zIndex: 5,
+                  }}
+                >
+                  <Icon name="repeat" size={16} />
+                </button>
+              </>
             )}
           </div>
 
+          <style>{`
+            @keyframes scanLaser {
+              0% { top: 6%; opacity: 0.9; }
+              100% { top: 92%; opacity: 0.9; }
+            }
+          `}</style>
+
           {camera === 'live' && (
-            <p className="smallish muted mb-3">
-              <Icon name="search" size={14} /> {t('qr.cameraHint')}
-            </p>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <p className="smallish muted mb-0">
+                <Icon name="search" size={14} /> {t('qr.cameraHint')}
+              </p>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => fileInputRef.current?.click()}
+                style={{ fontSize: '0.8125rem' }}
+              >
+                <Icon name="camera" size={14} /> {t('qr.uploadImage') || 'Scan Image / File'}
+              </button>
+            </div>
           )}
 
           {camera === 'starting' && (
@@ -465,7 +691,7 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
           )}
 
           {(camera === 'unsupported' || camera === 'denied' || camera === 'unavailable') && (
-            <div className="cc-qr-nocamera mb-3">
+            <div className="cc-qr-nocamera mb-3" style={{ padding: 12, borderRadius: 'var(--cc-radius)', background: 'var(--cc-surface-2)', border: '1px solid var(--cc-border)' }}>
               <p className="smallish mb-2">
                 <Icon name="warning" size={15} />{' '}
                 {camera === 'unsupported'
@@ -474,9 +700,18 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
                     ? t('qr.cameraDenied')
                     : t('qr.cameraUnavailable')}
               </p>
-              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setAttempt((n) => n + 1)}>
-                <Icon name="repeat" size={15} /> {t('qr.cameraTryAgain')}
-              </button>
+              <div className="d-flex gap-2 flex-wrap">
+                <button type="button" className="btn btn-secondary btn-sm" onClick={() => setAttempt((n) => n + 1)}>
+                  <Icon name="repeat" size={15} /> {t('qr.cameraTryAgain')}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Icon name="camera" size={15} /> {t('qr.uploadImage') || 'Select / Take Photo'}
+                </button>
+              </div>
             </div>
           )}
 
@@ -488,8 +723,79 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
                 rows={2}
                 spellCheck={false}
                 autoComplete="off"
+                placeholder="campuscoin://pay?... or barcode numbers"
                 value={manual}
                 onChange={(event) => setManual(event.target.value)}
+                {...aria}
+              />
+            )}
+          </FormField>
+        </>
+      )}
+
+      {/* ---------------------------------- fill --------------------------------- */}
+      {stage === STAGE_FILL && (
+        <>
+          <p className="smallish mb-3" style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+            <Icon name="info" size={15} style={{ flexShrink: 0, marginTop: 1 }} />
+            <span>{t('qr.barcodeHint')}</span>
+          </p>
+
+          {fillRef && (
+            <div
+              className="mb-3 smallish muted"
+              style={{
+                padding: '6px 10px',
+                borderRadius: 'var(--cc-radius)',
+                background: 'var(--cc-surface-2)',
+                border: '1px solid var(--cc-border)',
+                wordBreak: 'break-all',
+              }}
+            >
+              <span style={{ opacity: 0.7 }}>{t('qr.reference')}: </span>
+              <span className="num">{fillRef}</span>
+            </div>
+          )}
+
+          <FormField label={t('qr.fillMerchant')} htmlFor="qr-fill-merchant">
+            {(aria) => (
+              <input
+                id="qr-fill-merchant"
+                type="text"
+                className="input"
+                autoComplete="off"
+                value={fillMerchant}
+                onChange={(e) => setFillMerchant(e.target.value)}
+                {...aria}
+              />
+            )}
+          </FormField>
+
+          <FormField label={t('ui.amount')} htmlFor="qr-fill-amount">
+            {(aria) => (
+              <input
+                id="qr-fill-amount"
+                type="text"
+                inputMode="decimal"
+                className="input"
+                autoComplete="off"
+                placeholder={`0.00 ${getLedgerCurrency()}`}
+                value={fillAmount}
+                onChange={(e) => setFillAmount(e.target.value)}
+                {...aria}
+              />
+            )}
+          </FormField>
+
+          <FormField label={t('ui.note')} htmlFor="qr-fill-note">
+            {(aria) => (
+              <input
+                id="qr-fill-note"
+                type="text"
+                className="input"
+                autoComplete="off"
+                value={fillNote}
+                onChange={(e) => setFillNote(e.target.value)}
                 {...aria}
               />
             )}
@@ -565,10 +871,6 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
               <p className="smallish num mb-0">
                 {t('conv.rateLine', { from: quote.from, rate: rateText(quote.rate), to: quote.to })}
               </p>
-              {/* asOf is always sent with a converted quote, and dayLabel()
-                  reads it as a plain calendar day so it can never slip a day.
-                  If a future shape ever arrives without one, the line is left
-                  out rather than printed with a date nobody has. */}
               {quote.asOf && (
                 <p className="smallish muted mb-0">
                   {quote.source === 'reference'
@@ -602,7 +904,6 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
             <div className="cc-qr-row" style={ROW_STYLE}>
               <dt className="smallish muted">{t('ui.amount')}</dt>
               <dd className="num mb-0" style={{ minWidth: 0 }}>
-                {/* the recorded figure, in the currency it was recorded in */}
                 {moneyInLedger(paid.transaction?.amount ?? paid.quote?.amount)}
               </dd>
             </div>
@@ -653,11 +954,6 @@ export default function QrPaySheet({ open, onClose, onPaid }) {
   );
 }
 
-/**
- * The button that opens the sheet, for a caller that does not want to own the
- * open state. It is a real button with a real label, and it carries its own
- * state so a screen only has to place one thing.
- */
 export function QrPayButton({ onPaid, className = 'btn btn-primary' }) {
   const { t } = useLocale();
   const [open, setOpen] = useState(false);
@@ -665,6 +961,19 @@ export function QrPayButton({ onPaid, className = 'btn btn-primary' }) {
     <>
       <button type="button" className={className} onClick={() => setOpen(true)}>
         <Icon name="phone" size={16} /> {t('qr.open')}
+      </button>
+      {open && <QrPaySheet open onClose={() => setOpen(false)} onPaid={onPaid} />}
+    </>
+  );
+}
+
+export function QrPayFab({ onPaid, className = 'fab-scan' }) {
+  const { t } = useLocale();
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button type="button" className={className} onClick={() => setOpen(true)} aria-label={t('qr.open')}>
+        <Icon name="scan" />
       </button>
       {open && <QrPaySheet open onClose={() => setOpen(false)} onPaid={onPaid} />}
     </>

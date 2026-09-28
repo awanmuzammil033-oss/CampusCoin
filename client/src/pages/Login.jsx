@@ -155,7 +155,7 @@ export default function Login({ embedded = false, onClose, onSwitch } = {}) {
         </form>
 
         <div className="d-flex justify-content-between mt-4 smallish">
-          <Link to="/forgot-password">{t('auth.forgotPassword')}</Link>
+          {host.switchTo('/forgot-password', t('auth.forgotPassword'))}
           <span className="muted">
             {t('auth.newHere')} {host.switchTo('/register', t('auth.createAccount'))}
           </span>
